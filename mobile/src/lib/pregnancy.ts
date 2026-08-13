@@ -49,7 +49,13 @@ export type Journey = {
   today: Date;
   /** Days elapsed since the effective LMP. 0 on the LMP itself. */
   gestationalDay: number;
-  /** 1-based counterpart of `gestationalDay` — the "day N of 280" figure. */
+  /**
+   * The "day N of 280" figure, which is the same count as `gestationalDay`.
+   *
+   * Counting elapsed days rather than starting at 1 is what keeps the headline
+   * pair on the Today screen consistent: `dayNumber + daysLeft === 280` on every
+   * day of the pregnancy. Day 25 of 280 with 255 remaining, never 26 and 255.
+   */
   dayNumber: number;
   /** 1-based gestational week. */
   week: number;
@@ -87,7 +93,7 @@ export function computeJourney(settings: Settings, now: Date = new Date()): Jour
     effectiveLmp,
     today,
     gestationalDay,
-    dayNumber: gestationalDay + 1,
+    dayNumber: gestationalDay,
     week: Math.floor(gestationalDay / 7) + 1,
     gaWeeks: Math.floor(gestationalDay / 7),
     gaDays: ((gestationalDay % 7) + 7) % 7,

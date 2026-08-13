@@ -1,6 +1,8 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { t } from '../i18n';
+import type { StringKey } from '../i18n/strings';
 import { colors } from '../theme';
 import {
   BabyIcon,
@@ -14,7 +16,7 @@ import { Txt } from './Txt';
 
 type TabSpec = {
   name: string;
-  label: string;
+  labelKey: StringKey;
   Icon: (props: { size?: number; color?: string }) => React.ReactElement;
 };
 
@@ -41,12 +43,12 @@ type TabBarProps = {
 
 /** Right-to-left reading order, matching the prototype's nav. */
 const TABS: readonly TabSpec[] = [
-  { name: 'index', label: 'اليوم', Icon: HeartIcon },
-  { name: 'calendar', label: 'التقويم', Icon: CalendarIcon },
-  { name: 'baby', label: 'طفلك', Icon: BabyIcon },
-  { name: 'appointments', label: 'المواعيد', Icon: ClockIcon },
-  { name: 'journal', label: 'اليوميات', Icon: JournalIcon },
-  { name: 'records', label: 'الملف', Icon: FileIcon },
+  { name: 'index', labelKey: 'nav.today', Icon: HeartIcon },
+  { name: 'calendar', labelKey: 'nav.calendar', Icon: CalendarIcon },
+  { name: 'baby', labelKey: 'nav.baby', Icon: BabyIcon },
+  { name: 'appointments', labelKey: 'nav.appointments', Icon: ClockIcon },
+  { name: 'journal', labelKey: 'nav.journal', Icon: JournalIcon },
+  { name: 'records', labelKey: 'nav.records', Icon: FileIcon },
 ];
 
 export function TabBar({ state, navigation }: TabBarProps) {
@@ -55,7 +57,8 @@ export function TabBar({ state, navigation }: TabBarProps) {
 
   return (
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 2) }]}>
-      {TABS.map(({ name, label, Icon }) => {
+      {TABS.map(({ name, labelKey, Icon }) => {
+        const label = t(labelKey);
         // Nested stacks mean the calendar tab stays lit on a day page, and the
         // baby tab on a week page — the group route is what's active either way.
         const focused = activeName === name;

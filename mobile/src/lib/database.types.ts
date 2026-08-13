@@ -26,6 +26,7 @@ export type Database = {
           id: string;
           location: string;
           notes: string;
+          recurrence: string | null;
           reminder: string;
           time: string | null;
           title: string;
@@ -40,6 +41,7 @@ export type Database = {
           id?: string;
           location?: string;
           notes?: string;
+          recurrence?: string | null;
           reminder?: string;
           time?: string | null;
           title: string;
@@ -54,6 +56,7 @@ export type Database = {
           id?: string;
           location?: string;
           notes?: string;
+          recurrence?: string | null;
           reminder?: string;
           time?: string | null;
           title?: string;
@@ -61,6 +64,83 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [];
+      };
+      attachments: {
+        Row: {
+          caption: string;
+          created_at: string;
+          id: string;
+          kind: string;
+          mime_type: string;
+          owner_id: string;
+          owner_type: string;
+          path: string;
+          size_bytes: number | null;
+          user_id: string;
+        };
+        Insert: {
+          caption?: string;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          mime_type?: string;
+          owner_id: string;
+          owner_type: string;
+          path: string;
+          size_bytes?: number | null;
+          user_id: string;
+        };
+        Update: {
+          caption?: string;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          mime_type?: string;
+          owner_id?: string;
+          owner_type?: string;
+          path?: string;
+          size_bytes?: number | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      test_tracking: {
+        Row: {
+          appointment_id: string | null;
+          id: string;
+          notes: string;
+          status: string;
+          test_id: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          appointment_id?: string | null;
+          id?: string;
+          notes?: string;
+          status?: string;
+          test_id: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          appointment_id?: string | null;
+          id?: string;
+          notes?: string;
+          status?: string;
+          test_id?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'test_tracking_appointment_id_fkey';
+            columns: ['appointment_id'];
+            isOneToOne: false;
+            referencedRelation: 'appointments';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       journal_entries: {
         Row: {
@@ -144,6 +224,7 @@ export type Database = {
           new_edd: string | null;
           notes: string;
           provider: string;
+          scan_ga_days: number | null;
           title: string;
           type: string;
           user_id: string;
@@ -157,6 +238,7 @@ export type Database = {
           new_edd?: string | null;
           notes?: string;
           provider?: string;
+          scan_ga_days?: number | null;
           title: string;
           type?: string;
           user_id: string;
@@ -170,6 +252,7 @@ export type Database = {
           new_edd?: string | null;
           notes?: string;
           provider?: string;
+          scan_ga_days?: number | null;
           title?: string;
           type?: string;
           user_id?: string;
@@ -180,11 +263,13 @@ export type Database = {
         Row: {
           author: string;
           created_at: string;
+          description: string;
           duration: string;
           id: string;
           license: string;
           pub_date: string;
           source: string;
+          thumbnail_url: string;
           title: string;
           url: string;
           user_id: string;
@@ -193,11 +278,13 @@ export type Database = {
         Insert: {
           author?: string;
           created_at?: string;
+          description?: string;
           duration?: string;
           id?: string;
           license?: string;
           pub_date?: string;
           source?: string;
+          thumbnail_url?: string;
           title: string;
           url: string;
           user_id: string;
@@ -206,11 +293,13 @@ export type Database = {
         Update: {
           author?: string;
           created_at?: string;
+          description?: string;
           duration?: string;
           id?: string;
           license?: string;
           pub_date?: string;
           source?: string;
+          thumbnail_url?: string;
           title?: string;
           url?: string;
           user_id?: string;

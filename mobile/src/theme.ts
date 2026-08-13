@@ -50,6 +50,8 @@ export const colors = {
   dotAppt: '#C2857E',
   dotJournal: '#B7A26B',
   dotRecord: '#8A9BB0',
+  /** Days carrying an uploaded photo — scan images, journal pictures. */
+  dotPhoto: '#A78BA0',
 
   navActive: '#4E5D4C',
   navInactive: '#A5A292',

@@ -1,4 +1,5 @@
-import { Image, View } from 'react-native';
+import { Image } from 'expo-image';
+import { View } from 'react-native';
 
 import { BABY_WEEK_IMAGES } from '../../assets/babyWeeks';
 import { illustrationWeek } from '../lib/pregnancy';
@@ -7,34 +8,54 @@ import { Txt } from './Txt';
 
 /**
  * Circular illustration for a gestational week, replacing the prototype's
- * `<image-slot>`. Falls back to a placeholder carrying the week number so the
- * layout is complete before licensed artwork exists.
+ * `<image-slot>`.
+ *
+ * Falls back to a designed placeholder carrying the week number, so the layout
+ * is complete — and honest — before licensed artwork exists.
  */
 export function WeekIllustration({
   week,
   size,
   caption = 'صورة الأسبوع',
+  variant = 'full',
+  showCaption = false,
 }: {
   week: number;
   size: number;
+  /** Used for the accessibility label when the asset has no alt text of its own. */
   caption?: string;
+  /** `thumbnail` picks the smaller asset when one is registered. */
+  variant?: 'full' | 'thumbnail';
+  /** Renders the asset's caption underneath, where there is room for it. */
+  showCaption?: boolean;
 }) {
   const resolved = illustrationWeek(week);
-  const source = BABY_WEEK_IMAGES[resolved];
+  const asset = BABY_WEEK_IMAGES[resolved];
 
-  if (source) {
+  if (asset) {
+    const source = variant === 'thumbnail' ? (asset.thumbnail ?? asset.full) : asset.full;
     return (
-      <Image
-        source={source}
-        accessibilityLabel={`${caption} ${resolved}`}
-        style={{ width: size, height: size, borderRadius: size / 2 }}
-        resizeMode="cover"
-      />
+      <View style={{ alignItems: 'center', gap: 6 }}>
+        <Image
+          source={source}
+          accessibilityLabel={asset.alt}
+          accessible
+          style={{ width: size, height: size, borderRadius: size / 2 }}
+          contentFit="cover"
+          transition={150}
+        />
+        {showCaption && asset.caption ? (
+          <Txt size={11.5} color={colors.faint} align="center" lineHeight={1.5}>
+            {asset.caption}
+          </Txt>
+        ) : null}
+      </View>
     );
   }
 
   return (
     <View
+      accessible
       accessibilityLabel={`${caption} — الأسبوع ${resolved}`}
       style={{
         width: size,
@@ -46,6 +67,7 @@ export function WeekIllustration({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 1,
+        alignSelf: 'center',
       }}
     >
       <Txt size={size * 0.26} weight={600} color={colors.sage} align="center">

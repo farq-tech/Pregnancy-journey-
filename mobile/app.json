@@ -19,7 +19,9 @@
       "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "CFBundleDevelopmentRegion": "ar"
+        "CFBundleDevelopmentRegion": "ar",
+        "NSPhotoLibraryUsageDescription": "لإرفاق صور السونار والتقارير وصور اليوميات بملف الحمل.",
+        "NSPhotoLibraryAddUsageDescription": "لحفظ صور رحلة الحمل في مكتبة الصور."
       }
     },
     "android": {
@@ -36,7 +38,18 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": ["expo-router", "expo-font", "expo-localization"],
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-localization",
+      "expo-notifications",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "لإرفاق صور السونار والتقارير وصور اليوميات بملف الحمل."
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     }

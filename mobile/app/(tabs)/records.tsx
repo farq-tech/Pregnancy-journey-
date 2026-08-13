@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
+import { AttachmentGallery } from '../../src/components/AttachmentGallery';
+import { AttachmentPicker } from '../../src/components/AttachmentPicker';
 import { Screen } from '../../src/components/Screen';
 import { Sheet } from '../../src/components/Sheet';
 import { Txt } from '../../src/components/Txt';
@@ -17,8 +19,15 @@ import { TESTS } from '../../src/content/pregnancyData';
 import { formatDayMonth } from '../../src/lib/arabic';
 import { diffDays, fromIso } from '../../src/lib/dates';
 import { clampWeek, computeJourney } from '../../src/lib/pregnancy';
+import type { PickedFile } from '../../src/lib/storage';
 import { useJourney } from '../../src/store/JourneyProvider';
-import { RECORD_TYPE_LABELS, type RecordType } from '../../src/store/types';
+import {
+  RECORD_TYPE_LABELS,
+  TEST_STATUS_LABELS,
+  type MedicalRecord,
+  type RecordType,
+  type TestStatus,
+} from '../../src/store/types';
 import { colors } from '../../src/theme';
 
 const TYPE_OPTIONS = (Object.keys(RECORD_TYPE_LABELS) as RecordType[]).map((value) => ({
@@ -27,7 +36,17 @@ const TYPE_OPTIONS = (Object.keys(RECORD_TYPE_LABELS) as RecordType[]).map((valu
 }));
 
 export default function RecordsScreen() {
-  const { settings, records, today, addRecord, remove } = useJourney();
+  const {
+    settings,
+    records,
+    tests,
+    today,
+    addRecord,
+    remove,
+    attachmentsFor,
+    deleteAttachment,
+    setTestStatus,
+  } = useJourney();
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const journey = useMemo(
@@ -126,13 +145,19 @@ export default function RecordsScreen() {
                   </Txt>
                 ) : null}
 
-                {record.type === 'ultrasound' && (record.crl || record.fhr || record.newEdd) ? (
+                {record.type === 'ultrasound' &&
+                (record.crl || record.fhr || record.newEdd || record.scanGaDays != null) ? (
                   <Row wrap gap={10} style={{ marginTop: 6 }}>
                     {record.crl ? (
                       <Txt size={12} color={colors.sage}>{`CRL: ${record.crl}`}</Txt>
                     ) : null}
                     {record.fhr ? (
                       <Txt size={12} color={colors.sage}>{`نبض: ${record.fhr}`}</Txt>
+                    ) : null}
+                    {record.scanGaDays != null ? (
+                      <Txt size={12} color={colors.sage}>
+                        {`عمر الحمل بالسونار: ${Math.floor(record.scanGaDays / 7)}و${record.scanGaDays % 7}ي`}
+                      </Txt>
                     ) : null}
                     {record.newEdd ? (
                       <Txt size={12} color={colors.clayText}>
@@ -147,6 +172,11 @@ export default function RecordsScreen() {
                     {record.notes}
                   </Txt>
                 ) : null}
+
+                <AttachmentGallery
+                  attachments={attachmentsFor('record', record.id)}
+                  onRemove={(a) => void deleteAttachment(a)}
+                />
               </Card>
             );
           })}
@@ -160,34 +190,64 @@ export default function RecordsScreen() {
         توقيتات معتادة للاسترشاد فقط — تختلف بحسب البلد والطبيب والحالة، وليست توصية شخصية.
       </Txt>
 
-      <Card style={{ paddingVertical: 18, paddingHorizontal: 20, gap: 14 }}>
+      <Card style={{ paddingVertical: 18, paddingHorizontal: 20, gap: 16 }}>
         {TESTS.map((test) => {
-          const state =
+          // The catalogue window is advisory. Her own status, when she has set
+          // one, always takes precedence over where the calendar happens to be.
+          const timing =
             currentWeek > test.to
               ? 'مرّت الفترة المعتادة'
               : currentWeek >= test.from
                 ? 'الفترة الحالية'
                 : 'قادم';
-          const isCurrent = state === 'الفترة الحالية';
+          const isCurrent = timing === 'الفترة الحالية';
+          const tracked = tests.find((t) => t.testId === test.id);
+
           return (
-            <Row key={test.id} gap={10} align="flex-start">
-              <View style={{ flex: 1 }}>
-                <Txt size={13.5} weight={600}>
-                  {test.name}
-                </Txt>
-                <Txt size={12} color={colors.muted} lineHeight={1.7} style={{ marginTop: 2 }}>
-                  {test.why}
-                </Txt>
-                <Txt size={11.5} color={colors.faint} style={{ marginTop: 2 }}>
-                  {`الأسبوع ${test.from}–${test.to}`}
-                </Txt>
-              </View>
-              <Chip bg={isCurrent ? colors.sageSoft : colors.surfaceWarm} style={{ marginTop: 2 }}>
-                <Txt size={11} weight={500} color={isCurrent ? colors.sageDark : colors.muted}>
-                  {state}
-                </Txt>
-              </Chip>
-            </Row>
+            <View key={test.id} style={{ gap: 8 }}>
+              <Row gap={10} align="flex-start">
+                <View style={{ flex: 1 }}>
+                  <Txt size={13.5} weight={600}>
+                    {test.name}
+                  </Txt>
+                  <Txt size={12} color={colors.muted} lineHeight={1.7} style={{ marginTop: 2 }}>
+                    {test.why}
+                  </Txt>
+                  <Txt size={11.5} color={colors.faint} style={{ marginTop: 2 }}>
+                    {`الأسبوع ${test.from}–${test.to}`}
+                  </Txt>
+                </View>
+                <Chip bg={isCurrent ? colors.sageSoft : colors.surfaceWarm} style={{ marginTop: 2 }}>
+                  <Txt size={11} weight={500} color={isCurrent ? colors.sageDark : colors.muted}>
+                    {timing}
+                  </Txt>
+                </Chip>
+              </Row>
+
+              <Row wrap gap={6}>
+                {(Object.keys(TEST_STATUS_LABELS) as TestStatus[]).map((status) => {
+                  const active = tracked?.status === status;
+                  return (
+                    <Pressable
+                      key={status}
+                      onPress={() => void setTestStatus(test.id, status)}
+                      style={{
+                        borderRadius: 999,
+                        paddingVertical: 5,
+                        paddingHorizontal: 11,
+                        borderWidth: 1,
+                        borderColor: active ? colors.sage : colors.border,
+                        backgroundColor: active ? colors.sage : colors.surface,
+                      }}
+                    >
+                      <Txt size={11} weight={active ? 600 : 400} color={active ? colors.surface : colors.muted}>
+                        {TEST_STATUS_LABELS[status]}
+                      </Txt>
+                    </Pressable>
+                  );
+                })}
+              </Row>
+            </View>
           );
         })}
       </Card>
@@ -211,16 +271,7 @@ function RecordSheet({
   visible: boolean;
   today: string;
   onClose: () => void;
-  onSave: (input: {
-    type: RecordType;
-    title: string;
-    date: string;
-    provider: string;
-    notes: string;
-    crl: string;
-    fhr: string;
-    newEdd: string | null;
-  }) => Promise<void>;
+  onSave: (input: Omit<MedicalRecord, 'id'>, files?: PickedFile[]) => Promise<void>;
 }) {
   const [type, setType] = useState<RecordType>('blood');
   const [title, setTitle] = useState('');
@@ -229,7 +280,10 @@ function RecordSheet({
   const [crl, setCrl] = useState('');
   const [fhr, setFhr] = useState('');
   const [newEdd, setNewEdd] = useState('');
+  const [scanWeeks, setScanWeeks] = useState('');
+  const [scanDays, setScanDays] = useState('');
   const [notes, setNotes] = useState('');
+  const [files, setFiles] = useState<PickedFile[]>([]);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -240,24 +294,36 @@ function RecordSheet({
     }
     setSaving(true);
     try {
-      await onSave({
-        type,
-        title: title.trim(),
-        date,
-        provider,
-        notes,
-        // These only mean anything on an ultrasound; drop them otherwise so a
-        // type change cannot smuggle a stale due date into the profile.
-        crl: type === 'ultrasound' ? crl : '',
-        fhr: type === 'ultrasound' ? fhr : '',
-        newEdd: type === 'ultrasound' && newEdd ? newEdd : null,
-      });
+      const weeksPart = parseInt(scanWeeks, 10);
+      const daysPart = parseInt(scanDays, 10) || 0;
+      const scanGaDays =
+        type === 'ultrasound' && Number.isFinite(weeksPart) ? weeksPart * 7 + daysPart : null;
+
+      await onSave(
+        {
+          type,
+          title: title.trim(),
+          date,
+          provider,
+          notes,
+          // These only mean anything on an ultrasound; drop them otherwise so a
+          // type change cannot smuggle a stale due date into the profile.
+          crl: type === 'ultrasound' ? crl : '',
+          fhr: type === 'ultrasound' ? fhr : '',
+          newEdd: type === 'ultrasound' && newEdd ? newEdd : null,
+          scanGaDays,
+        },
+        files,
+      );
       setTitle('');
       setProvider('');
       setCrl('');
       setFhr('');
       setNewEdd('');
+      setScanWeeks('');
+      setScanDays('');
       setNotes('');
+      setFiles([]);
       setError('');
       onClose();
     } catch {
@@ -304,6 +370,29 @@ function RecordSheet({
           </Row>
           <View>
             <Txt size={12} color={colors.sage} style={{ marginBottom: 5 }}>
+              عمر الحمل حسب السونار (اختياري)
+            </Txt>
+            <Row gap={10} align="flex-start">
+              <TextField
+                value={scanWeeks}
+                onChange={setScanWeeks}
+                placeholder="أسابيع"
+                keyboardType="number-pad"
+                size={14}
+                style={{ flex: 1 }}
+              />
+              <TextField
+                value={scanDays}
+                onChange={setScanDays}
+                placeholder="أيام"
+                keyboardType="number-pad"
+                size={14}
+                style={{ flex: 1 }}
+              />
+            </Row>
+          </View>
+          <View>
+            <Txt size={12} color={colors.sage} style={{ marginBottom: 5 }}>
               موعد ولادة جديد من السونار (EDD) — يعيد بناء التقويم
             </Txt>
             <DateField value={newEdd} onChange={setNewEdd} placeholder="بدون تغيير" />
@@ -318,6 +407,7 @@ function RecordSheet({
         rows={2}
         size={14.5}
       />
+      <AttachmentPicker files={files} onChange={setFiles} label="صورة السونار / التقرير" />
       {error ? <ErrorText>{error}</ErrorText> : null}
       <Row gap={10}>
         <PrimaryButton label={saving ? 'جارٍ الحفظ…' : 'حفظ'} onPress={submit} style={{ flex: 2 }} />

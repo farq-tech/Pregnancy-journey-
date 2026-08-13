@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
+import { AttachmentGallery } from '../../src/components/AttachmentGallery';
+import { AttachmentPicker } from '../../src/components/AttachmentPicker';
 import { Screen } from '../../src/components/Screen';
 import { Sheet } from '../../src/components/Sheet';
 import { Txt } from '../../src/components/Txt';
@@ -17,11 +19,15 @@ import { formatDayMonth } from '../../src/lib/arabic';
 import { diffDays, fromIso } from '../../src/lib/dates';
 import { countdownLabel, joinMeta } from '../../src/lib/labels';
 import { computeJourney } from '../../src/lib/pregnancy';
+import type { PickedFile } from '../../src/lib/storage';
 import { useJourney } from '../../src/store/JourneyProvider';
 import {
   APPOINTMENT_TYPE_LABELS,
+  RECURRENCE_LABELS,
   REMINDER_LABELS,
+  type Appointment,
   type AppointmentType,
+  type Recurrence,
   type ReminderOffset,
 } from '../../src/store/types';
 import { colors } from '../../src/theme';
@@ -36,8 +42,22 @@ const REMINDER_OPTIONS = (Object.keys(REMINDER_LABELS) as ReminderOffset[]).map(
   label: value === '' ? 'بدون تذكير' : `تذكير ${REMINDER_LABELS[value]}`,
 }));
 
+const RECURRENCE_OPTIONS = (Object.keys(RECURRENCE_LABELS) as Recurrence[]).map((value) => ({
+  value,
+  label: RECURRENCE_LABELS[value],
+}));
+
 export default function AppointmentsScreen() {
-  const { settings, appointments, today, addAppointment, toggleAppointment, remove } = useJourney();
+  const {
+    settings,
+    appointments,
+    today,
+    addAppointment,
+    toggleAppointment,
+    remove,
+    attachmentsFor,
+    deleteAttachment,
+  } = useJourney();
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const journey = useMemo(
@@ -158,13 +178,27 @@ export default function AppointmentsScreen() {
                         {appointment.notes}
                       </Txt>
                     ) : null}
-                    {appointment.reminder ? (
-                      <Chip bg={colors.claySoft} style={{ marginTop: 6 }}>
-                        <Txt size={11.5} color={colors.clayText}>
-                          {`🔔 ${REMINDER_LABELS[appointment.reminder]}`}
-                        </Txt>
-                      </Chip>
-                    ) : null}
+                    <Row wrap gap={6} style={{ marginTop: 6 }}>
+                      {appointment.reminder ? (
+                        <Chip bg={colors.claySoft}>
+                          <Txt size={11.5} color={colors.clayText}>
+                            {`🔔 ${REMINDER_LABELS[appointment.reminder]}`}
+                          </Txt>
+                        </Chip>
+                      ) : null}
+                      {appointment.recurrence ? (
+                        <Chip bg={colors.surfaceWarm}>
+                          <Txt size={11.5} color={colors.muted}>
+                            {`🔁 ${RECURRENCE_LABELS[appointment.recurrence]}`}
+                          </Txt>
+                        </Chip>
+                      ) : null}
+                    </Row>
+
+                    <AttachmentGallery
+                      attachments={attachmentsFor('appointment', appointment.id)}
+                      onRemove={(a) => void deleteAttachment(a)}
+                    />
                   </View>
 
                   <View style={{ alignItems: 'flex-start', gap: 6 }}>
@@ -209,16 +243,7 @@ function AppointmentSheet({
   visible: boolean;
   today: string;
   onClose: () => void;
-  onSave: (input: {
-    title: string;
-    type: AppointmentType;
-    date: string;
-    time: string;
-    location: string;
-    doctor: string;
-    notes: string;
-    reminder: ReminderOffset;
-  }) => Promise<void>;
+  onSave: (input: Omit<Appointment, 'id' | 'done'>, files?: PickedFile[]) => Promise<void>;
 }) {
   const [title, setTitle] = useState('');
   const [type, setType] = useState<AppointmentType>('doctor');
@@ -227,7 +252,9 @@ function AppointmentSheet({
   const [location, setLocation] = useState('');
   const [doctor, setDoctor] = useState('');
   const [reminder, setReminder] = useState<ReminderOffset>('24h');
+  const [recurrence, setRecurrence] = useState<Recurrence>('');
   const [notes, setNotes] = useState('');
+  const [files, setFiles] = useState<PickedFile[]>([]);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -238,12 +265,17 @@ function AppointmentSheet({
     }
     setSaving(true);
     try {
-      await onSave({ title: title.trim(), type, date, time, location, doctor, notes, reminder });
+      await onSave(
+        { title: title.trim(), type, date, time, location, doctor, notes, reminder, recurrence },
+        files,
+      );
       setTitle('');
       setTime('');
       setLocation('');
       setDoctor('');
       setNotes('');
+      setRecurrence('');
+      setFiles([]);
       setError('');
       onClose();
     } catch {
@@ -288,12 +320,22 @@ function AppointmentSheet({
           style={{ flex: 1 }}
         />
       </Row>
-      <SelectField
-        value={reminder}
-        onChange={(v) => setReminder(v as ReminderOffset)}
-        options={REMINDER_OPTIONS}
-      />
+      <Row gap={10} align="flex-start">
+        <SelectField
+          value={reminder}
+          onChange={(v) => setReminder(v as ReminderOffset)}
+          options={REMINDER_OPTIONS}
+          style={{ flex: 1 }}
+        />
+        <SelectField
+          value={recurrence}
+          onChange={(v) => setRecurrence(v as Recurrence)}
+          options={RECURRENCE_OPTIONS}
+          style={{ flex: 1 }}
+        />
+      </Row>
       <TextField value={notes} onChange={setNotes} placeholder="ملاحظات" rows={2} size={14.5} />
+      <AttachmentPicker files={files} onChange={setFiles} label="إرفاق" />
       {error ? <ErrorText>{error}</ErrorText> : null}
       <Row gap={10}>
         <PrimaryButton

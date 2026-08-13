@@ -21,6 +21,9 @@ export type RecordType =
   | 'photo'
   | 'note';
 
+/** Repeat rule for follow-up visits; empty means a one-off. */
+export type Recurrence = '' | 'weekly' | 'biweekly' | 'monthly';
+
 export type Appointment = {
   id: string;
   title: string;
@@ -33,6 +36,7 @@ export type Appointment = {
   notes: string;
   reminder: ReminderOffset;
   done: boolean;
+  recurrence: Recurrence;
 };
 
 export type JournalEntry = {
@@ -56,6 +60,8 @@ export type MedicalRecord = {
   fhr: string;
   /** Due date assigned by this ultrasound, if any. */
   newEdd: IsoDate | null;
+  /** Gestational age in days as measured by the scan, if reported. */
+  scanGaDays: number | null;
 };
 
 export type WeekVideo = {
@@ -68,6 +74,33 @@ export type WeekVideo = {
   duration: string;
   pubDate: string;
   license: string;
+  description: string;
+  thumbnailUrl: string;
+};
+
+/** Her own status against the advisory test catalogue. Never prescriptive. */
+export type TestStatus = 'planned' | 'scheduled' | 'done' | 'skipped';
+
+export type TestTracking = {
+  id: string;
+  testId: string;
+  status: TestStatus;
+  notes: string;
+  appointmentId: string | null;
+};
+
+export const TEST_STATUS_LABELS: Record<TestStatus, string> = {
+  planned: 'لم يُحدَّد بعد',
+  scheduled: 'محجوز',
+  done: 'تم',
+  skipped: 'غير مطلوب',
+};
+
+export const RECURRENCE_LABELS: Record<Recurrence, string> = {
+  '': 'موعد واحد',
+  weekly: 'كل أسبوع',
+  biweekly: 'كل أسبوعين',
+  monthly: 'كل شهر',
 };
 
 export const APPOINTMENT_TYPE_LABELS: Record<AppointmentType, string> = {

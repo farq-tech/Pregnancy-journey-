@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
+import { AttachmentGallery } from '../../src/components/AttachmentGallery';
+import { AttachmentPicker } from '../../src/components/AttachmentPicker';
 import { Screen } from '../../src/components/Screen';
 import { Sheet } from '../../src/components/Sheet';
 import { Txt } from '../../src/components/Txt';
@@ -15,12 +17,14 @@ import { Card, Row } from '../../src/components/layout';
 import { formatDayMonth } from '../../src/lib/arabic';
 import { diffDays, fromIso } from '../../src/lib/dates';
 import { computeJourney } from '../../src/lib/pregnancy';
+import type { PickedFile } from '../../src/lib/storage';
 import { useJourney } from '../../src/store/JourneyProvider';
-import { MOODS } from '../../src/store/types';
+import { MOODS, type JournalEntry } from '../../src/store/types';
 import { colors } from '../../src/theme';
 
 export default function JournalScreen() {
-  const { settings, journal, today, addJournalEntry, remove } = useJourney();
+  const { settings, journal, today, addJournalEntry, remove, attachmentsFor, deleteAttachment } =
+    useJourney();
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const journey = useMemo(
@@ -137,6 +141,11 @@ export default function JournalScreen() {
                     ) : null}
                   </Row>
                 ) : null}
+
+                <AttachmentGallery
+                  attachments={attachmentsFor('journal', entry.id)}
+                  onRemove={(a) => void deleteAttachment(a)}
+                />
               </Card>
             );
           })}
@@ -162,19 +171,14 @@ function JournalSheet({
   visible: boolean;
   today: string;
   onClose: () => void;
-  onSave: (input: {
-    date: string;
-    mood: string;
-    text: string;
-    symptoms: string;
-    weight: number | null;
-  }) => Promise<void>;
+  onSave: (input: Omit<JournalEntry, 'id'>, files?: PickedFile[]) => Promise<void>;
 }) {
   const [date, setDate] = useState(today);
   const [mood, setMood] = useState('');
   const [text, setText] = useState('');
   const [symptoms, setSymptoms] = useState('');
   const [weight, setWeight] = useState('');
+  const [files, setFiles] = useState<PickedFile[]>([]);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -190,11 +194,12 @@ function JournalSheet({
     }
     setSaving(true);
     try {
-      await onSave({ date, mood, text: text.trim(), symptoms, weight: parsedWeight });
+      await onSave({ date, mood, text: text.trim(), symptoms, weight: parsedWeight }, files);
       setMood('');
       setText('');
       setSymptoms('');
       setWeight('');
+      setFiles([]);
       setError('');
       onClose();
     } catch {
@@ -254,6 +259,7 @@ function JournalSheet({
           style={{ flex: 1 }}
         />
       </Row>
+      <AttachmentPicker files={files} onChange={setFiles} label="صورة اليوم" />
       {error ? <ErrorText>{error}</ErrorText> : null}
       <Row gap={10}>
         <PrimaryButton label={saving ? 'جارٍ الحفظ…' : 'حفظ'} onPress={submit} style={{ flex: 2 }} />

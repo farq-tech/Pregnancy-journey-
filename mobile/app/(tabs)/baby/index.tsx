@@ -5,13 +5,12 @@ import { Pressable, View } from 'react-native';
 import { Screen } from '../../../src/components/Screen';
 import { Txt } from '../../../src/components/Txt';
 import { Card, Row } from '../../../src/components/layout';
+import { milestonesWithState } from '../../../src/content/milestones';
 import {
   MAX_CONTENT_WEEK,
-  MILESTONES,
   MIN_CONTENT_WEEK,
   weekContent,
 } from '../../../src/content/pregnancyData';
-import { days } from '../../../src/lib/arabic';
 import { fromIso } from '../../../src/lib/dates';
 import { joinMeta } from '../../../src/lib/labels';
 import { clampWeek, computeJourney } from '../../../src/lib/pregnancy';
@@ -19,7 +18,7 @@ import { useJourney } from '../../../src/store/JourneyProvider';
 import { colors } from '../../../src/theme';
 
 export default function BabyTimelineScreen() {
-  const { settings, today } = useJourney();
+  const { settings, today, records, appointments } = useJourney();
   const journey = useMemo(
     () => (settings ? computeJourney(settings, fromIso(today)) : null),
     [settings, today],
@@ -37,6 +36,12 @@ export default function BabyTimelineScreen() {
 
   const currentWeek = clampWeek(journey.week);
   const babyName = settings.babyName || 'طفلك';
+  const milestones = milestonesWithState(
+    journey.gestationalDay,
+    journey.effectiveLmp,
+    records,
+    appointments,
+  );
 
   return (
     <Screen gap={0}>
@@ -125,10 +130,19 @@ export default function BabyTimelineScreen() {
       </Txt>
 
       <Card style={{ paddingVertical: 18, paddingHorizontal: 20, gap: 12 }}>
-        {MILESTONES.map((milestone) => {
-          // A milestone's own gestational day is the first day of its week.
-          const delta = (milestone.week - 1) * 7 - journey.gestationalDay;
-          const reached = delta <= 0;
+        {milestones.map((milestone) => {
+          const { status, label } = milestone.state;
+          // Three distinct marks, because they mean three different things: a
+          // tick is something that happened, a ring is something merely due.
+          const mark =
+            status === 'confirmed' ? '✓' : status === 'expected' ? '◦' : '';
+          const markBg =
+            status === 'confirmed'
+              ? colors.sageRing
+              : status === 'expected'
+                ? colors.surfaceWarm
+                : colors.border;
+
           return (
             <Row key={milestone.id} gap={10} align="flex-start">
               <View
@@ -139,17 +153,27 @@ export default function BabyTimelineScreen() {
                   marginTop: 2,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: reached ? colors.sageRing : colors.border,
+                  backgroundColor: markBg,
+                  borderWidth: status === 'expected' ? 1 : 0,
+                  borderColor: colors.sageMid,
                 }}
               >
-                {reached ? (
-                  <Txt size={10} color={colors.surface} align="center">
-                    ✓
+                {mark ? (
+                  <Txt
+                    size={10}
+                    color={status === 'confirmed' ? colors.surface : colors.sage}
+                    align="center"
+                  >
+                    {mark}
                   </Txt>
                 ) : null}
               </View>
               <View style={{ flex: 1 }}>
-                <Txt size={13.5} weight={500} color={reached ? colors.text : colors.muted}>
+                <Txt
+                  size={13.5}
+                  weight={500}
+                  color={status === 'upcoming' ? colors.muted : colors.text}
+                >
                   {milestone.label}
                   <Txt size={12} color={colors.faint}>
                     {` · الأسبوع ${milestone.week}`}
@@ -160,8 +184,13 @@ export default function BabyTimelineScreen() {
                     {milestone.note}
                   </Txt>
                 ) : null}
-                <Txt size={12} color={colors.sageRing} style={{ marginTop: 1 }}>
-                  {reached ? 'وصلتِ لهذه المرحلة' : `باقي ${days(delta)}`}
+                <Txt
+                  size={12}
+                  lineHeight={1.6}
+                  color={status === 'confirmed' ? colors.sageRing : colors.muted}
+                  style={{ marginTop: 1 }}
+                >
+                  {label}
                 </Txt>
               </View>
             </Row>

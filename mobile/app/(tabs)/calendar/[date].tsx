@@ -79,7 +79,7 @@ export default function DayScreen() {
             <Row wrap gap={8} justify="center" style={{ marginTop: 10 }}>
               <Chip>
                 <Txt size={12} weight={500} color={colors.sageDark}>
-                  {`اليوم ${detail.gestationalDay + 1} من ${TERM_DAYS}`}
+                  {`اليوم ${detail.gestationalDay} من ${TERM_DAYS}`}
                 </Txt>
               </Chip>
               <Chip bg={colors.surfaceWarm}>

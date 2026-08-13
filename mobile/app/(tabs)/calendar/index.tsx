@@ -26,10 +26,11 @@ type Cell =
       hasAppointment: boolean;
       hasJournal: boolean;
       hasRecord: boolean;
+      hasPhoto: boolean;
     };
 
 export default function CalendarScreen() {
-  const { settings, appointments, journal, records, today } = useJourney();
+  const { settings, appointments, journal, records, attachments, today } = useJourney();
   const journey = useMemo(
     () => (settings ? computeJourney(settings, fromIso(today)) : null),
     [settings, today],
@@ -44,8 +45,25 @@ export default function CalendarScreen() {
     const appointmentDays = new Set(appointments.map((a) => a.date));
     const journalDays = new Set(journal.map((j) => j.date));
     const recordDays = new Set(records.map((r) => r.date));
-    return { appointmentDays, journalDays, recordDays };
-  }, [appointments, journal, records]);
+
+    // Photos hang off a record, journal entry or appointment rather than off a
+    // date, so resolve each one back to the day its owner falls on.
+    const dateByOwner = new Map<string, string>();
+    for (const record of records) dateByOwner.set(`record:${record.id}`, record.date);
+    for (const entry of journal) dateByOwner.set(`journal:${entry.id}`, entry.date);
+    for (const appointment of appointments) {
+      dateByOwner.set(`appointment:${appointment.id}`, appointment.date);
+    }
+
+    const photoDays = new Set<string>();
+    for (const attachment of attachments) {
+      if (attachment.kind !== 'photo') continue;
+      const date = dateByOwner.get(`${attachment.ownerType}:${attachment.ownerId}`);
+      if (date) photoDays.add(date);
+    }
+
+    return { appointmentDays, journalDays, recordDays, photoDays };
+  }, [appointments, journal, records, attachments]);
 
   const cells = useMemo<Cell[]>(() => {
     if (!journey) return [];
@@ -73,6 +91,7 @@ export default function CalendarScreen() {
         hasAppointment: marked.appointmentDays.has(iso),
         hasJournal: marked.journalDays.has(iso),
         hasRecord: marked.recordDays.has(iso),
+        hasPhoto: marked.photoDays.has(iso),
       });
     }
     return out;
@@ -147,6 +166,7 @@ export default function CalendarScreen() {
                     {cell.hasAppointment ? <Dot color={colors.dotAppt} /> : null}
                     {cell.hasJournal ? <Dot color={colors.dotJournal} /> : null}
                     {cell.hasRecord ? <Dot color={colors.dotRecord} /> : null}
+                    {cell.hasPhoto ? <Dot color={colors.dotPhoto} /> : null}
                   </Row>
                 </Pressable>
               </View>
@@ -160,6 +180,7 @@ export default function CalendarScreen() {
         <LegendItem color={colors.dotAppt} label="موعد" />
         <LegendItem color={colors.dotJournal} label="يوميات" />
         <LegendItem color={colors.dotRecord} label="ملف" />
+        <LegendItem color={colors.dotPhoto} label="صورة" />
       </Row>
 
       <Txt size={12} color={colors.faint} align="center" lineHeight={1.6}>

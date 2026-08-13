@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Screen } from '../../src/components/Screen';
+import { TodayWidget } from '../../src/components/TodayWidget';
 import { Txt } from '../../src/components/Txt';
 import { CheckIcon, ChevronIcon, SettingsIcon } from '../../src/components/icons';
 import { Card, Chip, Row } from '../../src/components/layout';
@@ -107,6 +108,13 @@ export default function TodayScreen() {
           <SettingsIcon />
         </Pressable>
       </Row>
+
+      <TodayWidget
+        journey={journey}
+        nextAppointmentLabel={
+          nextAppointment ? countdownLabel(nextAppointment.date, journey.today) : 'لا يوجد'
+        }
+      />
 
       {syncError ? (
         <View

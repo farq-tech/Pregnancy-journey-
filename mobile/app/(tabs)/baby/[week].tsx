@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Linking, Pressable, View } from 'react-native';
@@ -21,6 +22,7 @@ import {
   TESTS,
   weekContent,
 } from '../../../src/content/pregnancyData';
+import { questionsForWeek } from '../../../src/content/questions';
 import { formatDayMonth, weekOrdinalLabel } from '../../../src/lib/arabic';
 import { addDays, diffDays, fromIso } from '../../../src/lib/dates';
 import { joinMeta } from '../../../src/lib/labels';
@@ -32,6 +34,7 @@ import {
   weekStart,
 } from '../../../src/lib/pregnancy';
 import { useJourney } from '../../../src/store/JourneyProvider';
+import type { WeekVideo } from '../../../src/store/types';
 import { colors } from '../../../src/theme';
 
 export default function WeekScreen() {
@@ -86,7 +89,12 @@ export default function WeekScreen() {
       </Row>
 
       <Card>
-        <WeekIllustration week={week} size={130} caption={`صورة الجنين — ${weekOrdinalLabel(week)}`} />
+        <WeekIllustration
+          week={week}
+          size={130}
+          caption={`صورة الجنين — ${weekOrdinalLabel(week)}`}
+          showCaption
+        />
         <Txt size={16} weight={600} color={colors.sage} align="center" style={{ marginTop: 12 }}>
           {content.title}
         </Txt>
@@ -204,6 +212,27 @@ export default function WeekScreen() {
       ) : null}
 
       <Card>
+        <Txt size={15} weight={600} style={{ marginBottom: 4 }}>
+          أسئلة للطبيب 💬
+        </Txt>
+        <Txt size={12} color={colors.faint} lineHeight={1.5} style={{ marginBottom: 10 }}>
+          خذيها معك في الزيارة القادمة — أسئلة للنقاش، وليست توصيات.
+        </Txt>
+        <View style={{ gap: 8 }}>
+          {questionsForWeek(week).map((question) => (
+            <Row key={question} gap={8} align="flex-start">
+              <Txt size={13.5} color={colors.sageRing}>
+                ؟
+              </Txt>
+              <Txt size={13.5} color={colors.body} lineHeight={1.7} style={{ flex: 1 }}>
+                {question}
+              </Txt>
+            </Row>
+          ))}
+        </View>
+      </Card>
+
+      <Card>
         <Row justify="space-between" style={{ marginBottom: 10 }}>
           <Txt size={15} weight={600}>
             ▶ شاهدي تطور طفلك
@@ -231,20 +260,30 @@ export default function WeekScreen() {
                 gap={12}
                 style={{ backgroundColor: colors.bg, borderRadius: 14, padding: 12 }}
               >
-                <View
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 10,
-                    backgroundColor: colors.sage,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Txt size={13} color={colors.surface} align="center">
-                    ▶
-                  </Txt>
-                </View>
+                {video.thumbnailUrl ? (
+                  <Image
+                    source={{ uri: video.thumbnailUrl }}
+                    style={{ width: 58, height: 38, borderRadius: 8 }}
+                    contentFit="cover"
+                    transition={120}
+                    accessibilityLabel={`صورة مصغّرة — ${video.title}`}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 10,
+                      backgroundColor: colors.sage,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Txt size={13} color={colors.surface} align="center">
+                      ▶
+                    </Txt>
+                  </View>
+                )}
                 <View style={{ flex: 1 }}>
                   <Pressable
                     onPress={() => {
@@ -265,6 +304,11 @@ export default function WeekScreen() {
                       ? ` · ${joinMeta(video.pubDate, video.license)}`
                       : ''}
                   </Txt>
+                  {video.description ? (
+                    <Txt size={11.5} color={colors.faint} lineHeight={1.6} style={{ marginTop: 2 }}>
+                      {video.description}
+                    </Txt>
+                  ) : null}
                 </View>
                 <Pressable
                   onPress={() => void remove('videos', video.id)}
@@ -322,16 +366,7 @@ function VideoSheet({
   visible: boolean;
   week: number;
   onClose: () => void;
-  onSave: (input: {
-    week: number;
-    title: string;
-    url: string;
-    source: string;
-    author: string;
-    duration: string;
-    pubDate: string;
-    license: string;
-  }) => Promise<void>;
+  onSave: (input: Omit<WeekVideo, 'id'>) => Promise<void>;
 }) {
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
@@ -340,6 +375,8 @@ function VideoSheet({
   const [duration, setDuration] = useState('');
   const [pubDate, setPubDate] = useState('');
   const [license, setLicense] = useState('');
+  const [description, setDescription] = useState('');
+  const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -351,6 +388,8 @@ function VideoSheet({
     setDuration('');
     setPubDate('');
     setLicense('');
+    setDescription('');
+    setThumbnailUrl('');
     setError('');
   };
 
@@ -365,6 +404,10 @@ function VideoSheet({
       setError('الرابط يجب أن يبدأ بـ http:// أو https://');
       return;
     }
+    if (thumbnailUrl.trim() && !/^https?:\/\//i.test(thumbnailUrl.trim())) {
+      setError('رابط الصورة المصغّرة يجب أن يبدأ بـ http:// أو https://');
+      return;
+    }
     setSaving(true);
     try {
       await onSave({
@@ -376,6 +419,8 @@ function VideoSheet({
         duration,
         pubDate,
         license,
+        description,
+        thumbnailUrl: thumbnailUrl.trim(),
       });
       reset();
       onClose();
@@ -440,6 +485,20 @@ function VideoSheet({
           style={{ flex: 1 }}
         />
       </Row>
+      <TextField
+        value={thumbnailUrl}
+        onChange={setThumbnailUrl}
+        placeholder="رابط الصورة المصغّرة (اختياري)"
+        size={14.5}
+        ltr
+      />
+      <TextField
+        value={description}
+        onChange={setDescription}
+        placeholder="وصف مختصر"
+        rows={2}
+        size={14.5}
+      />
       {error ? <ErrorText>{error}</ErrorText> : null}
       <Row gap={10}>
         <PrimaryButton
