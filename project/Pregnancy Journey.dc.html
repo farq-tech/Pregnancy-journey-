@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EDEBE3}
+a{color:#5E6F5C}a:hover{color:#465443}
+input,select,textarea{outline:none}
+::-webkit-scrollbar{width:0;height:0}
+</style>
+<script src="./pregnancy-data.js"></script>
+<script src="./image-slot.js"></script>
+</helmet>
+<div style="display:flex;justify-content:center;padding:24px 0;background:#EDEBE3">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="430px,900px">
+<div dir="rtl" style="font-family:'Rubik',sans-serif;background:#F8F7F2;height:100%;position:relative;overflow:hidden;display:flex;flex-direction:column;color:#2C332B;text-align:right">
+
+<sc-if value="{{ sOnboard }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;overflow-y:auto;padding:28px 22px 40px">
+  <div style="text-align:center;margin:18px 0 26px">
+    <div style="width:64px;height:64px;border-radius:50%;background:#EEF1EA;display:inline-flex;align-items:center;justify-content:center">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#5E6F5C" stroke-width="1.6"><path d="M12 21C7 16.5 3 13.2 3 9.3 3 6.4 5.2 4.5 7.7 4.5c1.7 0 3.3.9 4.3 2.4 1-1.5 2.6-2.4 4.3-2.4 2.5 0 4.7 1.9 4.7 4.8 0 3.9-4 7.2-9 11.7Z"></path></svg>
+    </div>
+    <h1 style="font-size:26px;font-weight:600;margin:14px 0 6px">رحلة الحمل</h1>
+    <p style="font-size:14px;color:#85826F;margin:0;line-height:1.7">أدخلي بياناتك لنبني رحلتك يومًا بيوم<br>من أول يوم في آخر دورة حتى موعد الولادة</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div><div style="font-size:13px;font-weight:500;margin-bottom:6px">أول يوم في آخر دورة شهرية (LMP) *</div>
+      <input type="date" data-k="lmp" value="{{ f.lmp }}" onChange="{{ onField }}" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:15px;background:#fff;color:#2C332B"></div>
+    <div><div style="font-size:13px;font-weight:500;margin-bottom:6px">متوسط طول الدورة (بالأيام)</div>
+      <input type="number" min="21" max="40" data-k="cycle" value="{{ f.cycle }}" onChange="{{ onField }}" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:15px;background:#fff;color:#2C332B"></div>
+    <div><div style="font-size:13px;font-weight:500;margin-bottom:6px">حالة الحمل</div>
+      <select data-k="status" value="{{ f.status }}" onChange="{{ onField }}" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:15px;background:#fff;color:#2C332B">
+        <option value="pregnant">حامل</option><option value="planning">تخطيط للحمل</option>
+      </select></div>
+    <div><div style="font-size:13px;font-weight:500;margin-bottom:6px">تعديل موعد الولادة (EDD Override) — اختياري</div>
+      <input type="date" data-k="edd" value="{{ f.edd }}" onChange="{{ onField }}" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:15px;background:#fff;color:#2C332B">
+      <div style="font-size:12px;color:#85826F;margin-top:5px">يُستخدم إذا حدّد الطبيب موعدًا مختلفًا بعد السونار — يُعاد بناء التقويم كاملًا منه.</div></div>
+    <div style="display:flex;gap:10px">
+      <div style="flex:1"><div style="font-size:13px;font-weight:500;margin-bottom:6px">اسم / لقب الطفل — اختياري</div>
+        <input type="text" data-k="babyName" value="{{ f.babyName }}" onChange="{{ onField }}" placeholder="Baby Noor" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:15px;background:#fff;color:#2C332B"></div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:500;margin-bottom:6px">اسم الأم — اختياري</div>
+        <input type="text" data-k="motherName" value="{{ f.motherName }}" onChange="{{ onField }}" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:15px;background:#fff;color:#2C332B"></div>
+    </div>
+    <div><div style="font-size:13px;font-weight:500;margin-bottom:6px">الطبيب / العيادة — اختياري</div>
+      <input type="text" data-k="doctor" value="{{ f.doctor }}" onChange="{{ onField }}" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:15px;background:#fff;color:#2C332B"></div>
+    <sc-if value="{{ fError }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#A9564B;background:#F7ECEA;border-radius:10px;padding:10px 14px">{{ fError }}</div></sc-if>
+    <button onClick="{{ saveSettings }}" style="width:100%;background:#5E6F5C;color:#fff;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:4px" style-hover="background:#4E5D4C">ابدئي الرحلة</button>
+    <div style="font-size:12px;color:#A5A292;text-align:center;line-height:1.7">{{ disclaimer }}</div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasSetup }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;overflow-y:auto;padding:0 0 8px">
+
+<sc-if value="{{ sToday }}" hint-placeholder-val="{{ true }}">
+<div style="padding:14px 18px 24px;display:flex;flex-direction:column;gap:14px">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <div>
+      <div style="font-size:11px;letter-spacing:2px;color:#85826F;font-weight:500">اليوم</div>
+      <div style="font-size:17px;font-weight:600">{{ todayLong }}</div>
+    </div>
+    <button onClick="{{ editSettings }}" title="الإعدادات" style="background:#fff;border:1px solid #E3E1D5;border-radius:12px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:#EEF1EA">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5E6F5C" stroke-width="1.8"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.09a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.09a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"></path></svg>
+    </button>
+  </div>
+
+  <sc-if value="{{ eddBanner }}" hint-placeholder-val="{{ false }}">
+  <div style="background:#EEF1EA;border:1px solid #D8DFD3;border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5E6F5C" stroke-width="2"><path d="M20 6 9 17l-5-5"></path></svg>
+    <div style="font-size:13px;color:#4E5D4C;flex:1">تم تحديث موعد الولادة بناءً على السونار — أُعيد حساب التقويم كاملًا.</div>
+    <button onClick="{{ dismissBanner }}" style="background:none;border:none;color:#85826F;cursor:pointer;font-size:16px;padding:0">×</button>
+  </div>
+  </sc-if>
+
+  <div style="background:linear-gradient(160deg,#FFFFFF,#F4F2E9);border:1px solid #E3E1D5;border-radius:24px;padding:24px 20px;text-align:center">
+    <div style="font-size:14px;color:#B0776F;font-weight:500">رحلتكم بدأت ❤️</div>
+    <div style="font-size:26px;font-weight:600;margin:6px 0 2px">{{ weekOrdinalLabel }}</div>
+    <div style="font-size:15px;color:#5E6F5C;font-weight:500">{{ gaLabel }}</div>
+    <div style="font-size:11.5px;color:#A5A292;margin-top:2px">{{ gaTerm }}</div>
+    <div style="width:170px;height:170px;border-radius:50%;margin:18px auto 14px;display:grid;place-items:center;background:conic-gradient(#7D8F7B {{ progressPct }}%, #E9E7DA 0)">
+      <div style="width:142px;height:142px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+        <div style="font-size:38px;font-weight:600;line-height:1">{{ dayNum }}</div>
+        <div style="font-size:12.5px;color:#85826F">من 280 يومًا</div>
+      </div>
+    </div>
+    <div style="font-size:14px;color:#2C332B">باقي <b>{{ daysLeftLabel }}</b> تقريبًا على الموعد المتوقع</div>
+    <div style="font-size:13px;color:#85826F;margin-top:3px">{{ eddLong }}</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div style="background:#fff;border:1px solid #E3E1D5;border-radius:18px;padding:14px 16px">
+      <div style="font-size:11.5px;color:#85826F">باقي على الولادة</div>
+      <div style="font-size:22px;font-weight:600;color:#5E6F5C;margin-top:2px">{{ daysLeft }} <span style="font-size:12px;font-weight:400;color:#85826F">يومًا</span></div>
+    </div>
+    <div style="background:#fff;border:1px solid #E3E1D5;border-radius:18px;padding:14px 16px">
+      <div style="font-size:11.5px;color:#85826F">الموعد القادم</div>
+      <div style="font-size:15px;font-weight:600;margin-top:4px;color:#2C332B">{{ nextApptShort }}</div>
+    </div>
+    <div style="background:#fff;border:1px solid #E3E1D5;border-radius:18px;padding:14px 16px">
+      <div style="font-size:11.5px;color:#85826F">المرحلة القادمة</div>
+      <div style="font-size:13.5px;font-weight:500;margin-top:4px;line-height:1.5">{{ nextWeekLabel }}</div>
+    </div>
+    <div style="background:#fff;border:1px solid #E3E1D5;border-radius:18px;padding:14px 16px">
+      <div style="font-size:11.5px;color:#85826F">{{ triName }}</div>
+      <div style="font-size:13.5px;font-weight:500;margin-top:4px;line-height:1.5">{{ triLabel }}</div>
+    </div>
+  </div>
+
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:16px;font-weight:600">{{ babyCardTitle }}</div>
+      <div style="font-size:12px;color:#5E6F5C;background:#EEF1EA;border-radius:999px;padding:4px 12px;font-weight:500">{{ weekShort }}</div>
+    </div>
+    <div style="display:flex;gap:14px;align-items:center">
+      <image-slot id="{{ babySlotId }}" shape="circle" style="width:96px;height:96px;flex-shrink:0" placeholder="صورة الأسبوع"></image-slot>
+      <div style="flex:1">
+        <div style="font-size:14.5px;font-weight:600;color:#5E6F5C">{{ wcTitle }}</div>
+        <sc-if value="{{ wcSize }}" hint-placeholder-val="{{ true }}"><div style="font-size:13px;color:#85826F;margin-top:3px">{{ wcSize }} · {{ wcCompare }}</div></sc-if>
+        <sc-if value="{{ wcWeight }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#85826F;margin-top:2px">الوزن: {{ wcWeight }}</div></sc-if>
+      </div>
+    </div>
+    <div style="font-size:14px;line-height:1.9;color:#3D4439">{{ wcBaby }}</div>
+    <button data-d="{{ todayIso }}" onClick="{{ openDayEv }}" style="width:100%;background:#EEF1EA;color:#4E5D4C;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer" style-hover="background:#E2E8DC">ماذا يحدث اليوم؟</button>
+  </div>
+
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:20px">
+    <div style="font-size:16px;font-weight:600;margin-bottom:8px">أنتِ اليوم</div>
+    <div style="font-size:14px;line-height:1.9;color:#3D4439">{{ wcMom }}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px">
+      <sc-for list="{{ wcSymptoms }}" as="sy" hint-placeholder-count="3">
+        <div style="font-size:12px;color:#8B6E69;background:#F6EFED;border-radius:999px;padding:5px 12px">{{ sy }}</div>
+      </sc-for>
+    </div>
+    <div style="font-size:12px;color:#A5A292;margin-top:10px">قد تختلف الأعراض من امرأة لأخرى — بعض النساء لا يشعرن بأعراض تُذكر.</div>
+  </div>
+
+  <sc-if value="{{ nextAppt }}" hint-placeholder-val="{{ false }}">
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:18px 20px;display:flex;align-items:center;gap:14px">
+    <div style="width:46px;height:46px;border-radius:14px;background:#EEF1EA;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+      <div style="font-size:16px;font-weight:600;color:#4E5D4C;line-height:1">{{ nextAppt.dayN }}</div>
+      <div style="font-size:9.5px;color:#85826F">{{ nextAppt.monthN }}</div>
+    </div>
+    <div style="flex:1">
+      <div style="font-size:14.5px;font-weight:600">{{ nextAppt.title }}</div>
+      <div style="font-size:12.5px;color:#85826F;margin-top:2px">{{ nextAppt.meta }}</div>
+    </div>
+    <div style="font-size:12px;color:#5E6F5C;background:#EEF1EA;border-radius:999px;padding:4px 10px;font-weight:500;white-space:nowrap">{{ nextAppt.countdown }}</div>
+  </div>
+  </sc-if>
+
+  <button data-w="{{ curWeekClamped }}" onClick="{{ openWeekEv }}" style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:18px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;font-family:inherit;text-align:right;width:100%" style-hover="background:#FCFBF7">
+    <div style="flex:1">
+      <div style="font-size:15px;font-weight:600;color:#2C332B">هذا الأسبوع</div>
+      <div style="font-size:12.5px;color:#85826F;margin-top:2px">{{ thisWeekRange }} · التطور، الفحوصات، والأسئلة للطبيب</div>
+    </div>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#85826F" stroke-width="2" style="transform:scaleX(-1)"><path d="m9 18 6-6-6-6"></path></svg>
+  </button>
+
+  <div style="font-size:11.5px;color:#A5A292;text-align:center;line-height:1.8;padding:2px 14px 0">{{ disclaimer }}</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sCalendar }}" hint-placeholder-val="{{ false }}">
+<div style="padding:14px 18px 24px;display:flex;flex-direction:column;gap:14px">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <button data-n="-1" onClick="{{ monthShiftEv }}" style="background:#fff;border:1px solid #E3E1D5;border-radius:12px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="background:#EEF1EA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5E6F5C" stroke-width="2"><path d="m9 18 6-6-6-6"></path></svg></button>
+    <div style="font-size:17px;font-weight:600">{{ monthLabel }}</div>
+    <button data-n="1" onClick="{{ monthShiftEv }}" style="background:#fff;border:1px solid #E3E1D5;border-radius:12px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="background:#EEF1EA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5E6F5C" stroke-width="2" style="transform:scaleX(-1)"><path d="m9 18 6-6-6-6"></path></svg></button>
+  </div>
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:20px;padding:14px 10px">
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px">
+      <sc-for list="{{ wdNames }}" as="wd" hint-placeholder-count="7"><div style="text-align:center;font-size:10px;color:#A5A292;font-weight:500">{{ wd }}</div></sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">
+      <sc-for list="{{ cells }}" as="cell" hint-placeholder-count="35">
+        <sc-if value="{{ cell.blank }}" hint-placeholder-val="{{ false }}"><div></div></sc-if>
+        <sc-if value="{{ cell.d }}" hint-placeholder-val="{{ true }}">
+          <button data-d="{{ cell.iso }}" onClick="{{ openDayEv }}" disabled="{{ cell.disabledAttr }}" style="aspect-ratio:1;border-radius:12px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0;border:{{ cell.border }};background:{{ cell.bg }};color:{{ cell.fg }};opacity:{{ cell.op }}">
+            <span style="font-size:13px;font-weight:{{ cell.fw }}">{{ cell.d }}</span>
+            <span style="display:flex;gap:2px;height:4px">
+              <sc-if value="{{ cell.wk }}" hint-placeholder-val="{{ false }}"><span style="width:4px;height:4px;border-radius:50%;background:#7D8F7B"></span></sc-if>
+              <sc-if value="{{ cell.ap }}" hint-placeholder-val="{{ false }}"><span style="width:4px;height:4px;border-radius:50%;background:#C2857E"></span></sc-if>
+              <sc-if value="{{ cell.jr }}" hint-placeholder-val="{{ false }}"><span style="width:4px;height:4px;border-radius:50%;background:#B7A26B"></span></sc-if>
+              <sc-if value="{{ cell.rc }}" hint-placeholder-val="{{ false }}"><span style="width:4px;height:4px;border-radius:50%;background:#8A9BB0"></span></sc-if>
+            </span>
+          </button>
+        </sc-if>
+      </sc-for>
+    </div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;font-size:11px;color:#85826F">
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:6px;height:6px;border-radius:50%;background:#7D8F7B"></span>بداية أسبوع</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:6px;height:6px;border-radius:50%;background:#C2857E"></span>موعد</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:6px;height:6px;border-radius:50%;background:#B7A26B"></span>يوميات</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:6px;height:6px;border-radius:50%;background:#8A9BB0"></span>ملف</span>
+  </div>
+  <div style="font-size:12px;color:#A5A292;text-align:center">اضغطي أي يوم ضمن فترة الحمل لفتح تفاصيله — من اليوم 1 حتى اليوم 280</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sDay }}" hint-placeholder-val="{{ false }}">
+<div style="padding:14px 18px 24px;display:flex;flex-direction:column;gap:14px">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <button data-n="-1" onClick="{{ dayShiftEv }}" style="background:#fff;border:1px solid #E3E1D5;border-radius:12px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5E6F5C" stroke-width="2"><path d="m9 18 6-6-6-6"></path></svg></button>
+    <button data-s="calendar" onClick="{{ onNav }}" style="background:none;border:none;font-family:inherit;font-size:12.5px;color:#85826F;cursor:pointer">← عودة للتقويم</button>
+    <button data-n="1" onClick="{{ dayShiftEv }}" style="background:#fff;border:1px solid #E3E1D5;border-radius:12px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5E6F5C" stroke-width="2" style="transform:scaleX(-1)"><path d="m9 18 6-6-6-6"></path></svg></button>
+  </div>
+  <sc-if value="{{ dvMissing }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px solid #E3E1D5;border-radius:20px;padding:24px;text-align:center;font-size:14px;color:#85826F">هذا اليوم خارج فترة الحمل المحسوبة.</div></sc-if>
+  <sc-if value="{{ dv }}" hint-placeholder-val="{{ true }}">
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:20px;text-align:center">
+    <div style="font-size:16px;font-weight:600">{{ dv.dateLong }}</div>
+    <div style="display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <span style="font-size:12px;background:#EEF1EA;color:#4E5D4C;border-radius:999px;padding:5px 12px;font-weight:500">اليوم {{ dv.dayNum }} من 280</span>
+      <span style="font-size:12px;background:#F4F2E9;color:#5E6F5C;border-radius:999px;padding:5px 12px;font-weight:500">{{ dv.weekOrd }}</span>
+      <span style="font-size:12px;background:#F6EFED;color:#8B6E69;border-radius:999px;padding:5px 12px;font-weight:500">{{ dv.ga }}</span>
+    </div>
+  </div>
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;gap:14px;align-items:center">
+      <image-slot id="{{ dv.slotId }}" shape="circle" style="width:72px;height:72px;flex-shrink:0" placeholder="صورة الأسبوع"></image-slot>
+      <div><div style="font-size:15px;font-weight:600">تطور الجنين 👶</div>
+      <sc-if value="{{ dv.wc.size }}" hint-placeholder-val="{{ true }}"><div style="font-size:12.5px;color:#85826F;margin-top:3px">{{ dv.wc.size }} · {{ dv.wc.compare }}</div></sc-if></div>
+    </div>
+    <div style="font-size:14px;line-height:1.9;color:#3D4439">{{ dv.wc.baby }}</div>
+    <sc-if value="{{ dv.wc.appearance }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;line-height:1.8;color:#85826F"><b style="color:#5E6F5C">شكل الجنين:</b> {{ dv.wc.appearance }}</div></sc-if>
+    <div style="font-size:11.5px;color:#A5A292">المعلومة موثقة على مستوى الأسبوع — التفاصيل اليومية لا تُخترع.</div>
+  </div>
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:20px">
+    <div style="font-size:15px;font-weight:600;margin-bottom:8px">الأم 🤰</div>
+    <div style="font-size:14px;line-height:1.9;color:#3D4439">{{ dv.wc.mom }}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+      <sc-for list="{{ dv.symptoms }}" as="sy" hint-placeholder-count="3"><div style="font-size:12px;color:#8B6E69;background:#F6EFED;border-radius:999px;padding:5px 12px">{{ sy }}</div></sc-for>
+    </div>
+  </div>
+  <sc-if value="{{ dv.hasWms }}" hint-placeholder-val="{{ false }}">
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:20px">
+    <div style="font-size:15px;font-weight:600;margin-bottom:10px">محطات طبية هذا الأسبوع</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ dv.wms }}" as="m" hint-placeholder-count="1"><div style="font-size:13.5px;color:#3D4439;display:flex;gap:8px;line-height:1.7"><span style="color:#7D8F7B">◆</span>{{ m }}</div></sc-for>
+    </div>
+  </div>
+  </sc-if>
+  <sc-if value="{{ dv.hasAppts }}" hint-placeholder-val="{{ false }}">
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:20px">
+    <div style="font-size:15px;font-weight:600;margin-bottom:10px">مواعيد هذا اليوم 📅</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ dv.appts }}" as="a" hint-placeholder-count="1"><div style="font-size:13.5px"><b>{{ a.title }}</b> <span style="color:#85826F">— {{ a.meta }}</span></div></sc-for>
+    </div>
+  </div>
+  </sc-if>
+  <sc-if value="{{ dv.hasJs }}" hint-placeholder-val="{{ false }}">
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:20px">
+    <div style="font-size:15px;font-weight:600;margin-bottom:10px">يومياتك ❤️</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <sc-for list="{{ dv.js }}" as="j" hint-placeholder-count="1"><div style="font-size:13.5px;line-height:1.8;color:#3D4439"><sc-if value="{{ j.mood }}" hint-placeholder-val="{{ false }}"><b style="color:#8B6E69">{{ j.mood }} — </b></sc-if>{{ j.text }}</div></sc-for>
+    </div>
+  </div>
+  </sc-if>
+  <div style="background:#F6EFED;border:1px solid #EAD9D4;border-radius:24px;padding:20px">
+    <div style="font-size:15px;font-weight:600;color:#8B5850;margin-bottom:8px">متى يجب التواصل مع الطبيب؟</div>
+    <div style="font-size:13px;color:#6E5450;line-height:1.8;margin-bottom:8px">إذا ظهرت أي من هذه العلامات، يُنصح بطلب تقييم طبي عاجل:</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <sc-for list="{{ emergencySigns }}" as="e" hint-placeholder-count="4"><div style="font-size:13px;color:#6E5450;display:flex;gap:8px;line-height:1.6"><span style="color:#C2857E">•</span>{{ e }}</div></sc-for>
+    </div>
+    <div style="font-size:11.5px;color:#A98680;margin-top:10px">هذه ليست أداة تشخيص — {{ disclaimer }}</div>
+  </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ sWeek }}" hint-placeholder-val="{{ false }}">
+<div style="padding:14px 18px 24px;display:flex;flex-direction:column;gap:14px">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <button data-n="-1" onClick="{{ weekShiftEv }}" style="background:#fff;border:1px solid #E3E1D5;border-radius:12px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5E6F5C" stroke-width="2"><path d="m9 18 6-6-6-6"></path></svg></button>
+    <div style="text-align:center"><div style="font-size:17px;font-weight:600">{{ wv.ord }}</div><div style="font-size:12px;color:#85826F">{{ wv.range }}</div></div>
+    <button data-n="1" onClick="{{ weekShiftEv }}" style="background:#fff;border:1px solid #E3E1D5;border-radius:12px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5E6F5C" stroke-width="2" style="transform:scaleX(-1)"><path d="m9 18 6-6-6-6"></path></svg></button>
+  </div>
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:20px;text-align:center">
+    <image-slot id="{{ wv.slotId }}" shape="circle" style="width:130px;height:130px;margin:0 auto" placeholder="صورة الجنين — {{ wv.ord }}"></image-slot>
+    <div style="font-size:16px;font-weight:600;margin-top:12px;color:#5E6F5C">{{ wv.wc.title }}</div>
+    <sc-if value="{{ wv.wc.size }}" hint-placeholder-val="{{ true }}"><div style="font-size:13px;color:#85826F;margin-top:4px">{{ wv.wc.size }} · {{ wv.wc.compare }}<sc-if value="{{ wv.wc.weight }}" hint-placeholder-val="{{ false }}"> · {{ wv.wc.weight }}</sc-if></div></sc-if>
+    <div style="font-size:11.5px;color:#A5A292;margin-top:6px">{{ wv.status }}</div>
+  </div>
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:20px">
+    <div style="font-size:15px;font-weight:600;margin-bottom:8px">الطفل 👶</div>
+    <div style="font-size:14px;line-height:1.9;color:#3D4439">{{ wv.wc.baby }}</div>
+    <sc-if value="{{ wv.wc.appearance }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;line-height:1.8;color:#85826F;margin-top:8px"><b style="color:#5E6F5C">الشكل:</b> {{ wv.wc.appearance }}</div></sc-if>
+  </div>
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:20px">
+    <div style="font-size:15px;font-weight:600;margin-bottom:8px">الأم 🤰</div>
+    <div style="font-size:14px;line-height:1.9;color:#3D4439">{{ wv.wc.mom }}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+      <sc-for list="{{ wv.symptoms }}" as="sy" hint-placeholder-count="3"><div style="font-size:12px;color:#8B6E69;background:#F6EFED;border-radius:999px;padding:5px 12px">{{ sy }}</div></sc-for>
+    </div>
+  </div>
+  <sc-if value="{{ wv.hasTests }}" hint-placeholder-val="{{ false }}">
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:20px">
+    <div style="font-size:15px;font-weight:600;margin-bottom:4px">فحوصات محتملة 🧪</div>
+    <div style="font-size:12px;color:#A5A292;margin-bottom:10px">التوقيت يختلف بحسب البلد والطبيب والحالة — ليست توصية شخصية.</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <sc-for list="{{ wv.tests }}" as="t" hint-placeholder-count="1">
+        <div><div style="font-size:14px;font-weight:600">{{ t.name }}</div>
+        <div style="font-size:12.5px;color:#85826F;line-height:1.7;margin-top:2px">{{ t.why }} · {{ t.win }}</div></div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+  <sc-if value="{{ wv.hasMs }}" hint-placeholder-val="{{ false }}">
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:20px">
+    <div style="font-size:15px;font-weight:600;margin-bottom:10px">محطات هذا الأسبوع</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <sc-for list="{{ wv.ms }}" as="m" hint-placeholder-count="1">
+        <div style="display:flex;gap:8px;line-height:1.7"><span style="color:#7D8F7B">◆</span><div style="font-size:13.5px;color:#3D4439">{{ m.label }}<sc-if value="{{ m.note }}" hint-placeholder-val="{{ false }}"><span style="color:#A5A292"> — {{ m.note }}</span></sc-if></div></div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+  <sc-if value="{{ wv.hasAppts }}" hint-placeholder-val="{{ false }}">
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:20px">
+    <div style="font-size:15px;font-weight:600;margin-bottom:10px">مواعيدك هذا الأسبوع 📅</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ wv.appts }}" as="a" hint-placeholder-count="1"><div style="font-size:13.5px"><b>{{ a.title }}</b> <span style="color:#85826F">— {{ a.meta }}</span></div></sc-for>
+    </div>
+  </div>
+  </sc-if>
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:15px;font-weight:600">▶ شاهدي تطور طفلك</div>
+      <button data-sh="video" onClick="{{ openSheet }}" style="background:#EEF1EA;color:#4E5D4C;border:none;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">+ إضافة فيديو</button>
+    </div>
+    <sc-if value="{{ wv.hasVideos }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <sc-for list="{{ wv.videos }}" as="v" hint-placeholder-count="1">
+        <div style="display:flex;align-items:center;gap:12px;background:#F8F7F2;border-radius:14px;padding:12px 14px">
+          <div style="width:38px;height:38px;border-radius:10px;background:#5E6F5C;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:13px">▶</div>
+          <div style="flex:1"><a href="{{ v.url }}" target="_blank" style="font-size:13.5px;font-weight:600;text-decoration:none">{{ v.title }}</a>
+          <div style="font-size:11.5px;color:#85826F;margin-top:2px">{{ v.meta }}<sc-if value="{{ v.lic }}" hint-placeholder-val="{{ false }}"> · {{ v.lic }}</sc-if></div></div>
+          <button data-id="{{ v.sid }}" data-list="videos" onClick="{{ delItem }}" style="background:none;border:none;color:#C2857E;cursor:pointer;font-size:15px">×</button>
+        </div>
+      </sc-for>
+    </div>
+    </sc-if>
+    <sc-if value="{{ wv.noVideos }}" hint-placeholder-val="{{ true }}"><div style="font-size:12.5px;color:#A5A292;line-height:1.7">لا فيديوهات بعد — أضيفي فيديو من مصدر موثوق (يوتيوب، Vimeo، أو رابط خارجي) مع ذكر المصدر والمؤلف.</div></sc-if>
+  </div>
+  <sc-if value="{{ wv.hasSources }}" hint-placeholder-val="{{ true }}">
+  <div style="font-size:11.5px;color:#A5A292;text-align:center;line-height:1.8">المصادر: <sc-for list="{{ wv.sources }}" as="src" hint-placeholder-count="2"><a href="{{ src.url }}" target="_blank" style="color:#85826F">{{ src.name }}</a><span> </span></sc-for>· آخر مراجعة {{ lastReviewed }}</div>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ sBaby }}" hint-placeholder-val="{{ false }}">
+<div style="padding:14px 18px 24px">
+  <div style="font-size:20px;font-weight:600;margin-bottom:2px">رحلة {{ babyName }}</div>
+  <div style="font-size:13px;color:#85826F;margin-bottom:18px">التطور أسبوعًا بأسبوع — من الأسبوع 4 حتى 40</div>
+  <div style="display:flex;flex-direction:column">
+    <sc-for list="{{ timeline }}" as="tw" hint-placeholder-count="8">
+      <button data-w="{{ tw.w }}" onClick="{{ openWeekEv }}" style="display:flex;gap:14px;background:none;border:none;font-family:inherit;text-align:right;cursor:pointer;padding:0;width:100%" style-hover="opacity:.8">
+        <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+          <div style="width:34px;height:34px;border-radius:50%;background:{{ tw.dotBg }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600">{{ tw.w }}</div>
+          <div style="width:2px;flex:1;background:#E9E7DA;min-height:26px"></div>
+        </div>
+        <div style="padding-bottom:18px;flex:1">
+          <div style="font-size:14.5px;font-weight:600;color:{{ tw.fg }}">{{ tw.title }}</div>
+          <div style="font-size:12.5px;color:#85826F;margin-top:2px;line-height:1.6">{{ tw.size }} · {{ tw.compare }}<sc-if value="{{ tw.weight }}" hint-placeholder-val="{{ false }}"> · {{ tw.weight }}</sc-if></div>
+          <sc-if value="{{ tw.cur }}" hint-placeholder-val="{{ false }}"><div style="display:inline-block;font-size:11px;background:#EEF1EA;color:#4E5D4C;border-radius:999px;padding:3px 10px;margin-top:6px;font-weight:600">الأسبوع الحالي</div></sc-if>
+        </div>
+      </button>
+    </sc-for>
+  </div>
+  <div style="font-size:15px;font-weight:600;margin:14px 0 12px">المحطات ✓</div>
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+    <sc-for list="{{ msList }}" as="m" hint-placeholder-count="5">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <div style="width:18px;height:18px;border-radius:50%;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;background:{{ m.dotBg }};color:#fff;font-size:10px">{{ m.check }}</div>
+        <div style="flex:1"><div style="font-size:13.5px;font-weight:500;color:{{ m.fg }}">{{ m.label }} <span style="font-weight:400;color:#A5A292;font-size:12px">· {{ m.weekLbl }}</span></div>
+        <sc-if value="{{ m.note }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#A5A292;line-height:1.6;margin-top:1px">{{ m.note }}</div></sc-if>
+        <div style="font-size:12px;color:#7D8F7B;margin-top:1px">{{ m.state }}</div></div>
+      </div>
+    </sc-for>
+    <div style="font-size:11.5px;color:#A5A292;line-height:1.7">المحطات الطبية (كالنبض) لا تُعتبر مؤكدة بوصول التاريخ — تتأكد بإضافة نتيجة السونار في ملف الحمل.</div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sAppts }}" hint-placeholder-val="{{ false }}">
+<div style="padding:14px 18px 24px;display:flex;flex-direction:column;gap:14px">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <div><div style="font-size:20px;font-weight:600">المواعيد</div><div style="font-size:12.5px;color:#85826F">{{ apptCountLabel }}</div></div>
+    <button data-sh="appt" onClick="{{ openSheet }}" style="background:#5E6F5C;color:#fff;border:none;border-radius:999px;padding:10px 18px;font-size:13.5px;font-weight:600;font-family:inherit;cursor:pointer" style-hover="background:#4E5D4C">+ إضافة موعد</button>
+  </div>
+  <sc-if value="{{ hasAppts }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <sc-for list="{{ apptList }}" as="a" hint-placeholder-count="2">
+      <div style="background:#fff;border:1px solid #E3E1D5;border-radius:20px;padding:16px 18px;opacity:{{ a.op }}">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <button data-id="{{ a.sid }}" onClick="{{ toggleAppt }}" title="تم؟" style="width:22px;height:22px;border-radius:50%;border:1.5px solid #AEBCA9;background:{{ a.checkBg }};color:#fff;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;margin-top:1px">{{ a.check }}</button>
+          <div style="flex:1">
+            <div style="font-size:14.5px;font-weight:600">{{ a.title }}</div>
+            <div style="font-size:12.5px;color:#85826F;margin-top:2px">{{ a.dateL }} · {{ a.meta }}</div>
+            <sc-if value="{{ a.notes }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px;color:#A5A292;margin-top:4px;line-height:1.6">{{ a.notes }}</div></sc-if>
+            <sc-if value="{{ a.rem }}" hint-placeholder-val="{{ false }}"><div style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:#8B6E69;background:#F6EFED;border-radius:999px;padding:3px 10px;margin-top:6px">🔔 {{ a.rem }}</div></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+            <div style="font-size:11.5px;color:#5E6F5C;background:#EEF1EA;border-radius:999px;padding:4px 10px;font-weight:500;white-space:nowrap">{{ a.cd }}</div>
+            <button data-id="{{ a.sid }}" data-list="appts" onClick="{{ delItem }}" style="background:none;border:none;color:#C9A8A2;cursor:pointer;font-size:15px;padding:0">×</button>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  </sc-if>
+  <sc-if value="{{ noAppts }}" hint-placeholder-val="{{ false }}">
+  <div style="background:#fff;border:1px dashed #D5D2C3;border-radius:24px;padding:36px 24px;text-align:center">
+    <div style="font-size:15px;font-weight:600;color:#85826F">لا مواعيد بعد</div>
+    <div style="font-size:13px;color:#A5A292;margin-top:6px;line-height:1.7">أضيفي موعد الطبيب أو السونار أو التحاليل<br>مع تذكير قبل الموعد</div>
+  </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ sJournal }}" hint-placeholder-val="{{ false }}">
+<div style="padding:14px 18px 24px;display:flex;flex-direction:column;gap:14px">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <div><div style="font-size:20px;font-weight:600">اليوميات</div><div style="font-size:12.5px;color:#85826F">لحظاتك في الرحلة، يومًا بيوم</div></div>
+    <button data-sh="journal" onClick="{{ openSheet }}" style="background:#5E6F5C;color:#fff;border:none;border-radius:999px;padding:10px 18px;font-size:13.5px;font-weight:600;font-family:inherit;cursor:pointer" style-hover="background:#4E5D4C">+ تدوينة</button>
+  </div>
+  <sc-if value="{{ hasJournal }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <sc-for list="{{ journalList }}" as="j" hint-placeholder-count="2">
+      <div style="background:#fff;border:1px solid #E3E1D5;border-radius:20px;padding:16px 18px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:12.5px;color:#85826F;font-weight:500">{{ j.dateL }} · {{ j.weekL }}</div>
+          <button data-id="{{ j.sid }}" data-list="journal" onClick="{{ delItem }}" style="background:none;border:none;color:#C9A8A2;cursor:pointer;font-size:15px;padding:0">×</button>
+        </div>
+        <sc-if value="{{ j.mood }}" hint-placeholder-val="{{ false }}"><div style="display:inline-block;font-size:12px;color:#8B6E69;background:#F6EFED;border-radius:999px;padding:4px 12px;margin-top:8px">{{ j.mood }}</div></sc-if>
+        <sc-if value="{{ j.text }}" hint-placeholder-val="{{ true }}"><div style="font-size:14px;line-height:1.9;color:#3D4439;margin-top:8px">"{{ j.text }}"</div></sc-if>
+        <div style="display:flex;gap:12px;margin-top:8px;font-size:12px;color:#A5A292">
+          <sc-if value="{{ j.symptoms }}" hint-placeholder-val="{{ false }}"><span>أعراض: {{ j.symptoms }}</span></sc-if>
+          <sc-if value="{{ j.weight }}" hint-placeholder-val="{{ false }}"><span>الوزن: {{ j.weight }}</span></sc-if>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  </sc-if>
+  <sc-if value="{{ noJournal }}" hint-placeholder-val="{{ false }}">
+  <div style="background:#fff;border:1px dashed #D5D2C3;border-radius:24px;padding:36px 24px;text-align:center">
+    <div style="font-size:15px;font-weight:600;color:#85826F">"اليوم أشعر…"</div>
+    <div style="font-size:13px;color:#A5A292;margin-top:6px;line-height:1.7">دوّني مشاعرك وأعراضك ووزنك<br>لتصبح ذكريات الرحلة</div>
+  </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ sRecords }}" hint-placeholder-val="{{ false }}">
+<div style="padding:14px 18px 24px;display:flex;flex-direction:column;gap:14px">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <div><div style="font-size:20px;font-weight:600">ملف الحمل</div><div style="font-size:12.5px;color:#85826F">التحاليل والسونار والتقارير</div></div>
+    <button data-sh="record" onClick="{{ openSheet }}" style="background:#5E6F5C;color:#fff;border:none;border-radius:999px;padding:10px 18px;font-size:13.5px;font-weight:600;font-family:inherit;cursor:pointer" style-hover="background:#4E5D4C">+ إضافة</button>
+  </div>
+  <sc-if value="{{ hasRecords }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <sc-for list="{{ recordsList }}" as="r" hint-placeholder-count="2">
+      <div style="background:#fff;border:1px solid #E3E1D5;border-radius:20px;padding:16px 18px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:11.5px;color:#4E5D4C;background:#EEF1EA;border-radius:999px;padding:3px 10px;font-weight:600">{{ r.typeL }}</span>
+            <span style="font-size:12px;color:#A5A292">{{ r.dateL }} · {{ r.weekL }}</span>
+          </div>
+          <button data-id="{{ r.sid }}" data-list="records" onClick="{{ delItem }}" style="background:none;border:none;color:#C9A8A2;cursor:pointer;font-size:15px;padding:0">×</button>
+        </div>
+        <div style="font-size:14.5px;font-weight:600;margin-top:8px">{{ r.title }}</div>
+        <sc-if value="{{ r.provider }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px;color:#85826F;margin-top:2px">{{ r.provider }}</div></sc-if>
+        <sc-if value="{{ r.us }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:12px;color:#5E6F5C">
+          <sc-if value="{{ r.crl }}" hint-placeholder-val="{{ false }}"><span>{{ r.crl }}</span></sc-if>
+          <sc-if value="{{ r.fhr }}" hint-placeholder-val="{{ false }}"><span>{{ r.fhr }}</span></sc-if>
+          <sc-if value="{{ r.newEdd }}" hint-placeholder-val="{{ false }}"><span style="color:#8B6E69">{{ r.newEdd }}</span></sc-if>
+        </div></sc-if>
+        <sc-if value="{{ r.notes }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px;color:#A5A292;margin-top:6px;line-height:1.7">{{ r.notes }}</div></sc-if>
+      </div>
+    </sc-for>
+  </div>
+  </sc-if>
+  <sc-if value="{{ noRecords }}" hint-placeholder-val="{{ false }}">
+  <div style="background:#fff;border:1px dashed #D5D2C3;border-radius:24px;padding:30px 24px;text-align:center">
+    <div style="font-size:15px;font-weight:600;color:#85826F">لا ملفات بعد</div>
+    <div style="font-size:13px;color:#A5A292;margin-top:6px;line-height:1.7">أضيفي تحاليل الدم وتقارير السونار والوصفات — كل ملف يُربط بأسبوع الحمل تلقائيًا. إذا حدّد السونار موعد ولادة جديدًا، يُعاد بناء التقويم.</div>
+  </div>
+  </sc-if>
+  <div style="font-size:15px;font-weight:600;margin-top:4px">فحوصات الحمل 🧪</div>
+  <div style="font-size:12px;color:#A5A292;margin-top:-8px;line-height:1.7">توقيتات معتادة للاسترشاد فقط — تختلف بحسب البلد والطبيب والحالة، وليست توصية شخصية.</div>
+  <div style="background:#fff;border:1px solid #E3E1D5;border-radius:24px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+    <sc-for list="{{ testsList }}" as="t" hint-placeholder-count="4">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div style="flex:1"><div style="font-size:13.5px;font-weight:600">{{ t.name }}</div>
+        <div style="font-size:12px;color:#85826F;line-height:1.7;margin-top:2px">{{ t.why }}</div>
+        <div style="font-size:11.5px;color:#A5A292;margin-top:2px">{{ t.win }}</div></div>
+        <span style="font-size:11px;border-radius:999px;padding:4px 10px;font-weight:500;white-space:nowrap;background:{{ t.chipBg }};color:{{ t.chipFg }}">{{ t.state }}</span>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<!--SCREENS-->
+
+</div>
+
+<div style="flex-shrink:0;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-top:1px solid #E9E7DA;display:flex;padding:6px 4px 2px">
+  <button data-s="today" onClick="{{ onNav }}" style="flex:1;background:none;border:none;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:{{ navC.today }}">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21C7 16.5 3 13.2 3 9.3 3 6.4 5.2 4.5 7.7 4.5c1.7 0 3.3.9 4.3 2.4 1-1.5 2.6-2.4 4.3-2.4 2.5 0 4.7 1.9 4.7 4.8 0 3.9-4 7.2-9 11.7Z"></path></svg>
+    <span style="font-size:10px;font-weight:500">اليوم</span></button>
+  <button data-s="calendar" onClick="{{ onNav }}" style="flex:1;background:none;border:none;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:{{ navC.calendar }}">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M8 3v4M16 3v4M3 10h18"></path></svg>
+    <span style="font-size:10px;font-weight:500">التقويم</span></button>
+  <button data-s="baby" onClick="{{ onNav }}" style="flex:1;background:none;border:none;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:{{ navC.baby }}">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="5"></circle><path d="M10 8h.01M14 8h.01M10.5 10.5c.5.5 2.5.5 3 0M12 13v3m0 0c-3 0-5.5 2-5.5 4.5h11C17.5 18 15 16 12 16Z"></path></svg>
+    <span style="font-size:10px;font-weight:500">طفلك</span></button>
+  <button data-s="appts" onClick="{{ onNav }}" style="flex:1;background:none;border:none;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:{{ navC.appts }}">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+    <span style="font-size:10px;font-weight:500">المواعيد</span></button>
+  <button data-s="journal" onClick="{{ onNav }}" style="flex:1;background:none;border:none;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:{{ navC.journal }}">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Z"></path><path d="M5 4a2 2 0 0 0 0 4h14M9 12h6M9 15.5h4"></path></svg>
+    <span style="font-size:10px;font-weight:500">اليوميات</span></button>
+  <button data-s="records" onClick="{{ onNav }}" style="flex:1;background:none;border:none;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:{{ navC.records }}">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg>
+    <span style="font-size:10px;font-weight:500">الملف</span></button>
+</div>
+</sc-if>
+
+<sc-if value="{{ anySheet }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;background:rgba(44,51,43,.35);display:flex;flex-direction:column;justify-content:flex-end;z-index:50">
+  <div style="background:#F8F7F2;border-radius:24px 24px 0 0;max-height:82%;overflow-y:auto;padding:20px 20px 30px">
+    <div style="width:40px;height:4px;border-radius:2px;background:#D5D2C3;margin:0 auto 14px"></div>
+
+    <sc-if value="{{ sheetAppt }}" hint-placeholder-val="{{ false }}">
+    <div style="font-size:17px;font-weight:600;margin-bottom:14px">إضافة موعد</div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <input type="text" data-k="a_title" value="{{ f.a_title }}" onChange="{{ onField }}" placeholder="العنوان — مثال: موعد السونار" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+      <select data-k="a_type" value="{{ f.a_type }}" onChange="{{ onField }}" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+        <option value="doctor">موعد طبيب</option><option value="ultrasound">سونار</option><option value="blood">تحليل دم</option><option value="genetic">فحص جيني</option><option value="lab">مختبر</option><option value="hospital">مستشفى</option><option value="vaccine">تطعيم</option><option value="other">أخرى</option>
+      </select>
+      <div style="display:flex;gap:10px">
+        <input type="date" data-k="a_date" value="{{ f.a_date }}" onChange="{{ onField }}" style="flex:1;min-width:0;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+        <input type="time" data-k="a_time" value="{{ f.a_time }}" onChange="{{ onField }}" style="flex:1;min-width:0;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+      </div>
+      <div style="display:flex;gap:10px">
+        <input type="text" data-k="a_location" value="{{ f.a_location }}" onChange="{{ onField }}" placeholder="المكان" style="flex:1;min-width:0;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+        <input type="text" data-k="a_doctor" value="{{ f.a_doctor }}" onChange="{{ onField }}" placeholder="الطبيب" style="flex:1;min-width:0;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+      </div>
+      <select data-k="a_reminder" value="{{ f.a_reminder }}" onChange="{{ onField }}" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+        <option value="">بدون تذكير</option><option value="1h">تذكير قبل ساعة</option><option value="24h">تذكير قبل 24 ساعة</option><option value="48h">تذكير قبل يومين</option><option value="week">تذكير قبل أسبوع</option>
+      </select>
+      <textarea data-k="a_notes" value="{{ f.a_notes }}" onChange="{{ onField }}" placeholder="ملاحظات" rows="2" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B;resize:none"></textarea>
+      <sc-if value="{{ fError }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#A9564B">{{ fError }}</div></sc-if>
+      <div style="display:flex;gap:10px">
+        <button onClick="{{ saveAppt }}" style="flex:2;background:#5E6F5C;color:#fff;border:none;border-radius:13px;padding:14px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer">حفظ الموعد</button>
+        <button onClick="{{ closeSheet }}" style="flex:1;background:#fff;color:#85826F;border:1px solid #E3E1D5;border-radius:13px;padding:14px;font-size:15px;font-family:inherit;cursor:pointer">إلغاء</button>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ sheetJournal }}" hint-placeholder-val="{{ false }}">
+    <div style="font-size:17px;font-weight:600;margin-bottom:14px">تدوينة جديدة</div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <input type="date" data-k="j_date" value="{{ f.j_date }}" onChange="{{ onField }}" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+      <div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:8px">مزاج اليوم</div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px">
+          <sc-for list="{{ moods }}" as="mo" hint-placeholder-count="5">
+            <button data-m="{{ mo.m }}" onClick="{{ pickMood }}" style="border:none;border-radius:999px;padding:8px 15px;font-size:13px;font-family:inherit;cursor:pointer;background:{{ mo.bg }};color:{{ mo.fg }}">{{ mo.m }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <textarea data-k="j_text" value="{{ f.j_text }}" onChange="{{ onField }}" placeholder="اليوم أشعر…" rows="3" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B;resize:none"></textarea>
+      <div style="display:flex;gap:10px">
+        <input type="text" data-k="j_symptoms" value="{{ f.j_symptoms }}" onChange="{{ onField }}" placeholder="أعراض اليوم" style="flex:2;min-width:0;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+        <input type="number" step="0.1" data-k="j_weight" value="{{ f.j_weight }}" onChange="{{ onField }}" placeholder="الوزن كغم" style="flex:1;min-width:0;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+      </div>
+      <sc-if value="{{ fError }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#A9564B">{{ fError }}</div></sc-if>
+      <div style="display:flex;gap:10px">
+        <button onClick="{{ saveJournal }}" style="flex:2;background:#5E6F5C;color:#fff;border:none;border-radius:13px;padding:14px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer">حفظ</button>
+        <button onClick="{{ closeSheet }}" style="flex:1;background:#fff;color:#85826F;border:1px solid #E3E1D5;border-radius:13px;padding:14px;font-size:15px;font-family:inherit;cursor:pointer">إلغاء</button>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ sheetRecord }}" hint-placeholder-val="{{ false }}">
+    <div style="font-size:17px;font-weight:600;margin-bottom:14px">إضافة إلى ملف الحمل</div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <select data-k="r_type" value="{{ f.r_type }}" onChange="{{ onField }}" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+        <option value="blood">تحليل دم</option><option value="ultrasound">سونار</option><option value="report">تقرير طبيب</option><option value="lab">نتيجة مختبر</option><option value="rx">وصفة طبية</option><option value="photo">صورة</option><option value="note">ملاحظة</option>
+      </select>
+      <input type="text" data-k="r_title" value="{{ f.r_title }}" onChange="{{ onField }}" placeholder="العنوان — مثال: سونار الأسبوع 8" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+      <div style="display:flex;gap:10px">
+        <input type="date" data-k="r_date" value="{{ f.r_date }}" onChange="{{ onField }}" style="flex:1;min-width:0;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+        <input type="text" data-k="r_provider" value="{{ f.r_provider }}" onChange="{{ onField }}" placeholder="الجهة / الطبيب" style="flex:1;min-width:0;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+      </div>
+      <sc-if value="{{ isUsForm }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#EEF1EA;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:12.5px;color:#4E5D4C;font-weight:600">بيانات السونار (اختياري)</div>
+        <div style="display:flex;gap:10px">
+          <input type="text" data-k="r_crl" value="{{ f.r_crl }}" onChange="{{ onField }}" placeholder="CRL" style="flex:1;min-width:0;box-sizing:border-box;padding:11px 13px;border:1px solid #D8DFD3;border-radius:11px;font-family:inherit;font-size:14px;background:#fff;color:#2C332B">
+          <input type="text" data-k="r_fhr" value="{{ f.r_fhr }}" onChange="{{ onField }}" placeholder="نبض الجنين" style="flex:1;min-width:0;box-sizing:border-box;padding:11px 13px;border:1px solid #D8DFD3;border-radius:11px;font-family:inherit;font-size:14px;background:#fff;color:#2C332B">
+        </div>
+        <div><div style="font-size:12px;color:#5E6F5C;margin-bottom:5px">موعد ولادة جديد من السونار (EDD) — يعيد بناء التقويم</div>
+        <input type="date" data-k="r_newEdd" value="{{ f.r_newEdd }}" onChange="{{ onField }}" style="width:100%;box-sizing:border-box;padding:11px 13px;border:1px solid #D8DFD3;border-radius:11px;font-family:inherit;font-size:14px;background:#fff;color:#2C332B"></div>
+      </div>
+      </sc-if>
+      <textarea data-k="r_notes" value="{{ f.r_notes }}" onChange="{{ onField }}" placeholder="النتائج / ملاحظات الطبيب" rows="2" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B;resize:none"></textarea>
+      <sc-if value="{{ fError }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#A9564B">{{ fError }}</div></sc-if>
+      <div style="display:flex;gap:10px">
+        <button onClick="{{ saveRecord }}" style="flex:2;background:#5E6F5C;color:#fff;border:none;border-radius:13px;padding:14px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer">حفظ</button>
+        <button onClick="{{ closeSheet }}" style="flex:1;background:#fff;color:#85826F;border:1px solid #E3E1D5;border-radius:13px;padding:14px;font-size:15px;font-family:inherit;cursor:pointer">إلغاء</button>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ sheetVideo }}" hint-placeholder-val="{{ false }}">
+    <div style="font-size:17px;font-weight:600;margin-bottom:4px">إضافة فيديو</div>
+    <div style="font-size:12px;color:#A5A292;margin-bottom:14px;line-height:1.7">أضيفي فيديو من مصدر موثوق فقط — مع ذكر المصدر والمؤلف وحقوق الاستخدام.</div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <input type="text" data-k="v_title" value="{{ f.v_title }}" onChange="{{ onField }}" placeholder="عنوان الفيديو" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+      <input type="url" data-k="v_url" value="{{ f.v_url }}" onChange="{{ onField }}" placeholder="الرابط (YouTube / Vimeo / خارجي)" dir="ltr" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B;text-align:left">
+      <div style="display:flex;gap:10px">
+        <input type="text" data-k="v_source" value="{{ f.v_source }}" onChange="{{ onField }}" placeholder="المصدر" style="flex:1;min-width:0;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+        <input type="text" data-k="v_author" value="{{ f.v_author }}" onChange="{{ onField }}" placeholder="المؤلف" style="flex:1;min-width:0;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+      </div>
+      <div style="display:flex;gap:10px">
+        <input type="text" data-k="v_duration" value="{{ f.v_duration }}" onChange="{{ onField }}" placeholder="المدة" style="flex:1;min-width:0;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+        <input type="text" data-k="v_pubdate" value="{{ f.v_pubdate }}" onChange="{{ onField }}" placeholder="تاريخ النشر" style="flex:1;min-width:0;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+        <input type="text" data-k="v_license" value="{{ f.v_license }}" onChange="{{ onField }}" placeholder="الترخيص" style="flex:1;min-width:0;box-sizing:border-box;padding:12px 14px;border:1px solid #E3E1D5;border-radius:12px;font-family:inherit;font-size:14.5px;background:#fff;color:#2C332B">
+      </div>
+      <sc-if value="{{ fError }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#A9564B">{{ fError }}</div></sc-if>
+      <div style="display:flex;gap:10px">
+        <button onClick="{{ saveVideo }}" style="flex:2;background:#5E6F5C;color:#fff;border:none;border-radius:13px;padding:14px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer">حفظ الفيديو</button>
+        <button onClick="{{ closeSheet }}" style="flex:1;background:#fff;color:#85826F;border:1px solid #E3E1D5;border-radius:13px;padding:14px;font-size:15px;font-family:inherit;cursor:pointer">إلغاء</button>
+      </div>
+    </div>
+    </sc-if>
+
+  </div>
+</div>
+</sc-if>
+<!--SHEETS-->
+
+</div>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:480,&quot;height&quot;:960},&quot;demoDate&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;معاينة&quot;,&quot;description&quot;:&quot;YYYY-MM-DD لمعاينة يوم آخر (اتركيه فارغًا لليوم الحقيقي)&quot;},&quot;showEnTerms&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;عرض&quot;,&quot;description&quot;:&quot;إظهار المصطلح الطبي الإنجليزي بجانب العربي&quot;}}">
+class Component extends DCLogic {
+  state = { screen: 'today', selWeek: 4, selDay: null, vmY: null, vmM: null, form: {}, fError: '', eddBanner: false, booted: false, sheet: null, mood: '' };
+  componentDidMount() {
+    this.settings = this.lsGet('pj_settings', null);
+    this.appts = this.lsGet('pj_appts', []);
+    this.journal = this.lsGet('pj_journal', []);
+    this.records = this.lsGet('pj_records', []);
+    this.videos = this.lsGet('pj_videos', []);
+    const t = new Date();
+    const boot = () => this.setState({ booted: true, vmY: t.getFullYear(), vmM: t.getMonth(), screen: (this.settings && this.settings.lmp) ? 'today' : 'onboard', form: this.seedForm() });
+    if (window.PJ_DATA) boot(); else { this.pjt = setInterval(() => { if (window.PJ_DATA) { clearInterval(this.pjt); boot(); } }, 80); }
+    this.curIso = this.iso(new Date());
+    this.dayTimer = setInterval(() => { const n = this.iso(new Date()); if (n !== this.curIso) { this.curIso = n; this.forceUpdate(); } }, 30000);
+  }
+  componentWillUnmount() { clearInterval(this.dayTimer); clearInterval(this.pjt); }
+  lsGet(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
+  lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  pad(n) { return (n < 10 ? '0' : '') + n; }
+  iso(d) { return d.getFullYear() + '-' + this.pad(d.getMonth() + 1) + '-' + this.pad(d.getDate()); }
+  parseISO(s) { const p = String(s).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  D0(d) { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
+  addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+  diffDays(a, b) { return Math.round((this.D0(a) - this.D0(b)) / 864e5); }
+  fmt(d, o) { try { return new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', o).format(d); } catch (e) { return d.toLocaleDateString('ar'); } }
+  fLong(d) { return this.fmt(d, { day: 'numeric', month: 'long', year: 'numeric' }); }
+  fDM(d) { return this.fmt(d, { day: 'numeric', month: 'long' }); }
+  fWD(d) { return this.fmt(d, { weekday: 'long' }); }
+  arN(n, one, two, few, many) { n = Math.abs(n); if (n === 1) return one; if (n === 2) return two; if (n >= 3 && n <= 10) return n + ' ' + few; return n + ' ' + many; }
+  arDaysP(n) { return this.arN(n, 'يوم واحد', 'يومان', 'أيام', 'يومًا'); }
+  arWeeksP(n) { return this.arN(n, 'أسبوع واحد', 'أسبوعان', 'أسابيع', 'أسبوعًا'); }
+  ordWeek(n) {
+    const u = ['', 'الأول', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس', 'السابع', 'الثامن', 'التاسع', 'العاشر'];
+    const u2 = ['', 'الحادي', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس', 'السابع', 'الثامن', 'التاسع'];
+    const tens = { 1: 'عشر', 2: 'العشرون', 3: 'الثلاثون', 4: 'الأربعون' };
+    if (n <= 10) return u[n];
+    if (n < 20) return u2[n - 10] + ' عشر';
+    if (n % 10 === 0) return tens[n / 10];
+    return u2[n % 10] + ' و' + tens[Math.floor(n / 10)];
+  }
+  seedForm() {
+    const s = this.settings || {};
+    return { lmp: s.lmp || '', cycle: s.cycle || '28', status: s.status || 'pregnant', edd: s.eddOverride || '', babyName: s.babyName || '', motherName: s.motherName || '', doctor: s.doctor || '' };
+  }
+  calc() {
+    const s = this.settings; if (!s || !s.lmp) return null;
+    const lmp = this.parseISO(s.lmp);
+    const adj = (parseInt(s.cycle, 10) || 28) - 28;
+    const edd = s.eddOverride ? this.parseISO(s.eddOverride) : this.addDays(lmp, 280 + adj);
+    const effLmp = this.addDays(edd, -280);
+    const dd = this.props.demoDate;
+    const today = this.D0(dd ? this.parseISO(dd) : new Date());
+    const gd = this.diffDays(today, effLmp);
+    const week = Math.floor(gd / 7) + 1;
+    return { lmp, edd, effLmp, today, gd, dayNum: gd + 1, week, gaW: Math.floor(gd / 7), gaD: gd % 7, daysLeft: Math.max(0, this.diffDays(edd, today)) };
+  }
+  wc(week) {
+    const D = window.PJ_DATA; if (!D) return null;
+    if (week < 4) return Object.assign({ size: '', compare: '', weight: '', appearance: '', symptoms: [], milestones: [] }, D.preWeeks);
+    return D.weeks[Math.min(Math.max(week, 4), 40)];
+  }
+  onField = (e) => { const k = e.currentTarget.dataset.k, v = e.currentTarget.value; this.setState(s => ({ form: Object.assign({}, s.form, { [k]: v }) })); };
+  onNav = (e) => { this.setState({ screen: e.currentTarget.dataset.s, sheet: null }); };
+  editSettings = () => { this.setState({ screen: 'onboard', form: this.seedForm(), fError: '' }); };
+  dismissBanner = () => { this.setState({ eddBanner: false }); };
+  openWeekEv = (e) => { this.setState({ screen: 'week', selWeek: +e.currentTarget.dataset.w }); };
+  openDayEv = (e) => { this.setState({ screen: 'day', selDay: e.currentTarget.dataset.d }); };
+  weekShiftEv = (e) => { this.setState(s => ({ selWeek: Math.min(42, Math.max(1, s.selWeek + (+e.currentTarget.dataset.n))) })); };
+  dayShiftEv = (e) => { this.setState(s => ({ selDay: this.iso(this.addDays(this.parseISO(s.selDay), +e.currentTarget.dataset.n)) })); };
+  monthShiftEv = (e) => { this.setState(s => { const m = s.vmM + (+e.currentTarget.dataset.n); const d = new Date(s.vmY, m, 1); return { vmY: d.getFullYear(), vmM: d.getMonth() }; }); };
+  openSheet = (e) => { this.setState({ sheet: e.currentTarget.dataset.sh, form: Object.assign(this.seedForm(), { a_type: 'doctor', a_date: this.curIso, a_reminder: '24h', j_date: this.curIso, r_type: 'blood', r_date: this.curIso, v_week: String(this.state.selWeek) }), mood: '', fError: '' }); };
+  closeSheet = () => { this.setState({ sheet: null, fError: '' }); };
+  pickMood = (e) => { this.setState({ mood: e.currentTarget.dataset.m }); };
+  saveSettings = () => {
+    const f = this.state.form;
+    if (!f.lmp) { this.setState({ fError: 'أدخلي تاريخ أول يوم في آخر دورة (LMP) للمتابعة.' }); return; }
+    this.settings = { lmp: f.lmp, cycle: f.cycle || '28', status: f.status || 'pregnant', eddOverride: f.edd || null, babyName: (f.babyName || '').trim(), motherName: (f.motherName || '').trim(), doctor: (f.doctor || '').trim() };
+    this.lsSet('pj_settings', this.settings);
+    this.setState({ screen: 'today', fError: '' });
+  };
+  saveAppt = () => {
+    const f = this.state.form;
+    if (!f.a_title || !f.a_date) { this.setState({ fError: 'العنوان والتاريخ مطلوبان.' }); return; }
+    this.appts = this.appts.concat([{ id: Date.now(), title: f.a_title, type: f.a_type || 'doctor', date: f.a_date, time: f.a_time || '', location: f.a_location || '', doctor: f.a_doctor || '', notes: f.a_notes || '', reminder: f.a_reminder || '', done: false }]);
+    this.lsSet('pj_appts', this.appts); this.closeSheet();
+  };
+  toggleAppt = (e) => { const id = +e.currentTarget.dataset.id; this.appts = this.appts.map(a => a.id === id ? Object.assign({}, a, { done: !a.done }) : a); this.lsSet('pj_appts', this.appts); this.forceUpdate(); };
+  delItem = (e) => {
+    const id = +e.currentTarget.dataset.id, l = e.currentTarget.dataset.list;
+    const key = { appts: 'pj_appts', journal: 'pj_journal', records: 'pj_records', videos: 'pj_videos' }[l];
+    this[l] = this[l].filter(x => x.id !== id); this.lsSet(key, this[l]); this.forceUpdate();
+  };
+  saveJournal = () => {
+    const f = this.state.form;
+    if (!f.j_text && !this.state.mood) { this.setState({ fError: 'اكتبي شيئًا أو اختاري مزاج اليوم.' }); return; }
+    this.journal = [{ id: Date.now(), date: f.j_date || this.curIso, mood: this.state.mood, text: f.j_text || '', symptoms: f.j_symptoms || '', weight: f.j_weight || '' }].concat(this.journal);
+    this.lsSet('pj_journal', this.journal); this.closeSheet();
+  };
+  saveRecord = () => {
+    const f = this.state.form;
+    if (!f.r_title || !f.r_date) { this.setState({ fError: 'العنوان والتاريخ مطلوبان.' }); return; }
+    this.records = [{ id: Date.now(), type: f.r_type || 'blood', title: f.r_title, date: f.r_date, provider: f.r_provider || '', notes: f.r_notes || '', crl: f.r_crl || '', fhr: f.r_fhr || '', newEdd: f.r_newEdd || '' }].concat(this.records);
+    this.lsSet('pj_records', this.records);
+    if (f.r_type === 'ultrasound' && f.r_newEdd) {
+      this.settings = Object.assign({}, this.settings, { eddOverride: f.r_newEdd });
+      this.lsSet('pj_settings', this.settings);
+      this.setState({ sheet: null, eddBanner: true, screen: 'today', fError: '' });
+      return;
+    }
+    this.closeSheet();
+  };
+  saveVideo = () => {
+    const f = this.state.form;
+    if (!f.v_title || !f.v_url) { this.setState({ fError: 'العنوان والرابط مطلوبان.' }); return; }
+    this.videos = this.videos.concat([{ id: Date.now(), week: +(f.v_week || this.state.selWeek), title: f.v_title, url: f.v_url, source: f.v_source || '', author: f.v_author || '', duration: f.v_duration || '', pubDate: f.v_pubdate || '', license: f.v_license || '' }]);
+    this.lsSet('pj_videos', this.videos); this.closeSheet();
+  };
+  apptTypeLabel(t) { return ({ doctor: 'موعد طبيب', ultrasound: 'سونار', blood: 'تحليل دم', genetic: 'فحص جيني', lab: 'مختبر', hospital: 'مستشفى', vaccine: 'تطعيم', other: 'أخرى' })[t] || 'موعد'; }
+  recTypeLabel(t) { return ({ blood: 'تحليل دم', ultrasound: 'سونار', report: 'تقرير طبيب', lab: 'نتيجة مختبر', rx: 'وصفة طبية', note: 'ملاحظة', photo: 'صورة' })[t] || 'ملف'; }
+  remLabel(r) { return ({ '': 'بدون تذكير', '1h': 'قبل ساعة', '24h': 'قبل 24 ساعة', '48h': 'قبل يومين', week: 'قبل أسبوع' })[r] || r; }
+  renderVals() {
+    const st = this.state, D = window.PJ_DATA;
+    const base = { sOnboard: st.screen === 'onboard', hasSetup: st.screen !== 'onboard' && !!(this.settings && this.settings.lmp), f: st.form, fError: st.fError, onField: this.onField, saveSettings: this.saveSettings, disclaimer: D ? D.disclaimer : '', onNav: this.onNav };
+    if (!st.booted || !D) return Object.assign(base, { sOnboard: false, hasSetup: false });
+    const c = this.calc();
+    if (!c) return base;
+    const s = this.settings;
+    const babyName = s.babyName ? s.babyName : 'طفلك';
+    const curWeekClamped = Math.min(Math.max(c.week, 1), 42);
+    const wcCur = this.wc(c.week) || {};
+    const navC = {}; ['today', 'calendar', 'baby', 'appts', 'journal', 'records'].forEach(k => { const active = st.screen === k || (k === 'calendar' && st.screen === 'day') || (k === 'baby' && st.screen === 'week'); navC[k] = active ? '#4E5D4C' : '#A5A292'; });
+    const futureAppts = this.appts.filter(a => !a.done && this.diffDays(this.parseISO(a.date), c.today) >= 0).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+    const na = futureAppts[0];
+    const apptCountdown = (a) => { const d = this.diffDays(this.parseISO(a.date), c.today); return d === 0 ? 'اليوم' : d === 1 ? 'غدًا' : 'باقي ' + this.arDaysP(d); };
+    const nextAppt = na ? { title: na.title, dayN: +na.date.split('-')[2], monthN: this.fmt(this.parseISO(na.date), { month: 'short' }), meta: this.apptTypeLabel(na.type) + (na.time ? ' · ' + na.time : '') + (na.location ? ' · ' + na.location : ''), countdown: apptCountdown(na) } : null;
+    const t2gd = 91, t3gd = 189;
+    const tri = c.gd < t2gd ? 1 : c.gd < t3gd ? 2 : 3;
+    const triLabel = tri === 1 ? 'باقي ' + this.arWeeksP(Math.ceil((t2gd - c.gd) / 7)) + ' على الثلث الثاني' : tri === 2 ? 'باقي ' + this.arWeeksP(Math.ceil((t3gd - c.gd) / 7)) + ' على الثلث الثالث' : 'أنتِ في الثلث الأخير';
+    const weekStart = this.addDays(c.effLmp, (curWeekClamped - 1) * 7);
+    // calendar month
+    const first = new Date(st.vmY, st.vmM, 1), dim = new Date(st.vmY, st.vmM + 1, 0).getDate();
+    const cells = []; for (let i = 0; i < first.getDay(); i++) cells.push({ blank: true, key: 'b' + i });
+    const apptDays = {}, jDays = {}, rDays = {};
+    this.appts.forEach(a => apptDays[a.date] = 1); this.journal.forEach(j => jDays[j.date] = 1); this.records.forEach(r => rDays[r.date] = 1);
+    for (let d = 1; d <= dim; d++) {
+      const dt = new Date(st.vmY, st.vmM, d), di = this.iso(dt), g = this.diffDays(dt, c.effLmp);
+      const inP = g >= 0 && g < 294;
+      const isT = di === this.iso(c.today), isPast = this.diffDays(dt, c.today) < 0;
+      cells.push({ key: di, d, iso: di, inP, wk: inP && g % 7 === 0 && g >= 21, ap: !!apptDays[di], jr: !!jDays[di], rc: !!rDays[di],
+        disabledAttr: inP ? undefined : true,
+        border: isT ? '1.5px solid #5E6F5C' : '1px solid transparent',
+        bg: isT ? '#EEF1EA' : 'transparent',
+        fg: inP ? (isPast ? '#85826F' : '#2C332B') : '#D5D2C3',
+        fw: isT ? 700 : 400, op: 1 });
+    }
+    // day view
+    let dv = null;
+    if (st.selDay) {
+      const dd = this.parseISO(st.selDay), g = this.diffDays(dd, c.effLmp);
+      if (g >= 0 && g < 294) {
+        const w = Math.floor(g / 7) + 1, wcd = this.wc(w) || {};
+        dv = {
+          dateLong: this.fWD(dd) + ' ' + this.fLong(dd), dayNum: g + 1, week: w, weekOrd: 'الأسبوع ' + this.ordWeek(w),
+          ga: this.arWeeksP(Math.floor(g / 7)) + (g % 7 ? ' و' + this.arDaysP(g % 7) : ''),
+          isFuture: this.diffDays(dd, c.today) > 0, isToday: st.selDay === this.iso(c.today),
+          wc: wcd, symptoms: wcd.symptoms || [], wms: (wcd.milestones || []),
+          appts: this.appts.filter(a => a.date === st.selDay).map(a => ({ id: a.id, title: a.title, meta: this.apptTypeLabel(a.type) + (a.time ? ' · ' + a.time : ''), done: a.done })),
+          js: this.journal.filter(j => j.date === st.selDay),
+          hasAppts: this.appts.some(a => a.date === st.selDay),
+          hasJs: this.journal.some(j => j.date === st.selDay),
+          hasWms: (wcd.milestones || []).length > 0,
+          slotId: 'baby-week-' + this.pad(Math.min(Math.max(w, 4), 40))
+        };
+      }
+    }
+    // week view
+    const sw = Math.min(Math.max(st.selWeek || curWeekClamped, 1), 42);
+    const ws = this.addDays(c.effLmp, (sw - 1) * 7), we = this.addDays(ws, 6);
+    const wcSel = this.wc(sw) || {};
+    const wTests = D.tests.filter(t => sw >= t.from && sw <= t.to).map(t => ({ name: t.name, why: t.why, win: 'عادةً بين الأسبوع ' + t.from + '–' + t.to }));
+    const wMs = D.milestones.filter(m => m.week === sw).map(m => ({ label: m.label, note: m.note || '' }));
+    const wAppts = this.appts.filter(a => { const d = this.diffDays(this.parseISO(a.date), ws); return d >= 0 && d <= 6; }).map(a => ({ id: a.id, title: a.title, meta: this.fDM(this.parseISO(a.date)) + (a.time ? ' · ' + a.time : '') }));
+    const wVideos = this.videos.filter(v => v.week === sw).map(v => ({ id: v.id, sid: String(v.id), title: v.title, url: v.url, meta: [v.source, v.author, v.duration].filter(Boolean).join(' · ') || 'فيديو خارجي', lic: [v.pubDate, v.license].filter(Boolean).join(' · ') }));
+    const wSources = (wcSel.sources || []).map(k => D.sources[k]).filter(Boolean);
+    const wv = {
+      n: sw, ord: 'الأسبوع ' + this.ordWeek(sw), range: this.fDM(ws) + ' – ' + this.fDM(we) + ' ' + we.getFullYear(),
+      status: sw === curWeekClamped ? 'الأسبوع الحالي' : sw < curWeekClamped ? 'أسبوع سابق' : 'قادم',
+      cur: sw === curWeekClamped, wc: wcSel, symptoms: wcSel.symptoms || [], tests: wTests, ms: wMs, appts: wAppts, videos: wVideos, sources: wSources,
+      slotId: 'baby-week-' + this.pad(Math.min(Math.max(sw, 4), 40)),
+      hasTests: wTests.length > 0, hasMs: wMs.length > 0, hasAppts: wAppts.length > 0,
+      hasVideos: wVideos.length > 0, noVideos: wVideos.length === 0, hasSources: wSources.length > 0,
+      hasPrev: sw > 1, hasNext: sw < 42
+    };
+    // timeline
+    const timeline = []; for (let w = 4; w <= 40; w++) { const x = this.wc(w) || {}; timeline.push({ w, ord: 'الأسبوع ' + w, title: x.title, size: x.size, compare: x.compare, weight: x.weight || '', cur: w === curWeekClamped, past: w < curWeekClamped, dotBg: w === curWeekClamped ? '#5E6F5C' : w < curWeekClamped ? '#AEBCA9' : '#E3E1D5', fg: w <= curWeekClamped ? '#2C332B' : '#85826F' }); }
+    // milestones list
+    const msList = D.milestones.map(m => { const mgd = (m.week - 1) * 7, delta = mgd - c.gd; return { label: m.label, note: m.note || '', week: m.week, weekLbl: 'الأسبوع ' + m.week, state: delta <= 0 ? 'وصلتِ لهذه المرحلة' : 'باقي ' + this.arDaysP(delta), reached: delta <= 0, dotBg: delta <= 0 ? '#7D8F7B' : '#E3E1D5', check: delta <= 0 ? '✓' : '', fg: delta <= 0 ? '#2C332B' : '#85826F' }; });
+    // appointments screen
+    const apptList = this.appts.slice().sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)).map(a => { const d = this.diffDays(this.parseISO(a.date), c.today); return { id: a.id, sid: String(a.id), title: a.title, done: a.done, past: d < 0, dateL: this.fDM(this.parseISO(a.date)) + (a.time ? ' · ' + a.time : ''), meta: [this.apptTypeLabel(a.type), a.location, a.doctor].filter(Boolean).join(' · '), notes: a.notes, rem: a.reminder ? this.remLabel(a.reminder) : '', cd: d < 0 ? 'انتهى' : apptCountdown(a), op: a.done ? .55 : 1, checkBg: a.done ? '#7D8F7B' : '#fff', check: a.done ? '✓' : '' }; });
+    // journal
+    const moods = ['سعيدة ❤️', 'ممتنة', 'متحمسة', 'متعبة', 'قلقة', 'هادئة'].map(m => ({ m, bg: st.mood === m ? '#5E6F5C' : '#F4F2E9', fg: st.mood === m ? '#fff' : '#5E6F5C' }));
+    const journalList = this.journal.map(j => { const g = this.diffDays(this.parseISO(j.date), c.effLmp); return { id: j.id, sid: String(j.id), dateL: this.fDM(this.parseISO(j.date)), weekL: 'الأسبوع ' + (Math.floor(g / 7) + 1), mood: j.mood, text: j.text, symptoms: j.symptoms, weight: j.weight ? j.weight + ' كغم' : '' }; });
+    // records + tests timeline
+    const recordsList = this.records.map(r => { const g = this.diffDays(this.parseISO(r.date), c.effLmp); return { id: r.id, sid: String(r.id), typeL: this.recTypeLabel(r.type), title: r.title, dateL: this.fDM(this.parseISO(r.date)), weekL: 'الأسبوع ' + (Math.floor(g / 7) + 1), provider: r.provider, notes: r.notes, us: r.type === 'ultrasound', crl: r.crl ? 'CRL: ' + r.crl : '', fhr: r.fhr ? 'نبض: ' + r.fhr : '', newEdd: r.newEdd ? 'EDD جديد: ' + this.fDM(this.parseISO(r.newEdd)) : '' }; });
+    const testsList = D.tests.map(t => { const state = curWeekClamped > t.to ? 'مرّت الفترة المعتادة' : curWeekClamped >= t.from ? 'الفترة الحالية' : 'قادم'; return { name: t.name, why: t.why, win: 'الأسبوع ' + t.from + '–' + t.to, state, chipBg: state === 'الفترة الحالية' ? '#EEF1EA' : '#F4F2E9', chipFg: state === 'الفترة الحالية' ? '#4E5D4C' : '#85826F' }; });
+    const gaText = this.arWeeksP(c.gaW) + (c.gaD ? ' و' + this.arDaysP(c.gaD) : '');
+    const showEn = this.props.showEnTerms !== false;
+    return Object.assign(base, {
+      sToday: st.screen === 'today', sCalendar: st.screen === 'calendar', sDay: st.screen === 'day', sBaby: st.screen === 'baby', sWeek: st.screen === 'week', sAppts: st.screen === 'appts', sJournal: st.screen === 'journal', sRecords: st.screen === 'records',
+      navC, editSettings: this.editSettings, dismissBanner: this.dismissBanner, eddBanner: st.eddBanner,
+      openWeekEv: this.openWeekEv, openDayEv: this.openDayEv, weekShiftEv: this.weekShiftEv, dayShiftEv: this.dayShiftEv, monthShiftEv: this.monthShiftEv,
+      openSheet: this.openSheet, closeSheet: this.closeSheet, pickMood: this.pickMood, moods,
+      saveAppt: this.saveAppt, saveJournal: this.saveJournal, saveRecord: this.saveRecord, saveVideo: this.saveVideo, toggleAppt: this.toggleAppt, delItem: this.delItem,
+      sheetAppt: st.sheet === 'appt', sheetJournal: st.sheet === 'journal', sheetRecord: st.sheet === 'record', sheetVideo: st.sheet === 'video', anySheet: !!st.sheet,
+      todayLong: this.fWD(c.today) + ' ' + this.fLong(c.today), todayIso: this.iso(c.today),
+      weekOrdinalLabel: 'الأسبوع ' + this.ordWeek(curWeekClamped), weekShort: 'الأسبوع ' + curWeekClamped,
+      gaLabel: gaText, gaTerm: showEn ? 'العمر الحملي · Gestational Age' : 'العمر الحملي',
+      progressPct: Math.min(100, Math.max(0, (c.dayNum / 280) * 100)).toFixed(1), dayNum: c.dayNum,
+      daysLeft: c.daysLeft, daysLeftLabel: this.arDaysP(c.daysLeft), eddLong: this.fLong(c.edd),
+      nextAppt, nextApptShort: nextAppt ? nextAppt.countdown : 'لا مواعيد قادمة',
+      nextWeekLabel: 'باقي ' + this.arDaysP(7 - c.gaD) + ' على الأسبوع ' + this.ordWeek(curWeekClamped + 1),
+      triName: D.trimesters[tri - 1].name, triLabel,
+      curWeekClamped, thisWeekRange: this.fDM(weekStart) + ' – ' + this.fDM(this.addDays(weekStart, 6)),
+      babyCardTitle: (s.babyName ? s.babyName : 'طفلك') + ' اليوم 👶', babyName,
+      babySlotId: 'baby-week-' + this.pad(Math.min(Math.max(curWeekClamped, 4), 40)),
+      wcTitle: wcCur.title, wcSize: wcCur.size, wcCompare: wcCur.compare, wcWeight: wcCur.weight || '', wcBaby: wcCur.baby, wcMom: wcCur.mom, wcSymptoms: wcCur.symptoms || [],
+      monthLabel: this.fmt(first, { month: 'long', year: 'numeric' }), cells, wdNames: ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'],
+      dv, dvMissing: st.screen === 'day' && !dv, wv, timeline, msList, apptList, hasAppts: apptList.length > 0,
+      journalList, hasJournal: journalList.length > 0, noJournal: journalList.length === 0, recordsList, hasRecords: recordsList.length > 0, noRecords: recordsList.length === 0, noAppts: apptList.length === 0, testsList,
+      apptCountLabel: apptList.length ? apptList.filter(a => !a.past && !a.done).length + ' مواعيد قادمة' : 'نظّمي زياراتك وفحوصاتك',
+      lastReviewed: D.lastReviewed, isUsForm: st.form.r_type === 'ultrasound',
+      emergencySigns: D.emergencySigns, apptCount: apptList.filter(a => !a.past && !a.done).length
+    });
+  }
+}
+</script>
+</body>
+</html>
