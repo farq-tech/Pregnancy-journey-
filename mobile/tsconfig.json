@@ -1,0 +1,12 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    // The unit tests import `node:test` / `node:assert`. Expo's base config sets
+    // customConditions for react-native, which stops those from resolving unless
+    // the node types are named explicitly.
+    "types": ["node", "react", "expo"]
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
+  "exclude": ["node_modules"]
+}
