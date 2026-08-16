@@ -78,6 +78,79 @@ export type WeekVideo = {
   thumbnailUrl: string;
 };
 
+/**
+ * One "count to ten" sitting. `endedAt` is null while it is still running, so a
+ * session survives the app being backgrounded mid-count.
+ */
+export type KickSession = {
+  id: string;
+  date: IsoDate;
+  /** ISO timestamp. */
+  startedAt: string;
+  /** ISO timestamp, or null while running. */
+  endedAt: string | null;
+  count: number;
+  note: string;
+};
+
+export type Contraction = {
+  id: string;
+  /** ISO timestamp of the moment it began. */
+  startedAt: string;
+  durationSeconds: number;
+  note: string;
+};
+
+export type MeasurementKind = 'weight' | 'bp' | 'glucose';
+
+export type Measurement = {
+  id: string;
+  date: IsoDate;
+  kind: MeasurementKind;
+  /** Kilograms, systolic, or mg/dL depending on `kind`. */
+  value: number;
+  /** Diastolic, on a blood-pressure reading only. */
+  value2: number | null;
+  /** Fasting / after a meal, on a glucose reading. */
+  context: string;
+  notes: string;
+};
+
+/**
+ * One ticked line on a preparation list. Curated items carry an `itemId` from
+ * `content/checklists.ts` and an empty `label`; her own additions carry a
+ * generated id and their text.
+ */
+export type ChecklistTick = {
+  id: string;
+  listId: string;
+  itemId: string;
+  label: string;
+  done: boolean;
+};
+
+/** A letter to the baby — from her, or from anyone else in the family. */
+export type Letter = {
+  id: string;
+  date: IsoDate;
+  title: string;
+  body: string;
+  /** Who wrote it, as they want to be remembered. Empty means the mother. */
+  author: string;
+};
+
+export const MEASUREMENT_KIND_LABELS: Record<MeasurementKind, string> = {
+  weight: 'الوزن',
+  bp: 'ضغط الدم',
+  glucose: 'سكر الدم',
+};
+
+export const MEASUREMENT_UNITS: Record<MeasurementKind, string> = {
+  weight: 'كغم',
+  bp: 'ملم زئبق',
+  glucose: 'ملغم/دل',
+};
+
 /** Her own status against the advisory test catalogue. Never prescriptive. */
 export type TestStatus = 'planned' | 'scheduled' | 'done' | 'skipped';
 

@@ -34,6 +34,11 @@ export type Settings = {
   babyName: string;
   motherName: string;
   doctor: string;
+  /** Optional, and only used to place her on the published weight-gain band. */
+  heightCm: number | null;
+  prePregnancyWeightKg: number | null;
+  /** Shown in the family card; empty when she has not named anyone. */
+  partnerName: string;
 };
 
 export type Journey = {

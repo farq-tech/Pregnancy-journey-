@@ -142,6 +142,165 @@ export type Database = {
           },
         ];
       };
+      kick_sessions: {
+        Row: {
+          count: number;
+          created_at: string;
+          date: string;
+          ended_at: string | null;
+          id: string;
+          note: string;
+          started_at: string;
+          user_id: string;
+        };
+        Insert: {
+          count?: number;
+          created_at?: string;
+          date: string;
+          ended_at?: string | null;
+          id?: string;
+          note?: string;
+          started_at?: string;
+          user_id: string;
+        };
+        Update: {
+          count?: number;
+          created_at?: string;
+          date?: string;
+          ended_at?: string | null;
+          id?: string;
+          note?: string;
+          started_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      contractions: {
+        Row: {
+          created_at: string;
+          duration_seconds: number;
+          id: string;
+          note: string;
+          started_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          duration_seconds: number;
+          id?: string;
+          note?: string;
+          started_at: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          duration_seconds?: number;
+          id?: string;
+          note?: string;
+          started_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      measurements: {
+        Row: {
+          context: string;
+          created_at: string;
+          date: string;
+          id: string;
+          kind: string;
+          notes: string;
+          user_id: string;
+          value: number;
+          value2: number | null;
+        };
+        Insert: {
+          context?: string;
+          created_at?: string;
+          date: string;
+          id?: string;
+          kind: string;
+          notes?: string;
+          user_id: string;
+          value: number;
+          value2?: number | null;
+        };
+        Update: {
+          context?: string;
+          created_at?: string;
+          date?: string;
+          id?: string;
+          kind?: string;
+          notes?: string;
+          user_id?: string;
+          value?: number;
+          value2?: number | null;
+        };
+        Relationships: [];
+      };
+      checklist_items: {
+        Row: {
+          created_at: string;
+          done: boolean;
+          id: string;
+          item_id: string;
+          label: string;
+          list_id: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          done?: boolean;
+          id?: string;
+          item_id: string;
+          label?: string;
+          list_id: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          done?: boolean;
+          id?: string;
+          item_id?: string;
+          label?: string;
+          list_id?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      letters: {
+        Row: {
+          author: string;
+          body: string;
+          created_at: string;
+          date: string;
+          id: string;
+          title: string;
+          user_id: string;
+        };
+        Insert: {
+          author?: string;
+          body: string;
+          created_at?: string;
+          date: string;
+          id?: string;
+          title?: string;
+          user_id: string;
+        };
+        Update: {
+          author?: string;
+          body?: string;
+          created_at?: string;
+          date?: string;
+          id?: string;
+          title?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       journal_entries: {
         Row: {
           body: string;
@@ -182,9 +341,12 @@ export type Database = {
           cycle_length: number;
           doctor: string;
           edd_override: string | null;
+          height_cm: number | null;
           id: string;
           lmp: string;
           mother_name: string;
+          partner_name: string;
+          pre_pregnancy_weight_kg: number | null;
           status: string;
           updated_at: string;
         };
@@ -194,9 +356,12 @@ export type Database = {
           cycle_length?: number;
           doctor?: string;
           edd_override?: string | null;
+          height_cm?: number | null;
           id: string;
           lmp: string;
           mother_name?: string;
+          partner_name?: string;
+          pre_pregnancy_weight_kg?: number | null;
           status?: string;
           updated_at?: string;
         };
@@ -206,9 +371,12 @@ export type Database = {
           cycle_length?: number;
           doctor?: string;
           edd_override?: string | null;
+          height_cm?: number | null;
           id?: string;
           lmp?: string;
           mother_name?: string;
+          partner_name?: string;
+          pre_pregnancy_weight_kg?: number | null;
           status?: string;
           updated_at?: string;
         };

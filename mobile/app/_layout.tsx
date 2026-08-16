@@ -46,6 +46,11 @@ export default function RootLayout() {
         >
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="onboarding" />
+          {/* Full-attention screens that push over the tab bar. */}
+          <Stack.Screen name="track" />
+          <Stack.Screen name="learn" />
+          <Stack.Screen name="checklists" />
+          <Stack.Screen name="letters" />
         </Stack>
       </JourneyProvider>
     </SafeAreaProvider>

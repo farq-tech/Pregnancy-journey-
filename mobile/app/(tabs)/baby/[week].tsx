@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Linking, Pressable, View } from 'react-native';
 
@@ -15,6 +15,8 @@ import {
 } from '../../../src/components/fields';
 import { Card, Chip, Row } from '../../../src/components/layout';
 import { WeekIllustration } from '../../../src/components/WeekIllustration';
+import { familyRoleFor, insightForWeek, nutritionFor } from '../../../src/content/education';
+import { glossaryForWeek } from '../../../src/content/glossary';
 import {
   LAST_REVIEWED,
   MILESTONES,
@@ -64,6 +66,10 @@ export default function WeekScreen() {
   });
   const weekVideos = videos.filter((v) => v.week === week);
   const sources = (content.sources ?? []).map((key) => SOURCES[key]).filter(Boolean);
+  const insight = insightForWeek(week);
+  const nutrition = nutritionFor(week);
+  const familyRole = familyRoleFor(week);
+  const terms = glossaryForWeek(week);
 
   return (
     <Screen>
@@ -123,6 +129,15 @@ export default function WeekScreen() {
             {content.appearance}
           </Txt>
         ) : null}
+      </Card>
+
+      <Card style={{ backgroundColor: colors.sageSoft, borderColor: colors.sageBorder, gap: 6 }}>
+        <Txt size={12} weight={600} color={colors.sageDark} style={{ letterSpacing: 1 }}>
+          هل تعلمين؟
+        </Txt>
+        <Txt size={14} color={colors.body} lineHeight={1.9}>
+          {insight.fact}
+        </Txt>
       </Card>
 
       <Card>
@@ -210,6 +225,81 @@ export default function WeekScreen() {
           </View>
         </Card>
       ) : null}
+
+      {/* Nutrition, movement and the glossary all live in the library; this is
+          the slice of them that belongs to this week. */}
+      <Card>
+        <Row justify="space-between" style={{ marginBottom: 8 }}>
+          <Txt size={15} weight={600}>
+            التغذية هذه المرحلة 🥗
+          </Txt>
+          <Pressable onPress={() => router.push('/learn')} hitSlop={8}>
+            <Txt size={12} weight={600} color={colors.sage}>
+              المكتبة ←
+            </Txt>
+          </Pressable>
+        </Row>
+        <Txt size={13.5} weight={600} color={colors.sage} lineHeight={1.7}>
+          {nutrition.headline}
+        </Txt>
+        <View style={{ gap: 8, marginTop: 10 }}>
+          {nutrition.priorities.slice(0, 3).map((item) => (
+            <Txt key={item.label} size={13} color={colors.body} lineHeight={1.8}>
+              <Txt size={13} weight={600}>
+                {`${item.label} — `}
+              </Txt>
+              {item.why}
+            </Txt>
+          ))}
+        </View>
+      </Card>
+
+      {terms.length ? (
+        <Card>
+          <Row justify="space-between" style={{ marginBottom: 4 }}>
+            <Txt size={15} weight={600}>
+              مصطلحات ستسمعينها 📖
+            </Txt>
+            <Pressable onPress={() => router.push('/learn/glossary')} hitSlop={8}>
+              <Txt size={12} weight={600} color={colors.sage}>
+                القاموس ←
+              </Txt>
+            </Pressable>
+          </Row>
+          <Txt size={12} color={colors.faint} lineHeight={1.5} style={{ marginBottom: 10 }}>
+            حتى تقرئي تقاريرك بنفسك — الشرح للمصطلح، لا لنتيجتك.
+          </Txt>
+          <View style={{ gap: 10 }}>
+            {terms.map((term) => (
+              <View key={term.id}>
+                <Txt size={13.5} weight={600}>
+                  {term.term}
+                  <Txt size={12} color={colors.sage}>{` · ${term.en}`}</Txt>
+                </Txt>
+                <Txt size={12.5} color={colors.muted} lineHeight={1.7} style={{ marginTop: 2 }}>
+                  {term.meaning}
+                </Txt>
+              </View>
+            ))}
+          </View>
+        </Card>
+      ) : null}
+
+      <Card style={{ backgroundColor: colors.claySoft, borderColor: colors.clayBorder }}>
+        <Txt size={15} weight={600} color={colors.clayHeading} style={{ marginBottom: 8 }}>
+          دور العائلة ❤
+        </Txt>
+        <Txt size={13.5} color={colors.clayBody} lineHeight={1.9} style={{ marginBottom: 10 }}>
+          {insight.family}
+        </Txt>
+        <View style={{ gap: 6 }}>
+          {familyRole.map((line) => (
+            <Txt key={line} size={12.5} color={colors.clayBody} lineHeight={1.8}>
+              {`• ${line}`}
+            </Txt>
+          ))}
+        </View>
+      </Card>
 
       <Card>
         <Txt size={15} weight={600} style={{ marginBottom: 4 }}>

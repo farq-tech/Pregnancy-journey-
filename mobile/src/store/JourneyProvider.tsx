@@ -11,7 +11,7 @@ import {
 } from 'react';
 import { AppState } from 'react-native';
 
-import { isoToday, type IsoDate } from '../lib/dates';
+import { isoToday, toIso, type IsoDate } from '../lib/dates';
 import { cancelReminder, rescheduleAll, syncReminder } from '../lib/reminders';
 import { DEFAULT_CYCLE_LENGTH, type Settings } from '../lib/pregnancy';
 import { recurringDates } from '../lib/recurrence';
@@ -27,7 +27,13 @@ import { ensureSession, supabase } from '../lib/supabase';
 import type {
   Appointment,
   AppointmentType,
+  ChecklistTick,
+  Contraction,
   JournalEntry,
+  KickSession,
+  Letter,
+  Measurement,
+  MeasurementKind,
   MedicalRecord,
   RecordType,
   ReminderOffset,
@@ -46,6 +52,11 @@ type Snapshot = {
   videos: WeekVideo[];
   attachments: Attachment[];
   tests: TestTracking[];
+  kicks: KickSession[];
+  contractions: Contraction[];
+  measurements: Measurement[];
+  checklist: ChecklistTick[];
+  letters: Letter[];
 };
 
 const EMPTY: Snapshot = {
@@ -56,6 +67,11 @@ const EMPTY: Snapshot = {
   videos: [],
   attachments: [],
   tests: [],
+  kicks: [],
+  contractions: [],
+  measurements: [],
+  checklist: [],
+  letters: [],
 };
 
 type JourneyValue = Snapshot & {
@@ -83,6 +99,22 @@ type JourneyValue = Snapshot & {
   attachmentsFor: (ownerType: AttachmentOwner, ownerId: string) => Attachment[];
   deleteAttachment: (attachment: Attachment) => Promise<void>;
   setTestStatus: (testId: string, status: TestStatus, notes?: string) => Promise<void>;
+
+  /** Opens a kick-counting session and returns it, so the screen can tick it up. */
+  startKickSession: () => Promise<KickSession>;
+  /** Writes the running count through, so a closed app does not lose it. */
+  updateKickSession: (id: string, count: number) => Promise<void>;
+  endKickSession: (id: string, count: number, note?: string) => Promise<void>;
+  addContraction: (startedAt: Date, durationSeconds: number, note?: string) => Promise<void>;
+  addMeasurement: (input: Omit<Measurement, 'id'>) => Promise<void>;
+  deleteMeasurement: (id: string) => Promise<void>;
+  /** Ticks a curated or custom checklist line; creates the row on first tap. */
+  toggleChecklistItem: (listId: string, itemId: string, label?: string) => Promise<void>;
+  addChecklistItem: (listId: string, label: string) => Promise<void>;
+  removeChecklistItem: (listId: string, itemId: string) => Promise<void>;
+  addLetter: (input: Omit<Letter, 'id'>) => Promise<void>;
+  removeLetter: (id: string) => Promise<void>;
+
   refresh: () => Promise<void>;
 };
 
@@ -106,6 +138,9 @@ const toSettings = (row: {
   baby_name: string;
   mother_name: string;
   doctor: string;
+  height_cm: number | null;
+  pre_pregnancy_weight_kg: number | null;
+  partner_name: string;
 }): Settings => ({
   lmp: row.lmp,
   cycleLength: row.cycle_length,
@@ -114,6 +149,9 @@ const toSettings = (row: {
   babyName: row.baby_name,
   motherName: row.mother_name,
   doctor: row.doctor,
+  heightCm: row.height_cm,
+  prePregnancyWeightKg: row.pre_pregnancy_weight_kg,
+  partnerName: row.partner_name,
 });
 
 const toAppointment = (row: {
@@ -223,6 +261,80 @@ const toTest = (row: {
   appointmentId: row.appointment_id,
 });
 
+const toKickSession = (row: {
+  id: string;
+  date: string;
+  started_at: string;
+  ended_at: string | null;
+  count: number;
+  note: string;
+}): KickSession => ({
+  id: row.id,
+  date: row.date,
+  startedAt: row.started_at,
+  endedAt: row.ended_at,
+  count: row.count,
+  note: row.note,
+});
+
+const toContraction = (row: {
+  id: string;
+  started_at: string;
+  duration_seconds: number;
+  note: string;
+}): Contraction => ({
+  id: row.id,
+  startedAt: row.started_at,
+  durationSeconds: row.duration_seconds,
+  note: row.note,
+});
+
+const toMeasurement = (row: {
+  id: string;
+  date: string;
+  kind: string;
+  value: number;
+  value2: number | null;
+  context: string;
+  notes: string;
+}): Measurement => ({
+  id: row.id,
+  date: row.date,
+  kind: row.kind as MeasurementKind,
+  value: Number(row.value),
+  value2: row.value2 === null ? null : Number(row.value2),
+  context: row.context,
+  notes: row.notes,
+});
+
+const toChecklistTick = (row: {
+  id: string;
+  list_id: string;
+  item_id: string;
+  label: string;
+  done: boolean;
+}): ChecklistTick => ({
+  id: row.id,
+  listId: row.list_id,
+  itemId: row.item_id,
+  label: row.label,
+  done: row.done,
+});
+
+const toLetter = (row: {
+  id: string;
+  date: string;
+  title: string;
+  body: string;
+  author: string;
+}): Letter => ({
+  id: row.id,
+  date: row.date,
+  title: row.title,
+  body: row.body,
+  author: row.author,
+});
+
 // --------------------------------------------------------------- provider ---
 
 export function JourneyProvider({ children }: { children: ReactNode }) {
@@ -247,24 +359,57 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
       const user = await ensureSession();
       userId.current = user.id;
 
-      const [profile, appointments, journal, records, videos, attachments, tests] =
-        await Promise.all([
-          supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
-          supabase.from('appointments').select('*').eq('user_id', user.id).order('date'),
-          supabase
-            .from('journal_entries')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('date', { ascending: false }),
-          supabase
-            .from('records')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('date', { ascending: false }),
-          supabase.from('videos').select('*').eq('user_id', user.id).order('week'),
-          supabase.from('attachments').select('*').eq('user_id', user.id),
-          supabase.from('test_tracking').select('*').eq('user_id', user.id),
-        ]);
+      const [
+        profile,
+        appointments,
+        journal,
+        records,
+        videos,
+        attachments,
+        tests,
+        kicks,
+        contractions,
+        measurements,
+        checklist,
+        letters,
+      ] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
+        supabase.from('appointments').select('*').eq('user_id', user.id).order('date'),
+        supabase
+          .from('journal_entries')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('date', { ascending: false }),
+        supabase
+          .from('records')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('date', { ascending: false }),
+        supabase.from('videos').select('*').eq('user_id', user.id).order('week'),
+        supabase.from('attachments').select('*').eq('user_id', user.id),
+        supabase.from('test_tracking').select('*').eq('user_id', user.id),
+        supabase
+          .from('kick_sessions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('started_at', { ascending: false }),
+        supabase
+          .from('contractions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('started_at', { ascending: false }),
+        supabase
+          .from('measurements')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('date', { ascending: false }),
+        supabase.from('checklist_items').select('*').eq('user_id', user.id),
+        supabase
+          .from('letters')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('date', { ascending: false }),
+      ]);
 
       const failure =
         profile.error ??
@@ -273,7 +418,12 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
         records.error ??
         videos.error ??
         attachments.error ??
-        tests.error;
+        tests.error ??
+        kicks.error ??
+        contractions.error ??
+        measurements.error ??
+        checklist.error ??
+        letters.error;
       if (failure) throw failure;
 
       cache({
@@ -284,6 +434,11 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
         videos: (videos.data ?? []).map(toVideo),
         attachments: (attachments.data ?? []).map(toAttachment),
         tests: (tests.data ?? []).map(toTest),
+        kicks: (kicks.data ?? []).map(toKickSession),
+        contractions: (contractions.data ?? []).map(toContraction),
+        measurements: (measurements.data ?? []).map(toMeasurement),
+        checklist: (checklist.data ?? []).map(toChecklistTick),
+        letters: (letters.data ?? []).map(toLetter),
       });
       setSyncError(null);
     } catch (error) {
@@ -392,6 +547,9 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
           baby_name: input.babyName,
           mother_name: input.motherName,
           doctor: input.doctor,
+          height_cm: input.heightCm,
+          pre_pregnancy_weight_kg: input.prePregnancyWeightKg,
+          partner_name: input.partnerName,
         })
         .select()
         .single();
@@ -679,6 +837,224 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
     [cache, requireUser, snapshot],
   );
 
+  // ------------------------------------------------------------ tracking ---
+
+  const startKickSession = useCallback(async () => {
+    const id = await requireUser();
+    const now = new Date();
+    const { data, error } = await supabase
+      .from('kick_sessions')
+      .insert({ user_id: id, date: toIso(now), started_at: now.toISOString(), count: 0 })
+      .select()
+      .single();
+    if (error) throw error;
+
+    const session = toKickSession(data);
+    cache({ ...snapshot, kicks: [session, ...snapshot.kicks] });
+    return session;
+  }, [cache, requireUser, snapshot]);
+
+  /**
+   * Writes the count through on every tap. Chattier than saving at the end, and
+   * deliberately so: a count of eight lost to a locked phone is a count she has
+   * to start over, at the exact moment she is already anxious.
+   */
+  const updateKickSession = useCallback(
+    async (id: string, count: number) => {
+      cache({
+        ...snapshot,
+        kicks: snapshot.kicks.map((s) => (s.id === id ? { ...s, count } : s)),
+      });
+      const { error } = await supabase.from('kick_sessions').update({ count }).eq('id', id);
+      if (error) throw error;
+    },
+    [cache, snapshot],
+  );
+
+  const endKickSession = useCallback(
+    async (id: string, count: number, note = '') => {
+      const endedAt = new Date().toISOString();
+      cache({
+        ...snapshot,
+        kicks: snapshot.kicks.map((s) => (s.id === id ? { ...s, count, endedAt, note } : s)),
+      });
+      const { error } = await supabase
+        .from('kick_sessions')
+        .update({ count, ended_at: endedAt, note })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    [cache, snapshot],
+  );
+
+  const addContraction = useCallback(
+    async (startedAt: Date, durationSeconds: number, note = '') => {
+      const id = await requireUser();
+      const { data, error } = await supabase
+        .from('contractions')
+        .insert({
+          user_id: id,
+          started_at: startedAt.toISOString(),
+          duration_seconds: Math.round(durationSeconds),
+          note,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      cache({ ...snapshot, contractions: [toContraction(data), ...snapshot.contractions] });
+    },
+    [cache, requireUser, snapshot],
+  );
+
+  const addMeasurement = useCallback(
+    async (input: Omit<Measurement, 'id'>) => {
+      const id = await requireUser();
+      const { data, error } = await supabase
+        .from('measurements')
+        .insert({
+          user_id: id,
+          date: input.date,
+          kind: input.kind,
+          value: input.value,
+          value2: input.value2,
+          context: input.context,
+          notes: input.notes,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      cache({
+        ...snapshot,
+        measurements: [toMeasurement(data), ...snapshot.measurements].sort((a, b) =>
+          b.date.localeCompare(a.date),
+        ),
+      });
+    },
+    [cache, requireUser, snapshot],
+  );
+
+  const deleteMeasurement = useCallback(
+    async (id: string) => {
+      const previous = snapshot;
+      cache({ ...snapshot, measurements: snapshot.measurements.filter((m) => m.id !== id) });
+      const { error } = await supabase.from('measurements').delete().eq('id', id);
+      if (error) {
+        cache(previous);
+        throw error;
+      }
+    },
+    [cache, snapshot],
+  );
+
+  // ----------------------------------------------------------- checklists ---
+
+  /**
+   * Ticking a curated line for the first time creates its row; after that it
+   * flips. `label` is only set for lines she wrote herself.
+   */
+  const toggleChecklistItem = useCallback(
+    async (listId: string, itemId: string, label = '') => {
+      const uid = await requireUser();
+      const existing = snapshot.checklist.find(
+        (tick) => tick.listId === listId && tick.itemId === itemId,
+      );
+      const done = !existing?.done;
+
+      const { data, error } = await supabase
+        .from('checklist_items')
+        .upsert(
+          { user_id: uid, list_id: listId, item_id: itemId, label: existing?.label ?? label, done },
+          { onConflict: 'user_id,list_id,item_id' },
+        )
+        .select()
+        .single();
+      if (error) throw error;
+
+      const tick = toChecklistTick(data);
+      cache({
+        ...snapshot,
+        checklist: [
+          ...snapshot.checklist.filter((t) => !(t.listId === listId && t.itemId === itemId)),
+          tick,
+        ],
+      });
+    },
+    [cache, requireUser, snapshot],
+  );
+
+  const addChecklistItem = useCallback(
+    async (listId: string, label: string) => {
+      const uid = await requireUser();
+      // Her own lines need an id that cannot collide with a curated one.
+      const itemId = `custom-${Date.now().toString(36)}`;
+      const { data, error } = await supabase
+        .from('checklist_items')
+        .insert({ user_id: uid, list_id: listId, item_id: itemId, label, done: false })
+        .select()
+        .single();
+      if (error) throw error;
+      cache({ ...snapshot, checklist: [...snapshot.checklist, toChecklistTick(data)] });
+    },
+    [cache, requireUser, snapshot],
+  );
+
+  const removeChecklistItem = useCallback(
+    async (listId: string, itemId: string) => {
+      const previous = snapshot;
+      cache({
+        ...snapshot,
+        checklist: snapshot.checklist.filter(
+          (tick) => !(tick.listId === listId && tick.itemId === itemId),
+        ),
+      });
+      const { error } = await supabase
+        .from('checklist_items')
+        .delete()
+        .eq('list_id', listId)
+        .eq('item_id', itemId);
+      if (error) {
+        cache(previous);
+        throw error;
+      }
+    },
+    [cache, snapshot],
+  );
+
+  // -------------------------------------------------------------- letters ---
+
+  const addLetter = useCallback(
+    async (input: Omit<Letter, 'id'>) => {
+      const uid = await requireUser();
+      const { data, error } = await supabase
+        .from('letters')
+        .insert({
+          user_id: uid,
+          date: input.date,
+          title: input.title,
+          body: input.body,
+          author: input.author,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      cache({ ...snapshot, letters: [toLetter(data), ...snapshot.letters] });
+    },
+    [cache, requireUser, snapshot],
+  );
+
+  const removeLetter = useCallback(
+    async (id: string) => {
+      const previous = snapshot;
+      cache({ ...snapshot, letters: snapshot.letters.filter((letter) => letter.id !== id) });
+      const { error } = await supabase.from('letters').delete().eq('id', id);
+      if (error) {
+        cache(previous);
+        throw error;
+      }
+    },
+    [cache, snapshot],
+  );
+
   const attachmentsFor = useCallback(
     (ownerType: AttachmentOwner, ownerId: string) =>
       snapshot.attachments.filter((a) => a.ownerType === ownerType && a.ownerId === ownerId),
@@ -703,6 +1079,17 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
       attachmentsFor,
       deleteAttachment,
       setTestStatus,
+      startKickSession,
+      updateKickSession,
+      endKickSession,
+      addContraction,
+      addMeasurement,
+      deleteMeasurement,
+      toggleChecklistItem,
+      addChecklistItem,
+      removeChecklistItem,
+      addLetter,
+      removeLetter,
       refresh,
     }),
     [
@@ -721,6 +1108,17 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
       attachmentsFor,
       deleteAttachment,
       setTestStatus,
+      startKickSession,
+      updateKickSession,
+      endKickSession,
+      addContraction,
+      addMeasurement,
+      deleteMeasurement,
+      toggleChecklistItem,
+      addChecklistItem,
+      removeChecklistItem,
+      addLetter,
+      removeLetter,
       refresh,
     ],
   );

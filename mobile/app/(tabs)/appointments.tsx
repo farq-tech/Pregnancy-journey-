@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -14,7 +15,9 @@ import {
   SelectField,
   TextField,
 } from '../../src/components/fields';
+import { ChevronIcon } from '../../src/components/icons';
 import { Card, Chip, Row } from '../../src/components/layout';
+import { checklistById, itemsOf } from '../../src/content/checklists';
 import { formatDayMonth } from '../../src/lib/arabic';
 import { diffDays, fromIso } from '../../src/lib/dates';
 import { countdownLabel, joinMeta } from '../../src/lib/labels';
@@ -57,6 +60,7 @@ export default function AppointmentsScreen() {
     remove,
     attachmentsFor,
     deleteAttachment,
+    checklist,
   } = useJourney();
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -75,6 +79,12 @@ export default function AppointmentsScreen() {
   const upcoming = sorted.filter(
     (a) => !a.done && diffDays(fromIso(a.date), journey.today) >= 0,
   ).length;
+
+  const visitList = checklistById('visit');
+  const visitTicks = checklist.filter((tick) => tick.listId === 'visit');
+  const visitTotal =
+    (visitList ? itemsOf(visitList).length : 0) + visitTicks.filter((tick) => tick.label).length;
+  const visitDone = visitTicks.filter((tick) => tick.done).length;
 
   return (
     <Screen>
@@ -101,6 +111,37 @@ export default function AppointmentsScreen() {
           </Txt>
         </Pressable>
       </Row>
+
+      {/* The questions and the paperwork are what a visit actually needs, and
+          they are remembered on the way out, not on the way in. */}
+      <Pressable
+        onPress={() => router.push({ pathname: '/checklists/[list]', params: { list: 'visit' } })}
+      >
+        {({ pressed }) => (
+          <Card
+            radius={20}
+            padding={0}
+            style={{
+              paddingVertical: 14,
+              paddingHorizontal: 18,
+              backgroundColor: pressed ? '#FCFBF7' : colors.surface,
+            }}
+          >
+            <Row gap={12}>
+              <Txt size={18}>🩺</Txt>
+              <View style={{ flex: 1 }}>
+                <Txt size={14.5} weight={600}>
+                  تحضير الزيارة
+                </Txt>
+                <Txt size={12} color={colors.muted} lineHeight={1.6} style={{ marginTop: 1 }}>
+                  {`ما تأخذينه معك وما تسألين عنه · ${visitDone} من ${visitTotal}`}
+                </Txt>
+              </View>
+              <ChevronIcon size={18} color={colors.muted} direction="left" />
+            </Row>
+          </Card>
+        )}
+      </Pressable>
 
       {sorted.length === 0 ? (
         <View

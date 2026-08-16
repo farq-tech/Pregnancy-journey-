@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
+import { QuickActions } from '../../src/components/QuickActions';
 import { Screen } from '../../src/components/Screen';
 import { TodayWidget } from '../../src/components/TodayWidget';
 import { Txt } from '../../src/components/Txt';
@@ -9,7 +10,10 @@ import { CheckIcon, ChevronIcon, SettingsIcon } from '../../src/components/icons
 import { Card, Chip, Row } from '../../src/components/layout';
 import { ProgressRing } from '../../src/components/ProgressRing';
 import { WeekIllustration } from '../../src/components/WeekIllustration';
+import { suggestedChecklist, itemsOf } from '../../src/content/checklists';
+import { insightForWeek } from '../../src/content/education';
 import { DISCLAIMER, TRIMESTERS, weekContent } from '../../src/content/pregnancyData';
+import { KICK_TRACKING_FROM_WEEK, totalOn } from '../../src/lib/kicks';
 import {
   days,
   formatDayMonth,
@@ -43,6 +47,9 @@ export default function TodayScreen() {
     dismissEddBanner,
     refresh,
     syncError,
+    kicks,
+    checklist,
+    letters,
   } = useJourney();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -65,7 +72,10 @@ export default function TodayScreen() {
 
   const week = clampWeek(journey.week);
   const content = weekContent(journey.week);
+  const insight = insightForWeek(week);
   const babyName = settings.babyName || 'طفلك';
+  const kicksToday = totalOn(kicks, today);
+  const nextList = suggestedChecklist(week);
   const thisWeekStart = weekStart(journey, week);
   const weeksToNext = weeksToNextTrimester(journey.gestationalDay);
   const trimesterName = TRIMESTERS[journey.trimester - 1].name;
@@ -189,6 +199,42 @@ export default function TodayScreen() {
         </Txt>
       </Card>
 
+      {/* The tracking tools live off the tab bar, so they get a row here. */}
+      <QuickActions
+        actions={[
+          {
+            emoji: '👣',
+            label: 'الركلات',
+            href: '/track/kicks',
+            badge:
+              kicksToday > 0
+                ? `${kicksToday} اليوم`
+                : week >= KICK_TRACKING_FROM_WEEK
+                  ? 'ابدئي'
+                  : undefined,
+          },
+          { emoji: '⚖️', label: 'القياسات', href: '/track/measurements' },
+          { emoji: '📚', label: 'المكتبة', href: '/learn' },
+          {
+            emoji: '✅',
+            label: 'القوائم',
+            href: '/checklists',
+            badge: nextList
+              ? `${checklist.filter((t) => t.listId === nextList.id && t.done).length}/${
+                  itemsOf(nextList).length +
+                  checklist.filter((t) => t.listId === nextList.id && t.label).length
+                }`
+              : undefined,
+          },
+          {
+            emoji: '💌',
+            label: 'رسائل',
+            href: '/letters',
+            badge: letters.length ? `${letters.length}` : undefined,
+          },
+        ]}
+      />
+
       {/* Four stat tiles */}
       <Row wrap gap={10} align="stretch" justify="space-between">
         <StatTile label="باقي على الولادة">
@@ -278,6 +324,22 @@ export default function TodayScreen() {
         </Pressable>
       </Card>
 
+      {/* One fact a week — the small reward for opening the app. */}
+      <Card
+        style={{
+          backgroundColor: colors.sageSoft,
+          borderColor: colors.sageBorder,
+          gap: 6,
+        }}
+      >
+        <Txt size={12} weight={600} color={colors.sageDark} style={{ letterSpacing: 1 }}>
+          هل تعلمين؟
+        </Txt>
+        <Txt size={14.5} color={colors.body} lineHeight={1.9}>
+          {insight.fact}
+        </Txt>
+      </Card>
+
       {/* Mother today */}
       <Card>
         <Txt size={16} weight={600} style={{ marginBottom: 8 }}>
@@ -343,6 +405,29 @@ export default function TodayScreen() {
           </Row>
         </Card>
       ) : null}
+
+      {/* The family half of the journey — one concrete thing, not a sentiment. */}
+      <Card
+        style={{
+          backgroundColor: colors.claySoft,
+          borderColor: colors.clayBorder,
+          gap: 6,
+        }}
+      >
+        <Row justify="space-between">
+          <Txt size={12} weight={600} color={colors.clayHeading} style={{ letterSpacing: 1 }}>
+            {settings.partnerName ? `لـ${settings.partnerName} والعائلة` : 'للشريك والعائلة'}
+          </Txt>
+          <Pressable onPress={() => router.push('/letters')} hitSlop={8}>
+            <Txt size={11.5} weight={600} color={colors.clayText}>
+              اكتبوا رسالة ←
+            </Txt>
+          </Pressable>
+        </Row>
+        <Txt size={14} color={colors.clayBody} lineHeight={1.9}>
+          {insight.family}
+        </Txt>
+      </Card>
 
       {/* This week */}
       <Pressable onPress={() => router.push({ pathname: '/baby/[week]', params: { week } })}>

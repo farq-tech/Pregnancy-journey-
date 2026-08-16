@@ -12,6 +12,9 @@ const settings: Settings = {
   babyName: '',
   motherName: '',
   doctor: '',
+  heightCm: null,
+  prePregnancyWeightKg: null,
+  partnerName: '',
 };
 
 describe('recurring appointments', () => {

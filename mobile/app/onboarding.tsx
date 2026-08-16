@@ -30,6 +30,13 @@ export default function OnboardingScreen() {
   const [babyName, setBabyName] = useState(settings?.babyName ?? '');
   const [motherName, setMotherName] = useState(settings?.motherName ?? '');
   const [doctor, setDoctor] = useState(settings?.doctor ?? '');
+  const [partnerName, setPartnerName] = useState(settings?.partnerName ?? '');
+  const [height, setHeight] = useState(
+    settings?.heightCm != null ? String(settings.heightCm) : '',
+  );
+  const [preWeight, setPreWeight] = useState(
+    settings?.prePregnancyWeightKg != null ? String(settings.prePregnancyWeightKg) : '',
+  );
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -44,6 +51,24 @@ export default function OnboardingScreen() {
       return;
     }
 
+    // Both optional, but a value that is present has to be usable: the weight
+    // band is computed from them, and a typo would silently move the band.
+    const heightCm = height.trim() ? Number(height) : null;
+    if (heightCm !== null && (!Number.isFinite(heightCm) || heightCm < 120 || heightCm > 220)) {
+      setError('الطول يجب أن يكون بين 120 و220 سم، أو اتركيه فارغًا.');
+      return;
+    }
+    const prePregnancyWeightKg = preWeight.trim() ? Number(preWeight) : null;
+    if (
+      prePregnancyWeightKg !== null &&
+      (!Number.isFinite(prePregnancyWeightKg) ||
+        prePregnancyWeightKg < 30 ||
+        prePregnancyWeightKg > 250)
+    ) {
+      setError('الوزن قبل الحمل يجب أن يكون بين 30 و250 كغم، أو اتركيه فارغًا.');
+      return;
+    }
+
     setSaving(true);
     setError('');
     try {
@@ -55,6 +80,9 @@ export default function OnboardingScreen() {
         babyName: babyName.trim(),
         motherName: motherName.trim(),
         doctor: doctor.trim(),
+        heightCm,
+        prePregnancyWeightKg,
+        partnerName: partnerName.trim(),
       });
       router.replace('/(tabs)');
     } catch {
@@ -151,7 +179,53 @@ export default function OnboardingScreen() {
             />
           </Row>
 
-          <TextField label="الطبيب / العيادة — اختياري" value={doctor} onChange={setDoctor} />
+          <Row gap={10} align="flex-start">
+            <TextField
+              label="الطبيب / العيادة — اختياري"
+              value={doctor}
+              onChange={setDoctor}
+              style={{ flex: 1 }}
+            />
+            <TextField
+              label="اسم الشريك — اختياري"
+              value={partnerName}
+              onChange={setPartnerName}
+              style={{ flex: 1 }}
+            />
+          </Row>
+
+          <View
+            style={{
+              backgroundColor: colors.sageSoft,
+              borderRadius: 14,
+              padding: 14,
+              gap: 10,
+            }}
+          >
+            <Txt size={13} weight={600} color={colors.sageDark}>
+              لمتابعة الوزن — اختياري
+            </Txt>
+            <Row gap={10} align="flex-start">
+              <TextField
+                label="الطول (سم)"
+                value={height}
+                onChange={setHeight}
+                keyboardType="decimal-pad"
+                style={{ flex: 1 }}
+              />
+              <TextField
+                label="الوزن قبل الحمل (كغم)"
+                value={preWeight}
+                onChange={setPreWeight}
+                keyboardType="decimal-pad"
+                style={{ flex: 1 }}
+              />
+            </Row>
+            <Txt size={11.5} color={colors.muted} lineHeight={1.7}>
+              يُستخدمان لرسم نطاق زيادة الوزن المنشور (IOM/ACOG) لحمل بجنين واحد. بدونهما يبقى منحنى
+              وزنك متاحًا بلا نطاق — والنطاق المناسب لكِ يحدده طبيبك.
+            </Txt>
+          </View>
 
           {error ? (
             <View

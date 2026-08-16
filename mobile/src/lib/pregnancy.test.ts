@@ -25,6 +25,9 @@ const base: Settings = {
   babyName: '',
   motherName: '',
   doctor: '',
+  heightCm: null,
+  prePregnancyWeightKg: null,
+  partnerName: '',
 };
 
 const withLmp = (lmp: string, overrides: Partial<Settings> = {}): Settings => ({

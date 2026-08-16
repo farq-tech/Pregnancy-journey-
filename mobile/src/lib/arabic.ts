@@ -99,6 +99,16 @@ export function weeks(n: number): string {
   return pluralize(n, 'أسبوع واحد', 'أسبوعان', 'أسابيع', 'أسبوعًا');
 }
 
+/** `دقيقة واحدة` · `دقيقتان` · `5 دقائق` · `12 دقيقة` */
+export function minutes(n: number): string {
+  return pluralize(n, 'دقيقة واحدة', 'دقيقتان', 'دقائق', 'دقيقة');
+}
+
+/** `ثانية واحدة` · `ثانيتان` · `5 ثوانٍ` · `12 ثانية` */
+export function seconds(n: number): string {
+  return pluralize(n, 'ثانية واحدة', 'ثانيتان', 'ثوانٍ', 'ثانية');
+}
+
 const ONES = [
   '',
   'الأول',

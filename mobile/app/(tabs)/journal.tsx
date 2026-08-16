@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -13,6 +14,7 @@ import {
   SecondaryButton,
   TextField,
 } from '../../src/components/fields';
+import { ChevronIcon } from '../../src/components/icons';
 import { Card, Row } from '../../src/components/layout';
 import { formatDayMonth } from '../../src/lib/arabic';
 import { diffDays, fromIso } from '../../src/lib/dates';
@@ -23,8 +25,16 @@ import { MOODS, type JournalEntry } from '../../src/store/types';
 import { colors } from '../../src/theme';
 
 export default function JournalScreen() {
-  const { settings, journal, today, addJournalEntry, remove, attachmentsFor, deleteAttachment } =
-    useJourney();
+  const {
+    settings,
+    journal,
+    letters,
+    today,
+    addJournalEntry,
+    remove,
+    attachmentsFor,
+    deleteAttachment,
+  } = useJourney();
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const journey = useMemo(
@@ -59,6 +69,37 @@ export default function JournalScreen() {
           </Txt>
         </Pressable>
       </Row>
+
+      {/* Letters are memory-keeping too, and nobody would look for them under
+          a tab called "records". */}
+      <Pressable onPress={() => router.push('/letters')}>
+        {({ pressed }) => (
+          <Card
+            radius={20}
+            padding={0}
+            style={{
+              paddingVertical: 14,
+              paddingHorizontal: 18,
+              backgroundColor: pressed ? '#FCFBF7' : colors.surface,
+            }}
+          >
+            <Row gap={12}>
+              <Txt size={18}>💌</Txt>
+              <View style={{ flex: 1 }}>
+                <Txt size={14.5} weight={600}>
+                  رسائل لطفلك
+                </Txt>
+                <Txt size={12} color={colors.muted} lineHeight={1.6} style={{ marginTop: 1 }}>
+                  {letters.length
+                    ? `${letters.length} رسالة محفوظة — تُقرأ بعد سنوات`
+                    : 'كلمات من العائلة، تُقرأ بعد سنوات'}
+                </Txt>
+              </View>
+              <ChevronIcon size={18} color={colors.muted} direction="left" />
+            </Row>
+          </Card>
+        )}
+      </Pressable>
 
       {journal.length === 0 ? (
         <View
