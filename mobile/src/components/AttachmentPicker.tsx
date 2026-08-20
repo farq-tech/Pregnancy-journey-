@@ -1,7 +1,8 @@
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { Alert, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
+import { notify } from '../lib/alert';
 import { MAX_UPLOAD_BYTES, type PickedFile } from '../lib/storage';
 import { colors } from '../theme';
 import { Row } from './layout';
@@ -24,7 +25,7 @@ export function AttachmentPicker({
 }) {
   const add = (file: PickedFile) => {
     if (file.size && file.size > MAX_UPLOAD_BYTES) {
-      Alert.alert('الملف كبير', 'الحد الأقصى 20 ميغابايت للملف الواحد.');
+      notify('الملف كبير', 'الحد الأقصى 20 ميغابايت للملف الواحد.');
       return;
     }
     onChange([...files, file]);
@@ -35,7 +36,7 @@ export function AttachmentPicker({
     // block on a hard denial — the OS may still show a limited picker.
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted && !permission.canAskAgain) {
-      Alert.alert('لا يوجد إذن', 'اسمحي للتطبيق بالوصول إلى الصور من إعدادات الجهاز.');
+      notify('لا يوجد إذن', 'اسمحي للتطبيق بالوصول إلى الصور من إعدادات الجهاز.');
       return;
     }
 

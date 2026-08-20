@@ -10,6 +10,7 @@
  */
 
 import { File } from 'expo-file-system';
+import { Platform } from 'react-native';
 
 import { supabase } from './supabase';
 
@@ -71,6 +72,22 @@ function objectPath(userId: string, ownerType: AttachmentOwner, picked: PickedFi
 
 export class UploadError extends Error {}
 
+/**
+ * The picked file's bytes.
+ *
+ * On a device the picker hands back a `file://` path, which `expo-file-system`
+ * reads directly. In a browser it hands back a `blob:` URL that only `fetch`
+ * can resolve — and `expo-file-system`'s `File` has no web implementation, so
+ * asking it would throw on the first upload.
+ */
+async function readPickedFile(picked: PickedFile): Promise<ArrayBuffer> {
+  if (Platform.OS === 'web') {
+    const response = await fetch(picked.uri);
+    return await response.arrayBuffer();
+  }
+  return await new File(picked.uri).arrayBuffer();
+}
+
 /** Uploads one file and indexes it in `attachments`. */
 export async function uploadAttachment(
   userId: string,
@@ -82,8 +99,7 @@ export async function uploadAttachment(
     throw new UploadError('نوع الملف غير مدعوم — الصور و PDF فقط.');
   }
 
-  const file = new File(picked.uri);
-  const bytes = await file.arrayBuffer();
+  const bytes = await readPickedFile(picked);
 
   if (bytes.byteLength > MAX_UPLOAD_BYTES) {
     throw new UploadError('حجم الملف أكبر من 20 ميغابايت.');

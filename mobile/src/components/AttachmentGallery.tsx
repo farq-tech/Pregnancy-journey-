@@ -1,7 +1,8 @@
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
-import { Alert, Linking, Pressable, View } from 'react-native';
+import { Linking, Pressable, View } from 'react-native';
 
+import { confirmDestructive } from '../lib/alert';
 import { signedUrls, type Attachment } from '../lib/storage';
 import { colors } from '../theme';
 import { Row } from './layout';
@@ -133,8 +134,10 @@ export function AttachmentGallery({
 
 /** Medical files are not something to delete on a stray tap. */
 function confirmRemove(attachment: Attachment, onRemove: (a: Attachment) => void) {
-  Alert.alert('حذف المرفق؟', 'لا يمكن التراجع عن هذا الإجراء.', [
-    { text: 'إلغاء', style: 'cancel' },
-    { text: 'حذف', style: 'destructive', onPress: () => onRemove(attachment) },
-  ]);
+  confirmDestructive({
+    title: 'حذف المرفق؟',
+    message: 'لا يمكن التراجع عن هذا الإجراء.',
+    confirmLabel: 'حذف',
+    onConfirm: () => onRemove(attachment),
+  });
 }

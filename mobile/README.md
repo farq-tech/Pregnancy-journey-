@@ -32,6 +32,27 @@ it is on, the app shows an explicit error saying so rather than silently
 appearing empty. Every row and every uploaded file is scoped to `auth.uid()`, so
 anonymous auth is what gives each install its own private data.
 
+### Running it in a browser
+
+```bash
+npm run web                      # dev
+npx expo export --platform web   # static build into dist/
+```
+
+The web build is a real target, not a by-product, so the three native-only
+pieces have web stand-ins: the date picker becomes the browser's own date input
+(`src/components/DateControl.web.tsx`), `Alert` becomes the browser dialog
+(`src/lib/alert.ts` — React Native Web has no `Alert`), and uploads read the
+picked file with `fetch` instead of `expo-file-system`, which is native-only.
+Scheduled reminders are the one feature that genuinely is not there on the web:
+`src/lib/reminders.ts` turns into a no-op, the appointment and its reminder are
+still saved, nothing fires on the device.
+
+Deploying to Vercel needs no dashboard settings — the `vercel.json` at the
+repository root installs and builds inside `mobile/` and serves `mobile/dist`,
+with a rewrite so deep links land on the SPA. `mobile/.env` is read at build
+time, so the Supabase values ship with the bundle exactly as they do natively.
+
 ### Building a real iOS app
 
 ```bash

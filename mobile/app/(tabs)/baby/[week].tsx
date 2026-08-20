@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Linking, Pressable, View } from 'react-native';
+import { Linking, Pressable, View } from 'react-native';
 
 import { ArrowButton } from '../../../src/components/ArrowButton';
 import { Screen } from '../../../src/components/Screen';
@@ -23,6 +23,7 @@ import {
   weekContent,
 } from '../../../src/content/pregnancyData';
 import { questionsForWeek } from '../../../src/content/questions';
+import { notify } from '../../../src/lib/alert';
 import { formatDayMonth, weekOrdinalLabel } from '../../../src/lib/arabic';
 import { addDays, diffDays, fromIso } from '../../../src/lib/dates';
 import { joinMeta } from '../../../src/lib/labels';
@@ -290,7 +291,7 @@ export default function WeekScreen() {
                       // The link is user-supplied, so let the OS decide whether it
                       // is openable rather than assuming a browser will take it.
                       Linking.openURL(video.url).catch(() =>
-                        Alert.alert('تعذّر فتح الرابط', video.url),
+                        notify('تعذّر فتح الرابط', video.url),
                       );
                     }}
                   >

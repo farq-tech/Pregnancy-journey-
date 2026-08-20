@@ -1,4 +1,3 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useState } from 'react';
 import {
   Modal,
@@ -13,6 +12,7 @@ import {
 import { formatLong } from '../lib/arabic';
 import { fromIso, toIso, type IsoDate } from '../lib/dates';
 import { colors, fonts } from '../theme';
+import { DateControl } from './DateControl';
 import { Row } from './layout';
 import { Txt } from './Txt';
 
@@ -141,7 +141,7 @@ export function DateField({
     : placeholder;
 
   const picker = (
-    <DateTimePicker
+    <DateControl
       value={asDate()}
       mode={mode}
       display={Platform.OS === 'ios' ? 'spinner' : 'default'}

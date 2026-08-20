@@ -1,0 +1,6 @@
+{
+  "installCommand": "npm install --prefix mobile",
+  "buildCommand": "cd mobile && npx expo export --platform web",
+  "outputDirectory": "mobile/dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

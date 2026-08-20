@@ -24,20 +24,30 @@ const OFFSET_MINUTES: Record<Exclude<ReminderOffset, ''>, number> = {
 /** Appointments with no time set are assumed to be first thing in the morning. */
 const DEFAULT_HOUR = 9;
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+/**
+ * Scheduled local notifications are a native capability. In a web build every
+ * call below is a no-op: the appointment and its reminder are still saved and
+ * shown in the app, there is simply nothing to schedule on the device.
+ */
+const SUPPORTED = Platform.OS === 'ios' || Platform.OS === 'android';
+
+if (SUPPORTED) {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+}
 
 /**
  * Asks for notification permission. Returns false if it was refused, which is a
  * normal outcome — the reminder is still stored and shown in the app.
  */
 export async function ensureNotificationPermission(): Promise<boolean> {
+  if (!SUPPORTED) return false;
   const current = await Notifications.getPermissionsAsync();
   if (current.granted) return true;
   if (!current.canAskAgain) return false;
@@ -69,6 +79,7 @@ export function reminderDateFor(appointment: Appointment, now: Date = new Date()
 }
 
 export async function cancelReminder(appointmentId: string): Promise<void> {
+  if (!SUPPORTED) return;
   try {
     await Notifications.cancelScheduledNotificationAsync(identifierFor(appointmentId));
   } catch {
@@ -81,6 +92,7 @@ export async function cancelReminder(appointmentId: string): Promise<void> {
  * reschedules or cancels as needed. Safe to call after any change to it.
  */
 export async function syncReminder(appointment: Appointment): Promise<void> {
+  if (!SUPPORTED) return;
   await cancelReminder(appointment.id);
 
   const fireAt = reminderDateFor(appointment);
@@ -122,6 +134,7 @@ export async function syncReminder(appointment: Appointment): Promise<void> {
  * happens when she actually sets a reminder.
  */
 export async function rescheduleAll(appointments: Appointment[]): Promise<void> {
+  if (!SUPPORTED) return;
   const permission = await Notifications.getPermissionsAsync();
   if (!permission.granted) return;
 
