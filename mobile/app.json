@@ -16,12 +16,15 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "sa.farq.pregnancyjourney",
-      "buildNumber": "1",
+      "appleTeamId": "MH7J92HV9N",
+      "buildNumber": "2",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleDevelopmentRegion": "ar",
         "NSPhotoLibraryUsageDescription": "لإرفاق صور السونار والتقارير وصور اليوميات بملف الحمل.",
-        "NSPhotoLibraryAddUsageDescription": "لحفظ صور رحلة الحمل في مكتبة الصور."
+        "NSPhotoLibraryAddUsageDescription": "لحفظ صور رحلة الحمل في مكتبة الصور.",
+        "NSCameraUsageDescription": "لالتقاط صور السونار والتقارير وصور اليوميات وإرفاقها بملف الحمل.",
+        "NSMicrophoneUsageDescription": "لتسجيل فيديو قصير لرحلة الحمل عند الحاجة."
       }
     },
     "android": {

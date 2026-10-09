@@ -1,3 +1,6 @@
+import * as Print from 'expo-print';
+import { router } from 'expo-router';
+import * as Sharing from 'expo-sharing';
 import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -6,6 +9,7 @@ import { AttachmentPicker } from '../../src/components/AttachmentPicker';
 import { Screen } from '../../src/components/Screen';
 import { Sheet } from '../../src/components/Sheet';
 import { Txt } from '../../src/components/Txt';
+import { WeekChart } from '../../src/components/WeekChart';
 import {
   DateField,
   ErrorText,
@@ -16,8 +20,15 @@ import {
 } from '../../src/components/fields';
 import { Card, Chip, Row } from '../../src/components/layout';
 import { TESTS } from '../../src/content/pregnancyData';
+import {
+  diastolicSeries,
+  fundalSeries,
+  systolicSeries,
+  weightSeries,
+} from '../../src/lib/antenatal';
 import { formatDayMonth } from '../../src/lib/arabic';
 import { diffDays, fromIso } from '../../src/lib/dates';
+import { pregnancyFileHtml } from '../../src/lib/pregnancyFile';
 import { clampWeek, computeJourney } from '../../src/lib/pregnancy';
 import type { PickedFile } from '../../src/lib/storage';
 import { useJourney } from '../../src/store/JourneyProvider';
@@ -40,6 +51,8 @@ export default function RecordsScreen() {
     settings,
     records,
     tests,
+    journal,
+    appointments,
     today,
     addRecord,
     remove,
@@ -48,15 +61,65 @@ export default function RecordsScreen() {
     setTestStatus,
   } = useJourney();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
 
   const journey = useMemo(
     () => (settings ? computeJourney(settings, fromIso(today)) : null),
     [settings, today],
   );
 
-  if (!journey) return null;
+  const weights = useMemo(
+    () => (journey ? weightSeries(journal, journey.effectiveLmp) : []),
+    [journal, journey],
+  );
+  const systolic = useMemo(
+    () => (journey ? systolicSeries(journal, journey.effectiveLmp) : []),
+    [journal, journey],
+  );
+  const diastolic = useMemo(
+    () => (journey ? diastolicSeries(journal, journey.effectiveLmp) : []),
+    [journal, journey],
+  );
+  const fundal = useMemo(
+    () => (journey ? fundalSeries(journal, journey.effectiveLmp) : []),
+    [journal, journey],
+  );
+
+  if (!journey || !settings) return null;
 
   const currentWeek = clampWeek(journey.week);
+
+  const exportPdf = async () => {
+    setExporting(true);
+    setExportError('');
+    try {
+      const html = pregnancyFileHtml({
+        motherName: settings.motherName,
+        babyName: settings.babyName,
+        doctor: settings.doctor,
+        journey,
+        appointments,
+        records,
+        journal,
+        tests,
+      });
+      const printed = await Print.printToFileAsync({ html });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(printed.uri, {
+          mimeType: 'application/pdf',
+          UTI: 'com.adobe.pdf',
+          dialogTitle: 'ملف الحمل',
+        });
+      } else {
+        await Print.printAsync({ html });
+      }
+    } catch {
+      setExportError('تعذّر تصدير الملف — حاولي مرة أخرى.');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <Screen>

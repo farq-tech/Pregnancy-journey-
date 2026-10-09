@@ -47,6 +47,12 @@ export type JournalEntry = {
   symptoms: string;
   /** Kilograms, or null when not recorded. */
   weight: number | null;
+  /** Systolic mmHg, or null when not recorded. */
+  bpSystolic: number | null;
+  /** Diastolic mmHg, or null when not recorded. */
+  bpDiastolic: number | null;
+  /** Fundal height in centimetres, or null when not recorded. */
+  fundalHeightCm: number | null;
 };
 
 export type MedicalRecord = {

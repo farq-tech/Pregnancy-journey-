@@ -145,8 +145,11 @@ export type Database = {
       journal_entries: {
         Row: {
           body: string;
+          bp_diastolic: number | null;
+          bp_systolic: number | null;
           created_at: string;
           date: string;
+          fundal_height_cm: number | null;
           id: string;
           mood: string;
           symptoms: string;
@@ -155,8 +158,11 @@ export type Database = {
         };
         Insert: {
           body?: string;
+          bp_diastolic?: number | null;
+          bp_systolic?: number | null;
           created_at?: string;
           date: string;
+          fundal_height_cm?: number | null;
           id?: string;
           mood?: string;
           symptoms?: string;
@@ -165,8 +171,11 @@ export type Database = {
         };
         Update: {
           body?: string;
+          bp_diastolic?: number | null;
+          bp_systolic?: number | null;
           created_at?: string;
           date?: string;
+          fundal_height_cm?: number | null;
           id?: string;
           mood?: string;
           symptoms?: string;

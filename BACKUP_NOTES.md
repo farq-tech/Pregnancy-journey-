@@ -1,0 +1,152 @@
+# نسخة احتياطية — Pregnancy-journey-
+
+- المسار الأصلي على الجهاز: `/Users/m4pro/Pregnancy-journey-`
+- الفرع الأصلي: `claude/app-deployment-9lkzus`
+- آخر commit مرفوع تحته: 25a1160 Add react-native-web and Vercel config for web deployment
+- تاريخ النسخ: 2026-10-09 (تنظيف الجهاز)
+
+## commits كانت محلية بس (0)
+لا يوجد
+
+## ملفات معدّلة/جديدة ما كانت محفوظة (137)
+```
+M	mobile/app.json
+M	mobile/app/(tabs)/journal.tsx
+M	mobile/app/(tabs)/records.tsx
+M	mobile/assets/android-icon-foreground.png
+M	mobile/assets/icon.png
+M	mobile/assets/splash-icon.png
+A	mobile/build/PregnancyJourney.xcarchive/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/AppIcon60x60@2x.png
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/AppIcon76x76@2x~ipad.png
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Assets.car
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/EXConstants.bundle/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/EXConstants.bundle/app.config
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Expo.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/ExpoApplication_privacy.bundle/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/ExpoApplication_privacy.bundle/PrivacyInfo.xcprivacy
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/ExpoConstants_privacy.bundle/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/ExpoConstants_privacy.bundle/PrivacyInfo.xcprivacy
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/ExpoFileSystem_privacy.bundle/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/ExpoLocalization_privacy.bundle/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/ExpoLocalization_privacy.bundle/PrivacyInfo.xcprivacy
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/ExpoNotifications_privacy.bundle/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/ExpoNotifications_privacy.bundle/PrivacyInfo.xcprivacy
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/ExpoSystemUI_privacy.bundle/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/ExpoSystemUI_privacy.bundle/PrivacyInfo.xcprivacy
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoFileSystem.framework/ExpoFileSystem
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoFileSystem.framework/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoFileSystem.framework/_CodeSignature/CodeResources
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoFont.framework/ExpoFont
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoFont.framework/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoFont.framework/_CodeSignature/CodeResources
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoImage.framework/ExpoImage
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoImage.framework/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoImage.framework/_CodeSignature/CodeResources
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoModulesCore.framework/ExpoModulesCore
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoModulesCore.framework/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoModulesCore.framework/_CodeSignature/CodeResources
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoModulesJSI.framework/ExpoModulesJSI
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoModulesJSI.framework/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoModulesJSI.framework/_CodeSignature/CodeResources
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoModulesWorklets.framework/ExpoModulesWorklets
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoModulesWorklets.framework/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ExpoModulesWorklets.framework/_CodeSignature/CodeResources
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/React.framework/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/React.framework/React
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/React.framework/_CodeSignature/CodeResources
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ReactNativeDependencies.framework/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_boost.bundle/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_boost.bundle/PrivacyInfo.xcprivacy
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_folly.bundle/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_folly.bundle/PrivacyInfo.xcprivacy
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_glog.bundle/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_glog.bundle/PrivacyInfo.xcprivacy
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/ReactNativeDependencies.framework/_CodeSignature/CodeResources
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/SDWebImage.framework/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/SDWebImage.framework/SDWebImage
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/SDWebImage.framework/_CodeSignature/CodeResources
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/SDWebImageAVIFCoder.framework/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/SDWebImageAVIFCoder.framework/SDWebImageAVIFCoder
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/SDWebImageAVIFCoder.framework/_CodeSignature/CodeResources
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/SDWebImageSVGCoder.framework/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/SDWebImageSVGCoder.framework/SDWebImageSVGCoder
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/SDWebImageSVGCoder.framework/_CodeSignature/CodeResources
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/SDWebImageWebPCoder.framework/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/SDWebImageWebPCoder.framework/SDWebImageWebPCoder
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/SDWebImageWebPCoder.framework/_CodeSignature/CodeResources
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/hermesvm.framework/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/hermesvm.framework/_CodeSignature/CodeResources
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/hermesvm.framework/hermesvm
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/libavif.framework/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/libavif.framework/_CodeSignature/CodeResources
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Frameworks/libavif.framework/libavif
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/PkgInfo
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/PrivacyInfo.xcprivacy
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/RNCAsyncStorage_resources.bundle/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/RNCAsyncStorage_resources.bundle/PrivacyInfo.xcprivacy
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/RNSVGFilters.bundle/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/RNSVGFilters.bundle/RNSVGArithmeticFilter.iphoneos.metallib
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/RNSVGFilters.bundle/RNSVGCompositeXor.iphoneos.metallib
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/React-Core_privacy.bundle/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/React-Core_privacy.bundle/PrivacyInfo.xcprivacy
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/React-cxxreact_privacy.bundle/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/React-cxxreact_privacy.bundle/PrivacyInfo.xcprivacy
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/React-timing_privacy.bundle/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/React-timing_privacy.bundle/PrivacyInfo.xcprivacy
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/SplashScreen.storyboardc/EXPO-VIEWCONTROLLER-1-view-EXPO-ContainerView.nib
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/SplashScreen.storyboardc/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/SplashScreen.storyboardc/SplashScreenViewController.nib
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/_CodeSignature/CodeResources
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/main.jsbundle
+A	mobile/build/PregnancyJourney.xcarchive/Products/Applications/rhlhalhml.app/rhlhalhml
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoFileSystem.framework.dSYM/Contents/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoFileSystem.framework.dSYM/Contents/Resources/D5125F60-E6E4-3200-B818-0B91781F1A51.plist
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoFileSystem.framework.dSYM/Contents/Resources/DWARF/ExpoFileSystem
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoFileSystem.framework.dSYM/Contents/Resources/Relocations/aarch64/ExpoFileSystem.yml
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoFont.framework.dSYM/Contents/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoFont.framework.dSYM/Contents/Resources/154A708D-4C97-3216-AD93-9830609DBC29.plist
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoFont.framework.dSYM/Contents/Resources/DWARF/ExpoFont
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoFont.framework.dSYM/Contents/Resources/Relocations/aarch64/ExpoFont.yml
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoModulesCore.framework.dSYM/Contents/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoModulesCore.framework.dSYM/Contents/Resources/CFFF0ACD-9CD8-37A3-8127-F128196D16F2.plist
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoModulesCore.framework.dSYM/Contents/Resources/DWARF/ExpoModulesCore
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoModulesCore.framework.dSYM/Contents/Resources/Relocations/aarch64/ExpoModulesCore.yml
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoModulesJSI.framework.dSYM/Contents/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoModulesJSI.framework.dSYM/Contents/Resources/DWARF/ExpoModulesJSI
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoModulesJSI.framework.dSYM/Contents/Resources/Relocations/aarch64/ExpoModulesJSI.yml
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoModulesWorklets.framework.dSYM/Contents/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoModulesWorklets.framework.dSYM/Contents/Resources/DWARF/ExpoModulesWorklets
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoModulesWorklets.framework.dSYM/Contents/Resources/EA3AF269-9DC7-3041-BFF9-0BD60D1DA3B2.plist
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/ExpoModulesWorklets.framework.dSYM/Contents/Resources/Relocations/aarch64/ExpoModulesWorklets.yml
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/libavif.framework.dSYM/Contents/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/libavif.framework.dSYM/Contents/Resources/DWARF/libavif
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/libavif.framework.dSYM/Contents/Resources/Relocations/aarch64/libavif.yml
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/rhlhalhml.app.dSYM/Contents/Info.plist
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/rhlhalhml.app.dSYM/Contents/Resources/Relocations/aarch64/rhlhalhml.yml
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/rhlhalhml.app.dSYM/Contents/Resources/Swift/aarch64/ExpoFileSystem.swiftinterface
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/rhlhalhml.app.dSYM/Contents/Resources/Swift/aarch64/ExpoFont.swiftinterface
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/rhlhalhml.app.dSYM/Contents/Resources/Swift/aarch64/ExpoImage.swiftinterface
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/rhlhalhml.app.dSYM/Contents/Resources/Swift/aarch64/ExpoModulesCore.swiftinterface
+A	mobile/build/PregnancyJourney.xcarchive/dSYMs/rhlhalhml.app.dSYM/Contents/Resources/Swift/aarch64/ExpoModulesWorklets.swiftinterface
+A	mobile/build/export/DistributionSummary.plist
+A	mobile/build/export/ExportOptions.plist
+M	mobile/package.json
+A	mobile/src/components/HomeWidgetCard.tsx
+A	mobile/src/components/WeekChart.tsx
+A	mobile/src/lib/antenatal.ts
+A	mobile/src/lib/contractions.ts
+M	mobile/src/lib/database.types.ts
+A	mobile/src/lib/memories.ts
+A	mobile/src/lib/persistWidget.ts
+A	mobile/src/lib/pregnancyFile.ts
+A	mobile/src/lib/visitSchedule.ts
+A	mobile/src/lib/widgetGlance.ts
+M	mobile/src/store/JourneyProvider.tsx
+M	mobile/src/store/types.ts
+A	supabase/migrations/20260814183900_antenatal_vitals.sql
+```
+
+استُبعد: zip/log/فيديو/صوت، .env والمفاتيح، node_modules/.venv/dist، والملفات فوق 20MB.

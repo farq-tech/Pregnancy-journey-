@@ -76,7 +76,7 @@ export default function JournalScreen() {
             &quot;اليوم أشعر…&quot;
           </Txt>
           <Txt size={13} color={colors.faint} align="center" lineHeight={1.7} style={{ marginTop: 6 }}>
-            {'دوّني مشاعرك وأعراضك ووزنك\nلتصبح ذكريات الرحلة'}
+            {'دوّني مشاعرك ووزنك وضغطك وارتفاع الرحم\nلتصبح ذكريات الرحلة ورسمًا لمتابعة العيادة'}
           </Txt>
         </View>
       ) : (
@@ -127,8 +127,11 @@ export default function JournalScreen() {
                   </Txt>
                 ) : null}
 
-                {entry.symptoms || entry.weight != null ? (
-                  <Row gap={12} style={{ marginTop: 8 }}>
+                {entry.symptoms ||
+                entry.weight != null ||
+                entry.bpSystolic != null ||
+                entry.fundalHeightCm != null ? (
+                  <Row wrap gap={12} style={{ marginTop: 8 }}>
                     {entry.symptoms ? (
                       <Txt size={12} color={colors.faint}>
                         {`أعراض: ${entry.symptoms}`}
@@ -137,6 +140,16 @@ export default function JournalScreen() {
                     {entry.weight != null ? (
                       <Txt size={12} color={colors.faint}>
                         {`الوزن: ${entry.weight} كغم`}
+                      </Txt>
+                    ) : null}
+                    {entry.bpSystolic != null && entry.bpDiastolic != null ? (
+                      <Txt size={12} color={colors.faint}>
+                        {`الضغط: ${entry.bpSystolic}/${entry.bpDiastolic}`}
+                      </Txt>
+                    ) : null}
+                    {entry.fundalHeightCm != null ? (
+                      <Txt size={12} color={colors.faint}>
+                        {`ارتفاع الرحم: ${entry.fundalHeightCm} سم`}
                       </Txt>
                     ) : null}
                   </Row>
@@ -178,27 +191,65 @@ function JournalSheet({
   const [text, setText] = useState('');
   const [symptoms, setSymptoms] = useState('');
   const [weight, setWeight] = useState('');
+  const [systolic, setSystolic] = useState('');
+  const [diastolic, setDiastolic] = useState('');
+  const [fundal, setFundal] = useState('');
   const [files, setFiles] = useState<PickedFile[]>([]);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
   const submit = async () => {
-    if (!text.trim() && !mood) {
-      setError('اكتبي شيئًا أو اختاري مزاج اليوم.');
+    const parsedWeight = parsePositive(weight);
+    const parsedSys = parseIntField(systolic);
+    const parsedDia = parseIntField(diastolic);
+    const parsedFundal = parsePositive(fundal);
+
+    if (parsedWeight === 'invalid') {
+      setError('الوزن يجب أن يكون رقمًا أكبر من صفر.');
       return;
     }
-    const parsedWeight = weight.trim() ? Number(weight) : null;
-    if (parsedWeight !== null && (Number.isNaN(parsedWeight) || parsedWeight <= 0)) {
-      setError('الوزن يجب أن يكون رقمًا صحيحًا.');
+    if (parsedSys === 'invalid' || parsedDia === 'invalid') {
+      setError('الضغط يُكتب رقمين: الانقباضي ثم الانبساطي.');
+      return;
+    }
+    if ((parsedSys == null) !== (parsedDia == null)) {
+      setError('أدخلي الرقمين معًا، مثل 110 و70.');
+      return;
+    }
+    if (parsedSys != null && (parsedSys < 50 || parsedSys > 250 || parsedDia! < 30 || parsedDia! > 150 || parsedSys <= parsedDia!)) {
+      setError('تحقّقي من رقمي الضغط — الانقباضي أكبر من الانبساطي.');
+      return;
+    }
+    if (parsedFundal === 'invalid' || (parsedFundal != null && (parsedFundal < 10 || parsedFundal > 50))) {
+      setError('ارتفاع الرحم يُسجَّل بالسنتيمتر، عادة بين 10 و50.');
+      return;
+    }
+    if (!text.trim() && !mood && parsedWeight == null && parsedSys == null && parsedFundal == null) {
+      setError('اكتبي شيئًا، أو اختاري مزاجًا، أو سجّلي وزنًا أو ضغطًا أو ارتفاع الرحم.');
       return;
     }
     setSaving(true);
     try {
-      await onSave({ date, mood, text: text.trim(), symptoms, weight: parsedWeight }, files);
+      await onSave(
+        {
+          date,
+          mood,
+          text: text.trim(),
+          symptoms,
+          weight: parsedWeight,
+          bpSystolic: parsedSys,
+          bpDiastolic: parsedDia,
+          fundalHeightCm: parsedFundal,
+        },
+        files,
+      );
       setMood('');
       setText('');
       setSymptoms('');
       setWeight('');
+      setSystolic('');
+      setDiastolic('');
+      setFundal('');
       setFiles([]);
       setError('');
       onClose();
@@ -259,6 +310,32 @@ function JournalSheet({
           style={{ flex: 1 }}
         />
       </Row>
+      <Row gap={10} align="flex-start">
+        <TextField
+          value={systolic}
+          onChange={setSystolic}
+          placeholder="الضغط الأعلى"
+          keyboardType="number-pad"
+          size={14.5}
+          style={{ flex: 1 }}
+        />
+        <TextField
+          value={diastolic}
+          onChange={setDiastolic}
+          placeholder="الضغط الأدنى"
+          keyboardType="number-pad"
+          size={14.5}
+          style={{ flex: 1 }}
+        />
+        <TextField
+          value={fundal}
+          onChange={setFundal}
+          placeholder="ارتفاع الرحم سم"
+          keyboardType="decimal-pad"
+          size={14.5}
+          style={{ flex: 1 }}
+        />
+      </Row>
       <AttachmentPicker files={files} onChange={setFiles} label="صورة اليوم" />
       {error ? <ErrorText>{error}</ErrorText> : null}
       <Row gap={10}>
@@ -267,4 +344,16 @@ function JournalSheet({
       </Row>
     </Sheet>
   );
+}
+
+function parsePositive(raw: string): number | null | 'invalid' {
+  if (!raw.trim()) return null;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : 'invalid';
+}
+
+function parseIntField(raw: string): number | null | 'invalid' {
+  if (!raw.trim()) return null;
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n : 'invalid';
 }

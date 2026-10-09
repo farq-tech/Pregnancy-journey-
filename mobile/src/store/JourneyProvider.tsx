@@ -11,9 +11,11 @@ import {
 } from 'react';
 import { AppState } from 'react-native';
 
-import { isoToday, type IsoDate } from '../lib/dates';
+import { fromIso, isoToday, type IsoDate } from '../lib/dates';
+import { persistWidgetGlance } from '../lib/persistWidget';
 import { cancelReminder, rescheduleAll, syncReminder } from '../lib/reminders';
-import { DEFAULT_CYCLE_LENGTH, type Settings } from '../lib/pregnancy';
+import { DEFAULT_CYCLE_LENGTH, computeJourney, type Settings } from '../lib/pregnancy';
+import { buildWidgetGlance } from '../lib/widgetGlance';
 import { recurringDates } from '../lib/recurrence';
 import {
   removeAttachment,
@@ -74,6 +76,8 @@ type JourneyValue = Snapshot & {
     input: Omit<Appointment, 'id' | 'done'>,
     files?: PickedFile[],
   ) => Promise<void>;
+  /** Seeds several visits in one write so the cache cannot race between them. */
+  addAppointments: (inputs: Omit<Appointment, 'id' | 'done'>[]) => Promise<void>;
   toggleAppointment: (id: string) => Promise<void>;
   addJournalEntry: (input: Omit<JournalEntry, 'id'>, files?: PickedFile[]) => Promise<void>;
   addRecord: (input: Omit<MedicalRecord, 'id'>, files?: PickedFile[]) => Promise<void>;
@@ -150,6 +154,9 @@ const toJournalEntry = (row: {
   body: string;
   symptoms: string;
   weight_kg: number | null;
+  bp_systolic?: number | null;
+  bp_diastolic?: number | null;
+  fundal_height_cm?: number | null;
 }): JournalEntry => ({
   id: row.id,
   date: row.date,
@@ -157,7 +164,20 @@ const toJournalEntry = (row: {
   text: row.body,
   symptoms: row.symptoms,
   weight: row.weight_kg,
+  bpSystolic: row.bp_systolic ?? null,
+  bpDiastolic: row.bp_diastolic ?? null,
+  fundalHeightCm: row.fundal_height_cm == null ? null : Number(row.fundal_height_cm),
 });
+
+/** Older device caches predate blood pressure / fundal height. */
+function hydrateJournal(entries: JournalEntry[] | undefined): JournalEntry[] {
+  return (entries ?? []).map((entry) => ({
+    ...entry,
+    bpSystolic: entry.bpSystolic ?? null,
+    bpDiastolic: entry.bpDiastolic ?? null,
+    fundalHeightCm: entry.fundalHeightCm ?? null,
+  }));
+}
 
 const toRecord = (row: {
   id: string;
@@ -301,7 +321,8 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
         if (raw && !cancelled) {
           // Merge over EMPTY so a cache written by an older build, before these
           // fields existed, still hydrates instead of yielding undefined lists.
-          setSnapshot({ ...EMPTY, ...(JSON.parse(raw) as Partial<Snapshot>) });
+          const parsed = JSON.parse(raw) as Partial<Snapshot>;
+          setSnapshot({ ...EMPTY, ...parsed, journal: hydrateJournal(parsed.journal) });
         }
       } catch {
         // Corrupt cache: fall through to the server fetch.
@@ -325,6 +346,12 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
     void rescheduleAll(snapshot.appointments);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, appointmentsSignature]);
+
+  useEffect(() => {
+    if (loading || !snapshot.settings) return;
+    const journey = computeJourney(snapshot.settings, fromIso(today));
+    void persistWidgetGlance(buildWidgetGlance(journey, snapshot.appointments));
+  }, [loading, snapshot.settings, snapshot.appointments, today]);
 
   // Roll the app over at midnight, and re-check whenever it returns to the
   // foreground — a phone left open overnight must not still say "yesterday".
@@ -472,6 +499,41 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
     [cache, requireUser, snapshot, uploadFor],
   );
 
+  const addAppointments = useCallback(
+    async (inputs: Omit<Appointment, 'id' | 'done'>[]) => {
+      if (!inputs.length) return;
+      const id = await requireUser();
+      const { data, error } = await supabase
+        .from('appointments')
+        .insert(
+          inputs.map((input) => ({
+            user_id: id,
+            title: input.title,
+            type: input.type,
+            date: input.date,
+            time: input.time || null,
+            location: input.location,
+            doctor: input.doctor,
+            notes: input.notes,
+            reminder: input.reminder,
+            recurrence: input.recurrence || null,
+          })),
+        )
+        .select();
+      if (error) throw error;
+
+      const created = (data ?? []).map(toAppointment);
+      for (const appointment of created) await syncReminder(appointment);
+      cache({
+        ...snapshot,
+        appointments: [...snapshot.appointments, ...created].sort((a, b) =>
+          (a.date + a.time).localeCompare(b.date + b.time),
+        ),
+      });
+    },
+    [cache, requireUser, snapshot],
+  );
+
   const toggleAppointment = useCallback(
     async (id: string) => {
       const current = snapshot.appointments.find((a) => a.id === id);
@@ -507,6 +569,9 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
           body: input.text,
           symptoms: input.symptoms,
           weight_kg: input.weight,
+          bp_systolic: input.bpSystolic,
+          bp_diastolic: input.bpDiastolic,
+          fundal_height_cm: input.fundalHeightCm,
         })
         .select()
         .single();
@@ -695,6 +760,7 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
       dismissEddBanner: () => setEddBanner(false),
       saveSettings,
       addAppointment,
+      addAppointments,
       toggleAppointment,
       addJournalEntry,
       addRecord,
@@ -713,6 +779,7 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
       eddBanner,
       saveSettings,
       addAppointment,
+      addAppointments,
       toggleAppointment,
       addJournalEntry,
       addRecord,
