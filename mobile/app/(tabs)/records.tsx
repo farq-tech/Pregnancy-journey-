@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 
 import { AttachmentGallery } from '../../src/components/AttachmentGallery';
 import { AttachmentPicker } from '../../src/components/AttachmentPicker';
@@ -16,24 +16,22 @@ import {
 } from '../../src/components/fields';
 import { Card, Chip, Row } from '../../src/components/layout';
 import { TESTS } from '../../src/content/pregnancyData';
+import { useI18n } from '../../src/i18n/LocaleProvider';
 import { formatDayMonth } from '../../src/lib/arabic';
 import { diffDays, fromIso } from '../../src/lib/dates';
 import { clampWeek, computeJourney } from '../../src/lib/pregnancy';
 import type { PickedFile } from '../../src/lib/storage';
 import { useJourney } from '../../src/store/JourneyProvider';
 import {
-  RECORD_TYPE_LABELS,
-  TEST_STATUS_LABELS,
+  RECORD_TYPES,
+  TEST_STATUSES,
+  recordTypeLabel,
+  testStatusLabel,
   type MedicalRecord,
   type RecordType,
   type TestStatus,
 } from '../../src/store/types';
 import { colors } from '../../src/theme';
-
-const TYPE_OPTIONS = (Object.keys(RECORD_TYPE_LABELS) as RecordType[]).map((value) => ({
-  value,
-  label: RECORD_TYPE_LABELS[value],
-}));
 
 export default function RecordsScreen() {
   const {
@@ -47,7 +45,14 @@ export default function RecordsScreen() {
     deleteAttachment,
     setTestStatus,
   } = useJourney();
+  const { t } = useI18n();
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  const confirmDelete = (id: string) =>
+    Alert.alert(t('rec.deleteTitle'), t('rec.deleteMsg'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.delete'), style: 'destructive', onPress: () => void remove('records', id) },
+    ]);
 
   const journey = useMemo(
     () => (settings ? computeJourney(settings, fromIso(today)) : null),
@@ -63,14 +68,16 @@ export default function RecordsScreen() {
       <Row justify="space-between">
         <View style={{ flex: 1 }}>
           <Txt size={20} weight={600}>
-            ملف الحمل
+            {t('records.title')}
           </Txt>
           <Txt size={12.5} color={colors.muted}>
-            التحاليل والسونار والتقارير
+            {t('records.subtitle')}
           </Txt>
         </View>
         <Pressable
           onPress={() => setSheetOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('records.add')}
           style={({ pressed }) => ({
             backgroundColor: pressed ? colors.sageDark : colors.sage,
             borderRadius: 999,
@@ -79,7 +86,7 @@ export default function RecordsScreen() {
           })}
         >
           <Txt size={13.5} weight={600} color={colors.surface}>
-            + إضافة
+            {t('records.add')}
           </Txt>
         </Pressable>
       </Row>
@@ -97,17 +104,17 @@ export default function RecordsScreen() {
           }}
         >
           <Txt size={15} weight={600} color={colors.muted} align="center">
-            لا ملفات بعد
+            {t('records.empty')}
           </Txt>
-          <Txt size={13} color={colors.faint} align="center" lineHeight={1.7} style={{ marginTop: 6 }}>
-            أضيفي تحاليل الدم وتقارير السونار والوصفات — كل ملف يُربط بأسبوع الحمل تلقائيًا. إذا
-            حدّد السونار موعد ولادة جديدًا، يُعاد بناء التقويم.
+          <Txt size={13} color={colors.muted} align="center" lineHeight={1.7} style={{ marginTop: 6 }}>
+            {t('rec.emptyHint')}
           </Txt>
         </View>
       ) : (
         <View style={{ gap: 10 }}>
           {records.map((record) => {
             const gestationalDay = diffDays(fromIso(record.date), journey.effectiveLmp);
+            const recordWeek = Math.floor(gestationalDay / 7) + 1;
             return (
               <Card
                 key={record.id}
@@ -119,16 +126,21 @@ export default function RecordsScreen() {
                   <Row gap={8}>
                     <Chip>
                       <Txt size={11.5} weight={600} color={colors.sageDark}>
-                        {RECORD_TYPE_LABELS[record.type]}
+                        {recordTypeLabel(record.type)}
                       </Txt>
                     </Chip>
-                    <Txt size={12} color={colors.faint}>
-                      {`${formatDayMonth(fromIso(record.date))} · الأسبوع ${Math.floor(gestationalDay / 7) + 1}`}
+                    <Txt size={12} color={colors.muted}>
+                      {recordWeek >= 1
+                        ? `${formatDayMonth(fromIso(record.date))} · ${t('rec.weekN', { n: recordWeek })}`
+                        : formatDayMonth(fromIso(record.date))}
                     </Txt>
                   </Row>
                   <Pressable
-                    onPress={() => void remove('records', record.id)}
-                    accessibilityLabel="حذف الملف"
+                    onPress={() => confirmDelete(record.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('rec.deleteLabel')}
+                    hitSlop={12}
+                    style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Txt size={15} color={colors.clayDelete}>
                       ×
@@ -152,23 +164,23 @@ export default function RecordsScreen() {
                       <Txt size={12} color={colors.sage}>{`CRL: ${record.crl}`}</Txt>
                     ) : null}
                     {record.fhr ? (
-                      <Txt size={12} color={colors.sage}>{`نبض: ${record.fhr}`}</Txt>
+                      <Txt size={12} color={colors.sage}>{t('rec.fhr', { v: record.fhr })}</Txt>
                     ) : null}
                     {record.scanGaDays != null ? (
                       <Txt size={12} color={colors.sage}>
-                        {`عمر الحمل بالسونار: ${Math.floor(record.scanGaDays / 7)}و${record.scanGaDays % 7}ي`}
+                        {t('rec.scanGa', { w: Math.floor(record.scanGaDays / 7), d: record.scanGaDays % 7 })}
                       </Txt>
                     ) : null}
                     {record.newEdd ? (
                       <Txt size={12} color={colors.clayText}>
-                        {`EDD جديد: ${formatDayMonth(fromIso(record.newEdd))}`}
+                        {t('rec.newEdd', { v: formatDayMonth(fromIso(record.newEdd)) })}
                       </Txt>
                     ) : null}
                   </Row>
                 ) : null}
 
                 {record.notes ? (
-                  <Txt size={12.5} color={colors.faint} lineHeight={1.7} style={{ marginTop: 6 }}>
+                  <Txt size={12.5} color={colors.muted} lineHeight={1.7} style={{ marginTop: 6 }}>
                     {record.notes}
                   </Txt>
                 ) : null}
@@ -184,24 +196,23 @@ export default function RecordsScreen() {
       )}
 
       <Txt size={15} weight={600} style={{ marginTop: 4 }}>
-        فحوصات الحمل 🧪
+        {t('records.tests')}
       </Txt>
-      <Txt size={12} color={colors.faint} lineHeight={1.7} style={{ marginTop: -8 }}>
-        توقيتات معتادة للاسترشاد فقط — تختلف بحسب البلد والطبيب والحالة، وليست توصية شخصية.
+      <Txt size={12} color={colors.muted} lineHeight={1.7} style={{ marginTop: -8 }}>
+        {t('rec.testsNote')}
       </Txt>
 
       <Card style={{ paddingVertical: 18, paddingHorizontal: 20, gap: 16 }}>
         {TESTS.map((test) => {
           // The catalogue window is advisory. Her own status, when she has set
           // one, always takes precedence over where the calendar happens to be.
-          const timing =
-            currentWeek > test.to
-              ? 'مرّت الفترة المعتادة'
-              : currentWeek >= test.from
-                ? 'الفترة الحالية'
-                : 'قادم';
-          const isCurrent = timing === 'الفترة الحالية';
-          const tracked = tests.find((t) => t.testId === test.id);
+          const isCurrent = currentWeek >= test.from && currentWeek <= test.to;
+          const timing = isCurrent
+            ? t('rec.timingNow')
+            : currentWeek > test.to
+              ? t('rec.timingPast')
+              : t('rec.timingSoon');
+          const tracked = tests.find((x) => x.testId === test.id);
 
           return (
             <View key={test.id} style={{ gap: 8 }}>
@@ -213,8 +224,8 @@ export default function RecordsScreen() {
                   <Txt size={12} color={colors.muted} lineHeight={1.7} style={{ marginTop: 2 }}>
                     {test.why}
                   </Txt>
-                  <Txt size={11.5} color={colors.faint} style={{ marginTop: 2 }}>
-                    {`الأسبوع ${test.from}–${test.to}`}
+                  <Txt size={11.5} color={colors.muted} style={{ marginTop: 2 }}>
+                    {t('rec.weekRange', { from: test.from, to: test.to })}
                   </Txt>
                 </View>
                 <Chip bg={isCurrent ? colors.sageSoft : colors.surfaceWarm} style={{ marginTop: 2 }}>
@@ -225,13 +236,18 @@ export default function RecordsScreen() {
               </Row>
 
               <Row wrap gap={6}>
-                {(Object.keys(TEST_STATUS_LABELS) as TestStatus[]).map((status) => {
+                {TEST_STATUSES.map((status) => {
                   const active = tracked?.status === status;
                   return (
                     <Pressable
                       key={status}
                       onPress={() => void setTestStatus(test.id, status)}
+                      accessibilityRole="radio"
+                      accessibilityLabel={`${test.name}: ${testStatusLabel(status)}`}
+                      accessibilityState={{ selected: active }}
                       style={{
+                        minHeight: 44,
+                        justifyContent: 'center',
                         borderRadius: 999,
                         paddingVertical: 5,
                         paddingHorizontal: 11,
@@ -241,7 +257,7 @@ export default function RecordsScreen() {
                       }}
                     >
                       <Txt size={11} weight={active ? 600 : 400} color={active ? colors.surface : colors.muted}>
-                        {TEST_STATUS_LABELS[status]}
+                        {testStatusLabel(status)}
                       </Txt>
                     </Pressable>
                   );
@@ -273,6 +289,7 @@ function RecordSheet({
   onClose: () => void;
   onSave: (input: Omit<MedicalRecord, 'id'>, files?: PickedFile[]) => Promise<void>;
 }) {
+  const { t } = useI18n();
   const [type, setType] = useState<RecordType>('blood');
   const [title, setTitle] = useState('');
   const [date, setDate] = useState(today);
@@ -289,7 +306,7 @@ function RecordSheet({
 
   const submit = async () => {
     if (!title.trim() || !date) {
-      setError('العنوان والتاريخ مطلوبان.');
+      setError(t('rec.required'));
       return;
     }
     setSaving(true);
@@ -327,19 +344,21 @@ function RecordSheet({
       setError('');
       onClose();
     } catch {
-      setError('تعذّر الحفظ — تحقّقي من الاتصال وحاولي مرة أخرى.');
+      setError(t('common.saveFailed'));
     } finally {
       setSaving(false);
     }
   };
 
+  const typeOptions = RECORD_TYPES.map((value) => ({ value, label: recordTypeLabel(value) }));
+
   return (
-    <Sheet visible={visible} onClose={onClose} title="إضافة إلى ملف الحمل">
-      <SelectField value={type} onChange={(v) => setType(v as RecordType)} options={TYPE_OPTIONS} />
+    <Sheet visible={visible} onClose={onClose} title={t('rec.sheetTitle')}>
+      <SelectField value={type} onChange={(v) => setType(v as RecordType)} options={typeOptions} />
       <TextField
         value={title}
         onChange={setTitle}
-        placeholder="العنوان — مثال: سونار الأسبوع 8"
+        placeholder={t('rec.titlePh')}
         size={14.5}
       />
       <Row gap={10} align="flex-start">
@@ -347,7 +366,7 @@ function RecordSheet({
         <TextField
           value={provider}
           onChange={setProvider}
-          placeholder="الجهة / الطبيب"
+          placeholder={t('rec.providerPh')}
           size={14.5}
           style={{ flex: 1 }}
         />
@@ -356,27 +375,27 @@ function RecordSheet({
       {type === 'ultrasound' ? (
         <View style={{ backgroundColor: colors.sageSoft, borderRadius: 14, padding: 12, gap: 10 }}>
           <Txt size={12.5} weight={600} color={colors.sageDark}>
-            بيانات السونار (اختياري)
+            {t('rec.scanData')}
           </Txt>
           <Row gap={10} align="flex-start">
             <TextField value={crl} onChange={setCrl} placeholder="CRL" size={14} style={{ flex: 1 }} />
             <TextField
               value={fhr}
               onChange={setFhr}
-              placeholder="نبض الجنين"
+              placeholder={t('rec.fhrPh')}
               size={14}
               style={{ flex: 1 }}
             />
           </Row>
           <View>
             <Txt size={12} color={colors.sage} style={{ marginBottom: 5 }}>
-              عمر الحمل حسب السونار (اختياري)
+              {t('rec.scanGaTitle')}
             </Txt>
             <Row gap={10} align="flex-start">
               <TextField
                 value={scanWeeks}
                 onChange={setScanWeeks}
-                placeholder="أسابيع"
+                placeholder={t('rec.weeksPh')}
                 keyboardType="number-pad"
                 size={14}
                 style={{ flex: 1 }}
@@ -384,7 +403,7 @@ function RecordSheet({
               <TextField
                 value={scanDays}
                 onChange={setScanDays}
-                placeholder="أيام"
+                placeholder={t('rec.daysPh')}
                 keyboardType="number-pad"
                 size={14}
                 style={{ flex: 1 }}
@@ -393,9 +412,9 @@ function RecordSheet({
           </View>
           <View>
             <Txt size={12} color={colors.sage} style={{ marginBottom: 5 }}>
-              موعد ولادة جديد من السونار (EDD) — يعيد بناء التقويم
+              {t('rec.eddTitle')}
             </Txt>
-            <DateField value={newEdd} onChange={setNewEdd} placeholder="بدون تغيير" />
+            <DateField value={newEdd} onChange={setNewEdd} placeholder={t('rec.eddPh')} />
           </View>
         </View>
       ) : null}
@@ -403,15 +422,15 @@ function RecordSheet({
       <TextField
         value={notes}
         onChange={setNotes}
-        placeholder="النتائج / ملاحظات الطبيب"
+        placeholder={t('rec.notesPh')}
         rows={2}
         size={14.5}
       />
-      <AttachmentPicker files={files} onChange={setFiles} label="صورة السونار / التقرير" />
+      <AttachmentPicker files={files} onChange={setFiles} label={t('rec.attach')} />
       {error ? <ErrorText>{error}</ErrorText> : null}
       <Row gap={10}>
-        <PrimaryButton label={saving ? 'جارٍ الحفظ…' : 'حفظ'} onPress={submit} style={{ flex: 2 }} />
-        <SecondaryButton label="إلغاء" onPress={onClose} style={{ flex: 1 }} />
+        <PrimaryButton label={saving ? t('common.saving') : t('common.save')} onPress={submit} style={{ flex: 2 }} />
+        <SecondaryButton label={t('common.cancel')} onPress={onClose} style={{ flex: 1 }} />
       </Row>
     </Sheet>
   );

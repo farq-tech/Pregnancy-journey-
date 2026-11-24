@@ -9,7 +9,8 @@ import { CheckIcon, ChevronIcon, SettingsIcon } from '../../src/components/icons
 import { Card, Chip, Row } from '../../src/components/layout';
 import { ProgressRing } from '../../src/components/ProgressRing';
 import { WeekIllustration } from '../../src/components/WeekIllustration';
-import { DISCLAIMER, TRIMESTERS, weekContent } from '../../src/content/pregnancyData';
+import { DISCLAIMER, weekContent } from '../../src/content/pregnancyData';
+import { useI18n } from '../../src/i18n/LocaleProvider';
 import {
   days,
   formatDayMonth,
@@ -23,7 +24,6 @@ import {
 import { addDays, fromIso, toIso } from '../../src/lib/dates';
 import { countdownLabel, gestationalAgeLabel, joinMeta, monthLabel } from '../../src/lib/labels';
 import {
-  TERM_DAYS,
   clampWeek,
   computeJourney,
   progressPercent,
@@ -31,10 +31,11 @@ import {
   weeksToNextTrimester,
 } from '../../src/lib/pregnancy';
 import { useJourney } from '../../src/store/JourneyProvider';
-import { APPOINTMENT_TYPE_LABELS } from '../../src/store/types';
+import { appointmentTypeLabel } from '../../src/store/types';
 import { colors } from '../../src/theme';
 
 export default function TodayScreen() {
+  const { t, rtl } = useI18n();
   const {
     settings,
     appointments,
@@ -65,14 +66,16 @@ export default function TodayScreen() {
 
   const week = clampWeek(journey.week);
   const content = weekContent(journey.week);
-  const babyName = settings.babyName || 'طفلك';
+  const babyName = settings.babyName || t('today.babyDefault');
   const thisWeekStart = weekStart(journey, week);
   const weeksToNext = weeksToNextTrimester(journey.gestationalDay);
-  const trimesterName = TRIMESTERS[journey.trimester - 1].name;
+  const trimesterName = t(`today.trimester.${journey.trimester}` as 'today.trimester.1');
   const trimesterLabel =
     weeksToNext === null
-      ? 'أنتِ في الثلث الأخير'
-      : `باقي ${weeksLabel(weeksToNext)} على الثلث ${journey.trimester === 1 ? 'الثاني' : 'الثالث'}`;
+      ? t('today.lastTrimester')
+      : t(journey.trimester === 1 ? 'today.toTrimester2' : 'today.toTrimester3', {
+          w: weeksLabel(weeksToNext),
+        });
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -85,7 +88,7 @@ export default function TodayScreen() {
       <Row justify="space-between">
         <View>
           <Txt size={11} weight={500} color={colors.muted} style={{ letterSpacing: 2 }}>
-            اليوم
+            {t('today.label')}
           </Txt>
           <Txt size={17} weight={600}>
             {`${formatWeekday(journey.today)} ${formatLong(journey.today)}`}
@@ -93,7 +96,9 @@ export default function TodayScreen() {
         </View>
         <Pressable
           onPress={() => router.push('/onboarding')}
-          accessibilityLabel="الإعدادات"
+          accessibilityRole="button"
+          accessibilityLabel={t('today.settings')}
+          hitSlop={6}
           style={{
             backgroundColor: colors.surface,
             borderWidth: 1,
@@ -112,9 +117,26 @@ export default function TodayScreen() {
       <TodayWidget
         journey={journey}
         nextAppointmentLabel={
-          nextAppointment ? countdownLabel(nextAppointment.date, journey.today) : 'لا يوجد'
+          nextAppointment ? countdownLabel(nextAppointment.date, journey.today) : t('today.none')
         }
       />
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('emg.open')}
+        onPress={() => router.push('/emergency')}
+        style={{
+          backgroundColor: colors.errorBg,
+          borderRadius: 14,
+          minHeight: 48,
+          paddingHorizontal: 16,
+          justifyContent: 'center',
+        }}
+      >
+        <Txt size={13.5} weight={500} color={colors.error}>
+          {t('emg.open')}
+        </Txt>
+      </Pressable>
 
       {syncError ? (
         <View
@@ -126,7 +148,7 @@ export default function TodayScreen() {
           }}
         >
           <Txt size={12.5} color={colors.error} lineHeight={1.6}>
-            تعذّر التحديث من الخادم — تعرضين نسخة محفوظة على الجهاز.
+            {t('common.offline')}
           </Txt>
         </View>
       ) : null}
@@ -145,9 +167,15 @@ export default function TodayScreen() {
         >
           <CheckIcon size={18} strokeWidth={2} />
           <Txt size={13} color={colors.sageDark} style={{ flex: 1 }} lineHeight={1.5}>
-            تم تحديث موعد الولادة بناءً على السونار — أُعيد حساب التقويم كاملًا.
+            {t('today.eddUpdated')}
           </Txt>
-          <Pressable onPress={dismissEddBanner} accessibilityLabel="إخفاء">
+          <Pressable
+            onPress={dismissEddBanner}
+            accessibilityRole="button"
+            accessibilityLabel={t('today.dismiss')}
+            hitSlop={12}
+            style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
+          >
             <Txt size={16} color={colors.muted}>
               ×
             </Txt>
@@ -158,7 +186,7 @@ export default function TodayScreen() {
       {/* Hero */}
       <Card padding={0} radius={24} style={{ paddingVertical: 24, paddingHorizontal: 20 }}>
         <Txt size={14} weight={500} color={colors.clayDeep} align="center">
-          رحلتكم بدأت ❤️
+          {t('today.journeyBegan')}
         </Txt>
         <Txt size={26} weight={600} align="center" style={{ marginTop: 6, marginBottom: 2 }}>
           {weekOrdinalLabel(week)}
@@ -169,23 +197,27 @@ export default function TodayScreen() {
         <Txt size={13} color={colors.clayDeep} align="center" style={{ marginTop: 2 }}>
           {monthLabel(journey.monthNumber, journey.gaMonths)}
         </Txt>
-        <Txt size={11.5} color={colors.faint} align="center" style={{ marginTop: 2 }}>
-          العمر الحملي · Gestational Age
+        <Txt size={11.5} color={colors.muted} align="center" style={{ marginTop: 2 }}>
+          {t('today.gestationalAge')}
         </Txt>
 
-        <View style={{ marginTop: 18, marginBottom: 14 }}>
+        <View
+          accessible
+          accessibilityLabel={t('today.ringLabel', { n: journey.dayNumber, of: t('today.ofDays') })}
+          style={{ marginTop: 18, marginBottom: 14 }}
+        >
           <ProgressRing percent={progressPercent(journey)}>
             <Txt size={38} weight={600} align="center">
               {journey.dayNumber}
             </Txt>
             <Txt size={12.5} color={colors.muted} align="center">
-              {`من ${TERM_DAYS} يومًا`}
+              {t('today.ofDays')}
             </Txt>
           </ProgressRing>
         </View>
 
         <Txt size={14} align="center">
-          {`باقي ${days(journey.daysLeft)} تقريبًا على الموعد المتوقع`}
+          {t('today.toTerm', { d: days(journey.daysLeft) })}
         </Txt>
         <Txt size={13} color={colors.muted} align="center" style={{ marginTop: 3 }}>
           {formatLong(journey.edd)}
@@ -194,28 +226,31 @@ export default function TodayScreen() {
 
       {/* Four stat tiles */}
       <Row wrap gap={10} align="stretch" justify="space-between">
-        <StatTile label="باقي على الولادة">
+        <StatTile label={t('today.untilBirth')}>
           <Row gap={4} style={{ marginTop: 2 }}>
             <Txt size={22} weight={600} color={colors.sage}>
               {String(journey.daysLeft)}
             </Txt>
             <Txt size={12} color={colors.muted}>
-              يومًا
+              {t('today.daysUnit')}
             </Txt>
           </Row>
         </StatTile>
 
-        <StatTile label="الموعد القادم">
+        <StatTile label={t('today.nextAppointment')}>
           <Txt size={15} weight={600} style={{ marginTop: 4 }}>
             {nextAppointment
               ? countdownLabel(nextAppointment.date, journey.today)
-              : 'لا مواعيد قادمة'}
+              : t('today.noAppointments')}
           </Txt>
         </StatTile>
 
-        <StatTile label="المرحلة القادمة">
+        <StatTile label={t('today.nextStage')}>
           <Txt size={13.5} weight={500} lineHeight={1.5} style={{ marginTop: 4 }}>
-            {`باقي ${days(7 - journey.gaDays)} على الأسبوع ${ordinal(week + 1)}`}
+            {t('today.toNextWeek', {
+              d: days(7 - journey.gaDays),
+              n: rtl ? ordinal(week + 1) : week + 1,
+            })}
           </Txt>
         </StatTile>
 
@@ -230,11 +265,11 @@ export default function TodayScreen() {
       <Card style={{ gap: 12 }}>
         <Row justify="space-between">
           <Txt size={16} weight={600}>
-            {`${babyName} اليوم 👶`}
+            {t('today.babyToday', { name: babyName })}
           </Txt>
           <Chip>
             <Txt size={12} weight={500} color={colors.sage}>
-              {`الأسبوع ${week}`}
+              {t('today.weekN', { n: week })}
             </Txt>
           </Chip>
         </Row>
@@ -252,7 +287,7 @@ export default function TodayScreen() {
             ) : null}
             {content.weight ? (
               <Txt size={13} color={colors.muted} style={{ marginTop: 2 }}>
-                {`الوزن: ${content.weight}`}
+                {t('today.weight', { w: content.weight })}
               </Txt>
             ) : null}
           </View>
@@ -269,6 +304,8 @@ export default function TodayScreen() {
               params: { date: toIso(journey.today) },
             })
           }
+          accessibilityRole="button"
+          accessibilityLabel={t('today.whatToday')}
           style={({ pressed }) => ({
             backgroundColor: pressed ? '#E2E8DC' : colors.sageSoft,
             borderRadius: 12,
@@ -276,7 +313,7 @@ export default function TodayScreen() {
           })}
         >
           <Txt size={14} weight={600} color={colors.sageDark} align="center">
-            ماذا يحدث اليوم؟
+            {t('today.whatToday')}
           </Txt>
         </Pressable>
       </Card>
@@ -284,7 +321,7 @@ export default function TodayScreen() {
       {/* Mother today */}
       <Card>
         <Txt size={16} weight={600} style={{ marginBottom: 8 }}>
-          أنتِ اليوم
+          {t('today.youToday')}
         </Txt>
         <Txt size={14} color={colors.body} lineHeight={1.9}>
           {content.mom}
@@ -300,8 +337,8 @@ export default function TodayScreen() {
             ))}
           </Row>
         ) : null}
-        <Txt size={12} color={colors.faint} style={{ marginTop: 10 }} lineHeight={1.5}>
-          قد تختلف الأعراض من امرأة لأخرى — بعض النساء لا يشعرن بأعراض تُذكر.
+        <Txt size={12} color={colors.muted} style={{ marginTop: 10 }} lineHeight={1.5}>
+          {t('today.symptomsNote')}
         </Txt>
       </Card>
 
@@ -322,7 +359,7 @@ export default function TodayScreen() {
               <Txt size={16} weight={600} color={colors.sageDark} align="center">
                 {String(fromIso(nextAppointment.date).getDate())}
               </Txt>
-              <Txt size={9.5} color={colors.muted} align="center">
+              <Txt size={11} color={colors.muted} align="center">
                 {monthName(fromIso(nextAppointment.date).getMonth())}
               </Txt>
             </View>
@@ -332,7 +369,7 @@ export default function TodayScreen() {
               </Txt>
               <Txt size={12.5} color={colors.muted} style={{ marginTop: 2 }}>
                 {joinMeta(
-                  APPOINTMENT_TYPE_LABELS[nextAppointment.type],
+                  appointmentTypeLabel(nextAppointment.type),
                   nextAppointment.time,
                   nextAppointment.location,
                 )}
@@ -348,7 +385,11 @@ export default function TodayScreen() {
       ) : null}
 
       {/* This week */}
-      <Pressable onPress={() => router.push({ pathname: '/baby/[week]', params: { week } })}>
+      <Pressable
+        onPress={() => router.push({ pathname: '/baby/[week]', params: { week } })}
+        accessibilityRole="button"
+        accessibilityLabel={t('today.thisWeek')}
+      >
         {({ pressed }) => (
           <Card
             style={{
@@ -360,10 +401,12 @@ export default function TodayScreen() {
             <Row gap={12}>
               <View style={{ flex: 1 }}>
                 <Txt size={15} weight={600}>
-                  هذا الأسبوع
+                  {t('today.thisWeek')}
                 </Txt>
                 <Txt size={12.5} color={colors.muted} style={{ marginTop: 2 }}>
-                  {`${formatDayMonth(thisWeekStart)} – ${formatDayMonth(addDays(thisWeekStart, 6))} · التطور، الفحوصات، والأسئلة للطبيب`}
+                  {t('today.weekSub', {
+                    range: `${formatDayMonth(thisWeekStart)} – ${formatDayMonth(addDays(thisWeekStart, 6))}`,
+                  })}
                 </Txt>
               </View>
               <ChevronIcon size={18} color={colors.muted} direction="left" />
@@ -374,7 +417,7 @@ export default function TodayScreen() {
 
       <Txt
         size={11.5}
-        color={colors.faint}
+        color={colors.muted}
         align="center"
         lineHeight={1.8}
         style={{ paddingHorizontal: 14, paddingTop: 2 }}

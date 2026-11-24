@@ -57,6 +57,7 @@ function Root() {
         >
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="onboarding" />
+          <Stack.Screen name="emergency" options={{ presentation: 'modal' }} />
         </Stack>
       </JourneyProvider>
     </SafeAreaProvider>

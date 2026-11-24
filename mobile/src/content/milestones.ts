@@ -15,6 +15,7 @@
 import type { Appointment, MedicalRecord } from '../store/types';
 import { diffDays, fromIso } from '../lib/dates';
 import { days } from '../lib/arabic';
+import { t } from '../i18n';
 import { MILESTONES, type Milestone } from './pregnancyData';
 
 /** What would let the app say a milestone actually happened. */
@@ -93,7 +94,7 @@ export function milestonesWithState(
       return {
         ...milestone,
         confirmedBy,
-        state: { status: 'upcoming', label: `باقي ${days(daysAway)}` },
+        state: { status: 'upcoming', label: t('label.left', { d: days(daysAway) }) },
       };
     }
 
@@ -101,7 +102,7 @@ export function milestonesWithState(
       return {
         ...milestone,
         confirmedBy,
-        state: { status: 'confirmed', label: 'وصلتِ لهذه المرحلة' },
+        state: { status: 'confirmed', label: t('ms.reached') },
       };
     }
 
@@ -119,13 +120,13 @@ export function milestonesWithState(
         return {
           ...milestone,
           confirmedBy,
-          state: { status: 'expected', label: 'يوجد تقرير سونار — راجعي نتيجته مع الطبيب' },
+          state: { status: 'expected', label: t('ms.hasScan') },
         };
       }
       return {
         ...milestone,
         confirmedBy,
-        state: { status: 'expected', label: 'متوقع حول هذه المرحلة — يؤكده الطبيب بالسونار' },
+        state: { status: 'expected', label: t('ms.expectedScan') },
       };
     }
 
@@ -138,20 +139,20 @@ export function milestonesWithState(
         return {
           ...milestone,
           confirmedBy,
-          state: { status: 'confirmed', label: 'مؤكد — تمت الزيارة' },
+          state: { status: 'confirmed', label: t('ms.visitDone') },
         };
       }
       return {
         ...milestone,
         confirmedBy,
-        state: { status: 'expected', label: 'عادةً حول هذه المرحلة — سجّلي الزيارة عند إتمامها' },
+        state: { status: 'expected', label: t('ms.expectedVisit') },
       };
     }
 
     return {
       ...milestone,
       confirmedBy,
-      state: { status: 'expected', label: 'قد يحدث حول هذه المرحلة — تختلف بين النساء' },
+      state: { status: 'expected', label: t('ms.mayHappen') },
     };
   });
 }

@@ -1,3 +1,4 @@
+import { t, type StringKey } from '../i18n';
 import type { IsoDate } from '../lib/dates';
 
 export type AppointmentType =
@@ -89,49 +90,42 @@ export type TestTracking = {
   appointmentId: string | null;
 };
 
-export const TEST_STATUS_LABELS: Record<TestStatus, string> = {
-  planned: 'لم يُحدَّد بعد',
-  scheduled: 'محجوز',
-  done: 'تم',
-  skipped: 'غير مطلوب',
-};
+// Labels are looked up at call time so a language switch takes effect.
+const lab = (key: string): string => t(key as StringKey);
 
-export const RECURRENCE_LABELS: Record<Recurrence, string> = {
-  '': 'موعد واحد',
-  weekly: 'كل أسبوع',
-  biweekly: 'كل أسبوعين',
-  monthly: 'كل شهر',
-};
+export const TEST_STATUSES: readonly TestStatus[] = ['planned', 'scheduled', 'done', 'skipped'];
+export const testStatusLabel = (s: TestStatus): string => lab(`type.test.${s}`);
 
-export const APPOINTMENT_TYPE_LABELS: Record<AppointmentType, string> = {
-  doctor: 'موعد طبيب',
-  ultrasound: 'سونار',
-  blood: 'تحليل دم',
-  genetic: 'فحص جيني',
-  lab: 'مختبر',
-  hospital: 'مستشفى',
-  vaccine: 'تطعيم',
-  other: 'أخرى',
-};
+export const APPOINTMENT_TYPES: readonly AppointmentType[] = [
+  'doctor',
+  'ultrasound',
+  'blood',
+  'genetic',
+  'lab',
+  'hospital',
+  'vaccine',
+  'other',
+];
+export const appointmentTypeLabel = (v: AppointmentType): string => lab(`type.appt.${v}`);
 
-export const RECORD_TYPE_LABELS: Record<RecordType, string> = {
-  blood: 'تحليل دم',
-  ultrasound: 'سونار',
-  report: 'تقرير طبيب',
-  lab: 'نتيجة مختبر',
-  rx: 'وصفة طبية',
-  photo: 'صورة',
-  note: 'ملاحظة',
-};
+export const RECORD_TYPES: readonly RecordType[] = [
+  'blood',
+  'ultrasound',
+  'report',
+  'lab',
+  'rx',
+  'photo',
+  'note',
+];
+export const recordTypeLabel = (v: RecordType): string => lab(`type.record.${v}`);
 
-export const REMINDER_LABELS: Record<ReminderOffset, string> = {
-  '': 'بدون تذكير',
-  '1h': 'قبل ساعة',
-  '24h': 'قبل 24 ساعة',
-  '48h': 'قبل يومين',
-  week: 'قبل أسبوع',
-};
+export const REMINDER_OFFSETS: readonly ReminderOffset[] = ['', '1h', '24h', '48h', 'week'];
+export const reminderLabel = (v: ReminderOffset): string => lab(`type.reminder.${v || 'none'}`);
 
+export const RECURRENCES: readonly Recurrence[] = ['', 'weekly', 'biweekly', 'monthly'];
+export const recurrenceLabel = (v: Recurrence): string => lab(`type.rec.${v || 'none'}`);
+
+/** Moods are persisted as these exact Arabic strings; never change them. */
 export const MOODS = [
   'سعيدة ❤️',
   'ممتنة',
@@ -140,3 +134,16 @@ export const MOODS = [
   'قلقة',
   'هادئة',
 ] as const;
+
+const MOOD_KEYS: Record<string, string> = {
+  'سعيدة ❤️': 'happy',
+  'ممتنة': 'grateful',
+  'متحمسة': 'excited',
+  'متعبة': 'tired',
+  'قلقة': 'anxious',
+  'هادئة': 'calm',
+};
+
+/** Display text for a stored mood; unknown values show as stored. */
+export const moodLabel = (stored: string): string =>
+  MOOD_KEYS[stored] ? lab(`type.mood.${MOOD_KEYS[stored]}`) : stored;

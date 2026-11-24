@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 
 import { AttachmentGallery } from '../../src/components/AttachmentGallery';
 import { AttachmentPicker } from '../../src/components/AttachmentPicker';
@@ -15,6 +15,7 @@ import {
   TextField,
 } from '../../src/components/fields';
 import { Card, Chip, Row } from '../../src/components/layout';
+import { useI18n } from '../../src/i18n/LocaleProvider';
 import { formatDayMonth } from '../../src/lib/arabic';
 import { diffDays, fromIso } from '../../src/lib/dates';
 import { countdownLabel, joinMeta } from '../../src/lib/labels';
@@ -22,30 +23,18 @@ import { computeJourney } from '../../src/lib/pregnancy';
 import type { PickedFile } from '../../src/lib/storage';
 import { useJourney } from '../../src/store/JourneyProvider';
 import {
-  APPOINTMENT_TYPE_LABELS,
-  RECURRENCE_LABELS,
-  REMINDER_LABELS,
+  APPOINTMENT_TYPES,
+  RECURRENCES,
+  REMINDER_OFFSETS,
+  appointmentTypeLabel,
+  recurrenceLabel,
+  reminderLabel,
   type Appointment,
   type AppointmentType,
   type Recurrence,
   type ReminderOffset,
 } from '../../src/store/types';
 import { colors } from '../../src/theme';
-
-const TYPE_OPTIONS = (Object.keys(APPOINTMENT_TYPE_LABELS) as AppointmentType[]).map((value) => ({
-  value,
-  label: APPOINTMENT_TYPE_LABELS[value],
-}));
-
-const REMINDER_OPTIONS = (Object.keys(REMINDER_LABELS) as ReminderOffset[]).map((value) => ({
-  value,
-  label: value === '' ? 'بدون تذكير' : `تذكير ${REMINDER_LABELS[value]}`,
-}));
-
-const RECURRENCE_OPTIONS = (Object.keys(RECURRENCE_LABELS) as Recurrence[]).map((value) => ({
-  value,
-  label: RECURRENCE_LABELS[value],
-}));
 
 export default function AppointmentsScreen() {
   const {
@@ -58,7 +47,14 @@ export default function AppointmentsScreen() {
     attachmentsFor,
     deleteAttachment,
   } = useJourney();
+  const { t } = useI18n();
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  const confirmDelete = (id: string) =>
+    Alert.alert(t('appt.deleteTitle'), t('appt.deleteMsg'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.delete'), style: 'destructive', onPress: () => void remove('appointments', id) },
+    ]);
 
   const journey = useMemo(
     () => (settings ? computeJourney(settings, fromIso(today)) : null),
@@ -81,14 +77,16 @@ export default function AppointmentsScreen() {
       <Row justify="space-between">
         <View style={{ flex: 1 }}>
           <Txt size={20} weight={600}>
-            المواعيد
+            {t('appointments.title')}
           </Txt>
           <Txt size={12.5} color={colors.muted}>
-            {sorted.length ? `${upcoming} مواعيد قادمة` : 'نظّمي زياراتك وفحوصاتك'}
+            {sorted.length ? t('appt.upcoming', { n: upcoming }) : t('appt.subtitle')}
           </Txt>
         </View>
         <Pressable
           onPress={() => setSheetOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('appointments.add')}
           style={({ pressed }) => ({
             backgroundColor: pressed ? colors.sageDark : colors.sage,
             borderRadius: 999,
@@ -97,7 +95,7 @@ export default function AppointmentsScreen() {
           })}
         >
           <Txt size={13.5} weight={600} color={colors.surface}>
-            + إضافة موعد
+            {t('appointments.add')}
           </Txt>
         </Pressable>
       </Row>
@@ -115,10 +113,10 @@ export default function AppointmentsScreen() {
           }}
         >
           <Txt size={15} weight={600} color={colors.muted} align="center">
-            لا مواعيد بعد
+            {t('appointments.empty')}
           </Txt>
-          <Txt size={13} color={colors.faint} align="center" lineHeight={1.7} style={{ marginTop: 6 }}>
-            {'أضيفي موعد الطبيب أو السونار أو التحاليل\nمع تذكير قبل الموعد'}
+          <Txt size={13} color={colors.muted} align="center" lineHeight={1.7} style={{ marginTop: 6 }}>
+            {t('appt.emptyHint')}
           </Txt>
         </View>
       ) : (
@@ -139,9 +137,10 @@ export default function AppointmentsScreen() {
                 <Row gap={10} align="flex-start">
                   <Pressable
                     onPress={() => void toggleAppointment(appointment.id)}
-                    accessibilityLabel="تم؟"
+                    accessibilityLabel={t('appt.done')}
                     accessibilityRole="checkbox"
                     accessibilityState={{ checked: appointment.done }}
+                    hitSlop={11}
                     style={{
                       width: 22,
                       height: 22,
@@ -168,13 +167,13 @@ export default function AppointmentsScreen() {
                     <Txt size={12.5} color={colors.muted} style={{ marginTop: 2 }}>
                       {joinMeta(
                         joinMeta(formatDayMonth(fromIso(appointment.date)), appointment.time),
-                        APPOINTMENT_TYPE_LABELS[appointment.type],
+                        appointmentTypeLabel(appointment.type),
                         appointment.location,
                         appointment.doctor,
                       )}
                     </Txt>
                     {appointment.notes ? (
-                      <Txt size={12.5} color={colors.faint} lineHeight={1.6} style={{ marginTop: 4 }}>
+                      <Txt size={12.5} color={colors.muted} lineHeight={1.6} style={{ marginTop: 4 }}>
                         {appointment.notes}
                       </Txt>
                     ) : null}
@@ -182,14 +181,14 @@ export default function AppointmentsScreen() {
                       {appointment.reminder ? (
                         <Chip bg={colors.claySoft}>
                           <Txt size={11.5} color={colors.clayText}>
-                            {`🔔 ${REMINDER_LABELS[appointment.reminder]}`}
+                            {`🔔 ${reminderLabel(appointment.reminder)}`}
                           </Txt>
                         </Chip>
                       ) : null}
                       {appointment.recurrence ? (
                         <Chip bg={colors.surfaceWarm}>
                           <Txt size={11.5} color={colors.muted}>
-                            {`🔁 ${RECURRENCE_LABELS[appointment.recurrence]}`}
+                            {`🔁 ${recurrenceLabel(appointment.recurrence)}`}
                           </Txt>
                         </Chip>
                       ) : null}
@@ -204,13 +203,15 @@ export default function AppointmentsScreen() {
                   <View style={{ alignItems: 'flex-start', gap: 6 }}>
                     <Chip>
                       <Txt size={11.5} weight={500} color={colors.sage}>
-                        {past ? 'انتهى' : countdownLabel(appointment.date, journey.today)}
+                        {past ? t('label.ended') : countdownLabel(appointment.date, journey.today)}
                       </Txt>
                     </Chip>
                     <Pressable
-                      onPress={() => void remove('appointments', appointment.id)}
-                      accessibilityLabel="حذف الموعد"
-                      style={{ alignSelf: 'center' }}
+                      onPress={() => confirmDelete(appointment.id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('appt.deleteLabel')}
+                      hitSlop={12}
+                      style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center', alignSelf: 'center' }}
                     >
                       <Txt size={15} color={colors.clayDelete}>
                         ×
@@ -245,6 +246,7 @@ function AppointmentSheet({
   onClose: () => void;
   onSave: (input: Omit<Appointment, 'id' | 'done'>, files?: PickedFile[]) => Promise<void>;
 }) {
+  const { t } = useI18n();
   const [title, setTitle] = useState('');
   const [type, setType] = useState<AppointmentType>('doctor');
   const [date, setDate] = useState(today);
@@ -260,7 +262,7 @@ function AppointmentSheet({
 
   const submit = async () => {
     if (!title.trim() || !date) {
-      setError('العنوان والتاريخ مطلوبان.');
+      setError(t('appt.required'));
       return;
     }
     setSaving(true);
@@ -279,28 +281,35 @@ function AppointmentSheet({
       setError('');
       onClose();
     } catch {
-      setError('تعذّر الحفظ — تحقّقي من الاتصال وحاولي مرة أخرى.');
+      setError(t('common.saveFailed'));
     } finally {
       setSaving(false);
     }
   };
 
+  const typeOptions = APPOINTMENT_TYPES.map((value) => ({ value, label: appointmentTypeLabel(value) }));
+  const reminderOptions = REMINDER_OFFSETS.map((value) => ({
+    value,
+    label: value === '' ? reminderLabel(value) : t('appt.reminderOpt', { when: reminderLabel(value) }),
+  }));
+  const recurrenceOptions = RECURRENCES.map((value) => ({ value, label: recurrenceLabel(value) }));
+
   return (
-    <Sheet visible={visible} onClose={onClose} title="إضافة موعد">
+    <Sheet visible={visible} onClose={onClose} title={t('appt.sheetTitle')}>
       <TextField
         value={title}
         onChange={setTitle}
-        placeholder="العنوان — مثال: موعد السونار"
+        placeholder={t('appt.titlePh')}
         size={14.5}
       />
-      <SelectField value={type} onChange={(v) => setType(v as AppointmentType)} options={TYPE_OPTIONS} />
+      <SelectField value={type} onChange={(v) => setType(v as AppointmentType)} options={typeOptions} />
       <Row gap={10} align="flex-start">
         <DateField value={date} onChange={setDate} style={{ flex: 1 }} />
         <DateField
           value={time}
           onChange={setTime}
           mode="time"
-          placeholder="الوقت"
+          placeholder={t('appt.timePh')}
           style={{ flex: 1 }}
         />
       </Row>
@@ -308,14 +317,14 @@ function AppointmentSheet({
         <TextField
           value={location}
           onChange={setLocation}
-          placeholder="المكان"
+          placeholder={t('appt.locationPh')}
           size={14.5}
           style={{ flex: 1 }}
         />
         <TextField
           value={doctor}
           onChange={setDoctor}
-          placeholder="الطبيب"
+          placeholder={t('appt.doctorPh')}
           size={14.5}
           style={{ flex: 1 }}
         />
@@ -324,26 +333,26 @@ function AppointmentSheet({
         <SelectField
           value={reminder}
           onChange={(v) => setReminder(v as ReminderOffset)}
-          options={REMINDER_OPTIONS}
+          options={reminderOptions}
           style={{ flex: 1 }}
         />
         <SelectField
           value={recurrence}
           onChange={(v) => setRecurrence(v as Recurrence)}
-          options={RECURRENCE_OPTIONS}
+          options={recurrenceOptions}
           style={{ flex: 1 }}
         />
       </Row>
-      <TextField value={notes} onChange={setNotes} placeholder="ملاحظات" rows={2} size={14.5} />
-      <AttachmentPicker files={files} onChange={setFiles} label="إرفاق" />
+      <TextField value={notes} onChange={setNotes} placeholder={t('appt.notesPh')} rows={2} size={14.5} />
+      <AttachmentPicker files={files} onChange={setFiles} label={t('appt.attach')} />
       {error ? <ErrorText>{error}</ErrorText> : null}
       <Row gap={10}>
         <PrimaryButton
-          label={saving ? 'جارٍ الحفظ…' : 'حفظ الموعد'}
+          label={saving ? t('common.saving') : t('appt.saveBtn')}
           onPress={submit}
           style={{ flex: 2 }}
         />
-        <SecondaryButton label="إلغاء" onPress={onClose} style={{ flex: 1 }} />
+        <SecondaryButton label={t('common.cancel')} onPress={onClose} style={{ flex: 1 }} />
       </Row>
     </Sheet>
   );

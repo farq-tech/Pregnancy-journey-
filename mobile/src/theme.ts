@@ -19,8 +19,8 @@ export const colors = {
   text: '#2C332B',
   /** Long-form body copy inside cards. */
   body: '#3D4439',
-  muted: '#85826F',
-  faint: '#A5A292',
+  muted: '#6B6853',
+  faint: '#726F5C',
 
   sage: '#5E6F5C',
   sageDark: '#4E5D4C',
@@ -54,7 +54,7 @@ export const colors = {
   dotPhoto: '#A78BA0',
 
   navActive: '#4E5D4C',
-  navInactive: '#A5A292',
+  navInactive: '#726F5C',
 } as const;
 
 export const radius = {

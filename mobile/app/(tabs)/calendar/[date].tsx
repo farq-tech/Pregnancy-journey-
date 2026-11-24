@@ -12,6 +12,7 @@ import {
   EMERGENCY_SIGNS,
   weekContent,
 } from '../../../src/content/pregnancyData';
+import { useI18n } from '../../../src/i18n/LocaleProvider';
 import {
   days,
   formatLong,
@@ -23,10 +24,11 @@ import { addDays, fromIso, toIso } from '../../../src/lib/dates';
 import { joinMeta } from '../../../src/lib/labels';
 import { TERM_DAYS, computeJourney, gestationalDayFor } from '../../../src/lib/pregnancy';
 import { useJourney } from '../../../src/store/JourneyProvider';
-import { APPOINTMENT_TYPE_LABELS } from '../../../src/store/types';
+import { appointmentTypeLabel } from '../../../src/store/types';
 import { colors } from '../../../src/theme';
 
 export default function DayScreen() {
+  const { t } = useI18n();
   const params = useLocalSearchParams<{ date: string }>();
   const { settings, appointments, journal, today } = useJourney();
   const [date, setDate] = useState(params.date ?? today);
@@ -55,19 +57,25 @@ export default function DayScreen() {
   return (
     <Screen>
       <Row justify="space-between">
-        <ArrowButton direction="right" onPress={() => shiftDay(-1)} label="اليوم السابق" />
-        <Pressable onPress={() => router.back()}>
+        <ArrowButton direction="right" onPress={() => shiftDay(-1)} label={t('cal.prevDay')} />
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel={t('cal.back')}
+          hitSlop={8}
+          style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 8 }}
+        >
           <Txt size={12.5} color={colors.muted}>
-            ← عودة للتقويم
+            {t('cal.back')}
           </Txt>
         </Pressable>
-        <ArrowButton direction="left" onPress={() => shiftDay(1)} label="اليوم التالي" />
+        <ArrowButton direction="left" onPress={() => shiftDay(1)} label={t('cal.nextDay')} />
       </Row>
 
       {!detail ? (
         <Card radius={20}>
           <Txt size={14} color={colors.muted} align="center" lineHeight={1.6}>
-            هذا اليوم خارج فترة الحمل المحسوبة.
+            {t('calendar.outsidePregnancy')}
           </Txt>
         </Card>
       ) : (
@@ -79,7 +87,7 @@ export default function DayScreen() {
             <Row wrap gap={8} justify="center" style={{ marginTop: 10 }}>
               <Chip>
                 <Txt size={12} weight={500} color={colors.sageDark}>
-                  {`اليوم ${detail.gestationalDay} من ${TERM_DAYS}`}
+                  {t('cal.dayOf', { d: detail.gestationalDay, n: TERM_DAYS })}
                 </Txt>
               </Chip>
               <Chip bg={colors.surfaceWarm}>
@@ -90,7 +98,7 @@ export default function DayScreen() {
               <Chip bg={colors.claySoft}>
                 <Txt size={12} weight={500} color={colors.clayText}>
                   {weeksLabel(Math.floor(detail.gestationalDay / 7)) +
-                    (detail.gestationalDay % 7 ? ` و${days(detail.gestationalDay % 7)}` : '')}
+                    (detail.gestationalDay % 7 ? `${t('label.and')}${days(detail.gestationalDay % 7)}` : '')}
                 </Txt>
               </Chip>
             </Row>
@@ -101,7 +109,7 @@ export default function DayScreen() {
               <WeekIllustration week={detail.week} size={72} />
               <View style={{ flex: 1 }}>
                 <Txt size={15} weight={600}>
-                  تطور الجنين 👶
+                  {t('cal.fetalDev')}
                 </Txt>
                 {detail.content.size ? (
                   <Txt size={12.5} color={colors.muted} style={{ marginTop: 3 }}>
@@ -116,19 +124,19 @@ export default function DayScreen() {
             {detail.content.appearance ? (
               <Txt size={13} color={colors.muted} lineHeight={1.8}>
                 <Txt size={13} weight={600} color={colors.sage}>
-                  شكل الجنين:{' '}
+                  {t('cal.appearance')}
                 </Txt>
                 {detail.content.appearance}
               </Txt>
             ) : null}
-            <Txt size={11.5} color={colors.faint} lineHeight={1.5}>
-              المعلومة موثقة على مستوى الأسبوع — التفاصيل اليومية لا تُخترع.
+            <Txt size={11.5} color={colors.muted} lineHeight={1.5}>
+              {t('cal.weekLevel')}
             </Txt>
           </Card>
 
           <Card>
             <Txt size={15} weight={600} style={{ marginBottom: 8 }}>
-              الأم 🤰
+              {t('cal.mom')}
             </Txt>
             <Txt size={14} color={colors.body} lineHeight={1.9}>
               {detail.content.mom}
@@ -149,7 +157,7 @@ export default function DayScreen() {
           {detail.content.milestones?.length ? (
             <Card>
               <Txt size={15} weight={600} style={{ marginBottom: 10 }}>
-                محطات طبية هذا الأسبوع
+                {t('cal.weekMilestones')}
               </Txt>
               <View style={{ gap: 8 }}>
                 {detail.content.milestones.map((milestone) => (
@@ -169,7 +177,7 @@ export default function DayScreen() {
           {dayAppointments.length ? (
             <Card>
               <Txt size={15} weight={600} style={{ marginBottom: 10 }}>
-                مواعيد هذا اليوم 📅
+                {t('cal.dayAppointments')}
               </Txt>
               <View style={{ gap: 8 }}>
                 {dayAppointments.map((appointment) => (
@@ -178,7 +186,7 @@ export default function DayScreen() {
                       {appointment.title}
                     </Txt>
                     <Txt size={13.5} color={colors.muted}>
-                      {` — ${joinMeta(APPOINTMENT_TYPE_LABELS[appointment.type], appointment.time)}`}
+                      {` — ${joinMeta(appointmentTypeLabel(appointment.type), appointment.time)}`}
                     </Txt>
                   </Txt>
                 ))}
@@ -189,7 +197,7 @@ export default function DayScreen() {
           {dayJournal.length ? (
             <Card>
               <Txt size={15} weight={600} style={{ marginBottom: 10 }}>
-                يومياتك ❤️
+                {t('cal.dayJournal')}
               </Txt>
               <View style={{ gap: 10 }}>
                 {dayJournal.map((entry) => (
@@ -216,10 +224,10 @@ export default function DayScreen() {
             }}
           >
             <Txt size={15} weight={600} color={colors.clayHeading} style={{ marginBottom: 8 }}>
-              متى يجب التواصل مع الطبيب؟
+              {t('cal.whenDoctor')}
             </Txt>
             <Txt size={13} color={colors.clayBody} lineHeight={1.8} style={{ marginBottom: 8 }}>
-              إذا ظهرت أي من هذه العلامات، يُنصح بطلب تقييم طبي عاجل:
+              {t('cal.emergencyIntro')}
             </Txt>
             <View style={{ gap: 6 }}>
               {EMERGENCY_SIGNS.map((sign) => (
@@ -233,8 +241,8 @@ export default function DayScreen() {
                 </Row>
               ))}
             </View>
-            <Txt size={11.5} color={colors.clayFaint} lineHeight={1.6} style={{ marginTop: 10 }}>
-              {`هذه ليست أداة تشخيص — ${DISCLAIMER}`}
+            <Txt size={11.5} color={colors.clayBody} lineHeight={1.6} style={{ marginTop: 10 }}>
+              {t('cal.notDiagnostic', { disclaimer: DISCLAIMER })}
             </Txt>
           </View>
         </>

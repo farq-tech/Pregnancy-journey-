@@ -6,9 +6,10 @@ import { ArrowButton } from '../../../src/components/ArrowButton';
 import { Screen } from '../../../src/components/Screen';
 import { Txt } from '../../../src/components/Txt';
 import { Card, Row } from '../../../src/components/layout';
-import { WEEKDAY_SHORT, formatMonthYear } from '../../../src/lib/arabic';
+import { useI18n } from '../../../src/i18n/LocaleProvider';
+import { formatLong, formatMonthYear, weekdayShort } from '../../../src/lib/arabic';
 import { diffDays, fromIso, toIso } from '../../../src/lib/dates';
-import { computeJourney, gestationalDayFor } from '../../../src/lib/pregnancy';
+import { TERM_DAYS, computeJourney, gestationalDayFor } from '../../../src/lib/pregnancy';
 import { useJourney } from '../../../src/store/JourneyProvider';
 import { colors } from '../../../src/theme';
 
@@ -30,6 +31,7 @@ type Cell =
     };
 
 export default function CalendarScreen() {
+  const { t } = useI18n();
   const { settings, appointments, journal, records, attachments, today } = useJourney();
   const journey = useMemo(
     () => (settings ? computeJourney(settings, fromIso(today)) : null),
@@ -105,21 +107,33 @@ export default function CalendarScreen() {
       return { year: next.getFullYear(), month: next.getMonth() };
     });
 
+  const dayLabel = (cell: Extract<Cell, { blank: false }>) =>
+    [
+      formatLong(fromIso(cell.iso)),
+      cell.weekStart && t('calendar.legend.week'),
+      cell.hasAppointment && t('calendar.legend.appointment'),
+      cell.hasJournal && t('calendar.legend.journal'),
+      cell.hasRecord && t('calendar.legend.record'),
+      cell.hasPhoto && t('calendar.legend.photo'),
+    ]
+      .filter(Boolean)
+      .join(t('baby.sourceSep'));
+
   return (
     <Screen>
       <Row justify="space-between">
-        <ArrowButton direction="right" onPress={() => shiftMonth(-1)} label="الشهر السابق" />
+        <ArrowButton direction="right" onPress={() => shiftMonth(-1)} label={t('cal.prevMonth')} />
         <Txt size={17} weight={600}>
           {formatMonthYear(new Date(view.year, view.month, 1))}
         </Txt>
-        <ArrowButton direction="left" onPress={() => shiftMonth(1)} label="الشهر التالي" />
+        <ArrowButton direction="left" onPress={() => shiftMonth(1)} label={t('cal.nextMonth')} />
       </Row>
 
       <Card radius={20} padding={0} style={{ paddingVertical: 14, paddingHorizontal: 10 }}>
         <Row wrap style={{ marginBottom: 6 }}>
-          {WEEKDAY_SHORT.map((name) => (
+          {weekdayShort().map((name) => (
             <View key={name} style={{ width: `${100 / 7}%` }}>
-              <Txt size={10} weight={500} color={colors.faint} align="center">
+              <Txt size={11} weight={500} color={colors.muted} align="center">
                 {name}
               </Txt>
             </View>
@@ -135,7 +149,9 @@ export default function CalendarScreen() {
                 <Pressable
                   disabled={!cell.inPregnancy}
                   onPress={() => router.push({ pathname: '/calendar/[date]', params: { date: cell.iso } })}
-                  accessibilityLabel={`${cell.day}`}
+                  accessibilityRole="button"
+                  accessibilityLabel={dayLabel(cell)}
+                  accessibilityState={{ selected: cell.isToday, disabled: !cell.inPregnancy }}
                   style={{
                     flex: 1,
                     borderRadius: 12,
@@ -176,15 +192,15 @@ export default function CalendarScreen() {
       </Card>
 
       <Row wrap gap={12} justify="center">
-        <LegendItem color={colors.dotWeek} label="بداية أسبوع" />
-        <LegendItem color={colors.dotAppt} label="موعد" />
-        <LegendItem color={colors.dotJournal} label="يوميات" />
-        <LegendItem color={colors.dotRecord} label="ملف" />
-        <LegendItem color={colors.dotPhoto} label="صورة" />
+        <LegendItem color={colors.dotWeek} label={t('calendar.legend.week')} />
+        <LegendItem color={colors.dotAppt} label={t('calendar.legend.appointment')} />
+        <LegendItem color={colors.dotJournal} label={t('calendar.legend.journal')} />
+        <LegendItem color={colors.dotRecord} label={t('calendar.legend.record')} />
+        <LegendItem color={colors.dotPhoto} label={t('calendar.legend.photo')} />
       </Row>
 
-      <Txt size={12} color={colors.faint} align="center" lineHeight={1.6}>
-        اضغطي أي يوم ضمن فترة الحمل لفتح تفاصيله — من اليوم 1 حتى اليوم 280
+      <Txt size={12} color={colors.muted} align="center" lineHeight={1.6}>
+        {t('cal.hint', { n: TERM_DAYS })}
       </Txt>
     </Screen>
   );

@@ -2,6 +2,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { Alert, Pressable, View } from 'react-native';
 
+import { useI18n } from '../i18n/LocaleProvider';
 import { MAX_UPLOAD_BYTES, type PickedFile } from '../lib/storage';
 import { colors } from '../theme';
 import { Row } from './layout';
@@ -16,15 +17,17 @@ import { Txt } from './Txt';
 export function AttachmentPicker({
   files,
   onChange,
-  label = 'إرفاق ملف',
+  label,
 }: {
   files: PickedFile[];
   onChange: (next: PickedFile[]) => void;
   label?: string;
 }) {
+  const { t } = useI18n();
+  const pickerLabel = label ?? t('cmp.attachFile');
   const add = (file: PickedFile) => {
     if (file.size && file.size > MAX_UPLOAD_BYTES) {
-      Alert.alert('الملف كبير', 'الحد الأقصى 20 ميغابايت للملف الواحد.');
+      Alert.alert(t('cmp.fileTooLarge'), t('cmp.maxUpload'));
       return;
     }
     onChange([...files, file]);
@@ -35,7 +38,7 @@ export function AttachmentPicker({
     // block on a hard denial — the OS may still show a limited picker.
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted && !permission.canAskAgain) {
-      Alert.alert('لا يوجد إذن', 'اسمحي للتطبيق بالوصول إلى الصور من إعدادات الجهاز.');
+      Alert.alert(t('cmp.noPermission'), t('cmp.allowPhotos'));
       return;
     }
 
@@ -77,8 +80,8 @@ export function AttachmentPicker({
   return (
     <View style={{ gap: 8 }}>
       <Row gap={8}>
-        <PickButton label={`📷 ${label} — صورة`} onPress={pickImage} />
-        <PickButton label="📄 تقرير PDF" onPress={pickDocument} />
+        <PickButton label={t('cmp.pickPhoto', { label: pickerLabel })} onPress={pickImage} />
+        <PickButton label={t('cmp.pickPdf')} onPress={pickDocument} />
       </Row>
 
       {files.length ? (
@@ -102,7 +105,10 @@ export function AttachmentPicker({
               </Txt>
               <Pressable
                 onPress={() => onChange(files.filter((_, i) => i !== index))}
-                accessibilityLabel={`إزالة ${file.name}`}
+                accessibilityRole="button"
+                accessibilityLabel={t('cmp.removeFile', { name: file.name })}
+                hitSlop={12}
+                style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
               >
                 <Txt size={15} color={colors.clayDelete}>
                   ×
@@ -120,6 +126,8 @@ function PickButton({ label, onPress }: { label: string; onPress: () => void }) 
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
       style={({ pressed }) => ({
         flex: 1,
         backgroundColor: pressed ? '#E2E8DC' : colors.sageSoft,

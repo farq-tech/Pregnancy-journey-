@@ -11,6 +11,7 @@
 
 import { File } from 'expo-file-system';
 
+import { t } from '../i18n';
 import { supabase } from './supabase';
 
 export const MEDIA_BUCKET = 'pregnancy-media';
@@ -79,14 +80,14 @@ export async function uploadAttachment(
   picked: PickedFile,
 ): Promise<Attachment> {
   if (!ALLOWED_MIME_TYPES.includes(picked.mimeType as (typeof ALLOWED_MIME_TYPES)[number])) {
-    throw new UploadError('نوع الملف غير مدعوم — الصور و PDF فقط.');
+    throw new UploadError(t('sys.unsupportedFile'));
   }
 
   const file = new File(picked.uri);
   const bytes = await file.arrayBuffer();
 
   if (bytes.byteLength > MAX_UPLOAD_BYTES) {
-    throw new UploadError('حجم الملف أكبر من 20 ميغابايت.');
+    throw new UploadError(t('sys.fileTooLarge'));
   }
 
   const path = objectPath(userId, ownerType, picked);

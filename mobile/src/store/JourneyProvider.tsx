@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { AppState } from 'react-native';
 
+import { t } from '../i18n';
 import { isoToday, type IsoDate } from '../lib/dates';
 import { cancelReminder, rescheduleAll, syncReminder } from '../lib/reminders';
 import { DEFAULT_CYCLE_LENGTH, type Settings } from '../lib/pregnancy';
@@ -298,7 +299,7 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
       setSyncError(null);
     } catch (error) {
       // Cached data stays on screen; the banner tells her it may be stale.
-      setSyncError(error instanceof Error ? error.message : 'تعذّر الاتصال بالخادم.');
+      setSyncError(error instanceof Error ? error.message : t('sys.connectFailed'));
     }
   }, [cache]);
 
@@ -380,7 +381,7 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
           uploaded.push(await uploadAttachment(uid, ownerType, ownerId, file));
         } catch (error) {
           setSyncError(
-            error instanceof Error ? error.message : 'تعذّر رفع أحد المرفقات.',
+            error instanceof Error ? error.message : t('sys.uploadFailed'),
           );
         }
       }

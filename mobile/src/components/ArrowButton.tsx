@@ -16,6 +16,7 @@ export function ArrowButton({
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
       accessibilityLabel={label}
       style={({ pressed }) => ({
         backgroundColor: pressed ? colors.sageSoft : colors.surface,
