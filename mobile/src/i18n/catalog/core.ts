@@ -64,7 +64,7 @@ export const ar = {
   };
 
 export const en = {
-  'label.and': ' ',
+  'label.and': ' and ',
   'label.ended': 'Ended',
   'label.today': 'Today',
   'label.tomorrow': 'Tomorrow',
