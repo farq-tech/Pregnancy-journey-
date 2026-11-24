@@ -23,6 +23,8 @@ import {
   weekContent,
 } from '../../../src/content/pregnancyData';
 import { questionsForWeek } from '../../../src/content/questions';
+import { useI18n } from '../../../src/i18n/LocaleProvider';
+import { getLocale } from '../../../src/i18n';
 import { formatDayMonth, weekOrdinalLabel } from '../../../src/lib/arabic';
 import { addDays, diffDays, fromIso } from '../../../src/lib/dates';
 import { joinMeta } from '../../../src/lib/labels';
@@ -38,6 +40,7 @@ import type { WeekVideo } from '../../../src/store/types';
 import { colors } from '../../../src/theme';
 
 export default function WeekScreen() {
+  const { t } = useI18n();
   const params = useLocalSearchParams<{ week: string }>();
   const { settings, appointments, videos, today, addVideo, remove } = useJourney();
 
@@ -56,7 +59,7 @@ export default function WeekScreen() {
   const start = weekStart(journey, week);
   const end = addDays(start, 6);
 
-  const weekTests = TESTS.filter((t) => week >= t.from && week <= t.to);
+  const weekTests = TESTS.filter((x) => week >= x.from && week <= x.to);
   const weekMilestones = MILESTONES.filter((m) => m.week === week);
   const weekAppointments = appointments.filter((a) => {
     const delta = diffDays(fromIso(a.date), start);
@@ -67,11 +70,16 @@ export default function WeekScreen() {
 
   return (
     <Screen>
+      {getLocale() === 'en' ? (
+        <Txt size={12} color={colors.muted} lineHeight={1.5}>
+          {t('lang.contentNote')}
+        </Txt>
+      ) : null}
       <Row justify="space-between">
         <ArrowButton
           direction="right"
           onPress={() => setWeek((w) => Math.max(MIN_WEEK, w - 1))}
-          label="الأسبوع السابق"
+          label={t('baby.prevWeek')}
         />
         <View>
           <Txt size={17} weight={600} align="center">
@@ -84,7 +92,7 @@ export default function WeekScreen() {
         <ArrowButton
           direction="left"
           onPress={() => setWeek((w) => Math.min(MAX_WEEK, w + 1))}
-          label="الأسبوع التالي"
+          label={t('baby.nextWeek')}
         />
       </Row>
 
@@ -92,7 +100,7 @@ export default function WeekScreen() {
         <WeekIllustration
           week={week}
           size={130}
-          caption={`صورة الجنين — ${weekOrdinalLabel(week)}`}
+          caption={t('baby.fetusImage', { week: weekOrdinalLabel(week) })}
           showCaption
         />
         <Txt size={16} weight={600} color={colors.sage} align="center" style={{ marginTop: 12 }}>
@@ -103,14 +111,18 @@ export default function WeekScreen() {
             {joinMeta(content.size, content.compare, content.weight)}
           </Txt>
         ) : null}
-        <Txt size={11.5} color={colors.faint} align="center" style={{ marginTop: 6 }}>
-          {week === currentWeek ? 'الأسبوع الحالي' : week < currentWeek ? 'أسبوع سابق' : 'قادم'}
+        <Txt size={11.5} color={colors.muted} align="center" style={{ marginTop: 6 }}>
+          {week === currentWeek
+            ? t('baby.currentWeek')
+            : week < currentWeek
+              ? t('baby.pastWeek')
+              : t('baby.upcomingWeek')}
         </Txt>
       </Card>
 
       <Card>
         <Txt size={15} weight={600} style={{ marginBottom: 8 }}>
-          الطفل 👶
+          {t('baby.sectionBaby')}
         </Txt>
         <Txt size={14} color={colors.body} lineHeight={1.9}>
           {content.baby}
@@ -118,7 +130,7 @@ export default function WeekScreen() {
         {content.appearance ? (
           <Txt size={13} color={colors.muted} lineHeight={1.8} style={{ marginTop: 8 }}>
             <Txt size={13} weight={600} color={colors.sage}>
-              الشكل:{' '}
+              {t('baby.appearance')}
             </Txt>
             {content.appearance}
           </Txt>
@@ -127,7 +139,7 @@ export default function WeekScreen() {
 
       <Card>
         <Txt size={15} weight={600} style={{ marginBottom: 8 }}>
-          الأم 🤰
+          {t('baby.sectionMom')}
         </Txt>
         <Txt size={14} color={colors.body} lineHeight={1.9}>
           {content.mom}
@@ -148,10 +160,10 @@ export default function WeekScreen() {
       {weekTests.length ? (
         <Card>
           <Txt size={15} weight={600} style={{ marginBottom: 4 }}>
-            فحوصات محتملة 🧪
+            {t('baby.testsTitle')}
           </Txt>
-          <Txt size={12} color={colors.faint} lineHeight={1.5} style={{ marginBottom: 10 }}>
-            التوقيت يختلف بحسب البلد والطبيب والحالة — ليست توصية شخصية.
+          <Txt size={12} color={colors.muted} lineHeight={1.5} style={{ marginBottom: 10 }}>
+            {t('baby.testsNote')}
           </Txt>
           <View style={{ gap: 12 }}>
             {weekTests.map((test) => (
@@ -160,7 +172,7 @@ export default function WeekScreen() {
                   {test.name}
                 </Txt>
                 <Txt size={12.5} color={colors.muted} lineHeight={1.7} style={{ marginTop: 2 }}>
-                  {`${test.why} · عادةً بين الأسبوع ${test.from}–${test.to}`}
+                  {t('baby.testRange', { why: test.why, from: test.from, to: test.to })}
                 </Txt>
               </View>
             ))}
@@ -171,7 +183,7 @@ export default function WeekScreen() {
       {weekMilestones.length ? (
         <Card>
           <Txt size={15} weight={600} style={{ marginBottom: 10 }}>
-            محطات هذا الأسبوع
+            {t('baby.weekMilestones')}
           </Txt>
           <View style={{ gap: 10 }}>
             {weekMilestones.map((milestone) => (
@@ -182,7 +194,7 @@ export default function WeekScreen() {
                 <Txt size={13.5} color={colors.body} lineHeight={1.7} style={{ flex: 1 }}>
                   {milestone.label}
                   {milestone.note ? (
-                    <Txt size={13.5} color={colors.faint}>{` — ${milestone.note}`}</Txt>
+                    <Txt size={13.5} color={colors.muted}>{` — ${milestone.note}`}</Txt>
                   ) : null}
                 </Txt>
               </Row>
@@ -194,7 +206,7 @@ export default function WeekScreen() {
       {weekAppointments.length ? (
         <Card>
           <Txt size={15} weight={600} style={{ marginBottom: 10 }}>
-            مواعيدك هذا الأسبوع 📅
+            {t('baby.weekAppointments')}
           </Txt>
           <View style={{ gap: 8 }}>
             {weekAppointments.map((appointment) => (
@@ -213,10 +225,10 @@ export default function WeekScreen() {
 
       <Card>
         <Txt size={15} weight={600} style={{ marginBottom: 4 }}>
-          أسئلة للطبيب 💬
+          {t('baby.questions')}
         </Txt>
-        <Txt size={12} color={colors.faint} lineHeight={1.5} style={{ marginBottom: 10 }}>
-          خذيها معك في الزيارة القادمة — أسئلة للنقاش، وليست توصيات.
+        <Txt size={12} color={colors.muted} lineHeight={1.5} style={{ marginBottom: 10 }}>
+          {t('baby.questionsNote')}
         </Txt>
         <View style={{ gap: 8 }}>
           {questionsForWeek(week).map((question) => (
@@ -235,19 +247,22 @@ export default function WeekScreen() {
       <Card>
         <Row justify="space-between" style={{ marginBottom: 10 }}>
           <Txt size={15} weight={600}>
-            ▶ شاهدي تطور طفلك
+            {t('baby.watch')}
           </Txt>
           <Pressable
             onPress={() => setSheetOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel={t('baby.addVideo')}
             style={{
               backgroundColor: colors.sageSoft,
               borderRadius: 999,
-              paddingVertical: 6,
+              minHeight: 44,
+              justifyContent: 'center',
               paddingHorizontal: 14,
             }}
           >
             <Txt size={12} weight={600} color={colors.sageDark}>
-              + إضافة فيديو
+              {t('baby.addVideo')}
             </Txt>
           </Pressable>
         </Row>
@@ -266,7 +281,7 @@ export default function WeekScreen() {
                     style={{ width: 58, height: 38, borderRadius: 8 }}
                     contentFit="cover"
                     transition={120}
-                    accessibilityLabel={`صورة مصغّرة — ${video.title}`}
+                    accessibilityLabel={t('baby.thumbnail', { title: video.title })}
                   />
                 ) : (
                   <View
@@ -290,29 +305,34 @@ export default function WeekScreen() {
                       // The link is user-supplied, so let the OS decide whether it
                       // is openable rather than assuming a browser will take it.
                       Linking.openURL(video.url).catch(() =>
-                        Alert.alert('تعذّر فتح الرابط', video.url),
+                        Alert.alert(t('baby.openFailed'), video.url),
                       );
                     }}
+                    accessibilityRole="link"
+                    accessibilityLabel={video.title}
+                    style={{ minHeight: 44, justifyContent: 'center' }}
                   >
                     <Txt size={13.5} weight={600} color={colors.sage}>
                       {video.title}
                     </Txt>
                   </Pressable>
                   <Txt size={11.5} color={colors.muted} style={{ marginTop: 2 }}>
-                    {joinMeta(video.source, video.author, video.duration) || 'فيديو خارجي'}
+                    {joinMeta(video.source, video.author, video.duration) || t('baby.externalVideo')}
                     {joinMeta(video.pubDate, video.license)
                       ? ` · ${joinMeta(video.pubDate, video.license)}`
                       : ''}
                   </Txt>
                   {video.description ? (
-                    <Txt size={11.5} color={colors.faint} lineHeight={1.6} style={{ marginTop: 2 }}>
+                    <Txt size={11.5} color={colors.muted} lineHeight={1.6} style={{ marginTop: 2 }}>
                       {video.description}
                     </Txt>
                   ) : null}
                 </View>
                 <Pressable
                   onPress={() => void remove('videos', video.id)}
-                  accessibilityLabel="حذف الفيديو"
+                  accessibilityRole="button"
+                  accessibilityLabel={t('baby.deleteVideo')}
+                  style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
                 >
                   <Txt size={15} color={colors.clay}>
                     ×
@@ -322,28 +342,28 @@ export default function WeekScreen() {
             ))}
           </View>
         ) : (
-          <Txt size={12.5} color={colors.faint} lineHeight={1.7}>
-            لا فيديوهات بعد — أضيفي فيديو من مصدر موثوق (يوتيوب، Vimeo، أو رابط خارجي) مع ذكر
-            المصدر والمؤلف.
+          <Txt size={12.5} color={colors.muted} lineHeight={1.7}>
+            {t('baby.noVideos')}
           </Txt>
         )}
       </Card>
 
       {sources.length ? (
-        <Txt size={11.5} color={colors.faint} align="center" lineHeight={1.8}>
-          {'المصادر: '}
+        <Txt size={11.5} color={colors.muted} align="center" lineHeight={1.8}>
+          {t('baby.sources')}
           {sources.map((source, index) => (
             <Txt
               key={source.name}
               size={11.5}
               color={colors.muted}
               onPress={() => void Linking.openURL(source.url)}
+              accessibilityRole="link"
             >
               {source.name}
-              {index < sources.length - 1 ? '، ' : ' '}
+              {index < sources.length - 1 ? t('baby.sourceSep') : ' '}
             </Txt>
           ))}
-          {`· آخر مراجعة ${LAST_REVIEWED}`}
+          {t('baby.lastReviewed', { date: LAST_REVIEWED })}
         </Txt>
       ) : null}
 
@@ -368,6 +388,7 @@ function VideoSheet({
   onClose: () => void;
   onSave: (input: Omit<WeekVideo, 'id'>) => Promise<void>;
 }) {
+  const { t } = useI18n();
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [source, setSource] = useState('');
@@ -395,17 +416,17 @@ function VideoSheet({
 
   const submit = async () => {
     if (!title.trim() || !url.trim()) {
-      setError('العنوان والرابط مطلوبان.');
+      setError(t('baby.video.required'));
       return;
     }
     // The database rejects anything that is not http(s); check here so she gets
     // an Arabic message instead of a Postgres constraint error.
     if (!/^https?:\/\//i.test(url.trim())) {
-      setError('الرابط يجب أن يبدأ بـ http:// أو https://');
+      setError(t('baby.video.badUrl'));
       return;
     }
     if (thumbnailUrl.trim() && !/^https?:\/\//i.test(thumbnailUrl.trim())) {
-      setError('رابط الصورة المصغّرة يجب أن يبدأ بـ http:// أو https://');
+      setError(t('baby.video.badThumb'));
       return;
     }
     setSaving(true);
@@ -425,7 +446,7 @@ function VideoSheet({
       reset();
       onClose();
     } catch {
-      setError('تعذّر الحفظ — تحقّقي من الاتصال وحاولي مرة أخرى.');
+      setError(t('common.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -435,14 +456,14 @@ function VideoSheet({
     <Sheet
       visible={visible}
       onClose={onClose}
-      title="إضافة فيديو"
-      subtitle="أضيفي فيديو من مصدر موثوق فقط — مع ذكر المصدر والمؤلف وحقوق الاستخدام."
+      title={t('baby.video.sheetTitle')}
+      subtitle={t('baby.video.sheetSubtitle')}
     >
-      <TextField value={title} onChange={setTitle} placeholder="عنوان الفيديو" size={14.5} />
+      <TextField value={title} onChange={setTitle} placeholder={t('baby.video.title')} size={14.5} />
       <TextField
         value={url}
         onChange={setUrl}
-        placeholder="الرابط (YouTube / Vimeo / خارجي)"
+        placeholder={t('baby.video.url')}
         size={14.5}
         ltr
       />
@@ -450,14 +471,14 @@ function VideoSheet({
         <TextField
           value={source}
           onChange={setSource}
-          placeholder="المصدر"
+          placeholder={t('baby.video.source')}
           size={14.5}
           style={{ flex: 1 }}
         />
         <TextField
           value={author}
           onChange={setAuthor}
-          placeholder="المؤلف"
+          placeholder={t('baby.video.author')}
           size={14.5}
           style={{ flex: 1 }}
         />
@@ -466,21 +487,21 @@ function VideoSheet({
         <TextField
           value={duration}
           onChange={setDuration}
-          placeholder="المدة"
+          placeholder={t('baby.video.duration')}
           size={14.5}
           style={{ flex: 1 }}
         />
         <TextField
           value={pubDate}
           onChange={setPubDate}
-          placeholder="تاريخ النشر"
+          placeholder={t('baby.video.pubDate')}
           size={14.5}
           style={{ flex: 1 }}
         />
         <TextField
           value={license}
           onChange={setLicense}
-          placeholder="الترخيص"
+          placeholder={t('baby.video.license')}
           size={14.5}
           style={{ flex: 1 }}
         />
@@ -488,25 +509,25 @@ function VideoSheet({
       <TextField
         value={thumbnailUrl}
         onChange={setThumbnailUrl}
-        placeholder="رابط الصورة المصغّرة (اختياري)"
+        placeholder={t('baby.video.thumbnail')}
         size={14.5}
         ltr
       />
       <TextField
         value={description}
         onChange={setDescription}
-        placeholder="وصف مختصر"
+        placeholder={t('baby.video.description')}
         rows={2}
         size={14.5}
       />
       {error ? <ErrorText>{error}</ErrorText> : null}
       <Row gap={10}>
         <PrimaryButton
-          label={saving ? 'جارٍ الحفظ…' : 'حفظ الفيديو'}
+          label={saving ? t('common.saving') : t('baby.video.save')}
           onPress={submit}
           style={{ flex: 2 }}
         />
-        <SecondaryButton label="إلغاء" onPress={onClose} style={{ flex: 1 }} />
+        <SecondaryButton label={t('common.cancel')} onPress={onClose} style={{ flex: 1 }} />
       </Row>
     </Sheet>
   );

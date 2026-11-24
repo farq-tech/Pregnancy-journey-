@@ -3,6 +3,7 @@ import { View } from 'react-native';
 
 import { BABY_WEEK_IMAGES } from '../../assets/babyWeeks';
 import { illustrationWeek } from '../lib/pregnancy';
+import { useI18n } from '../i18n/LocaleProvider';
 import { colors } from '../theme';
 import { Txt } from './Txt';
 
@@ -16,7 +17,7 @@ import { Txt } from './Txt';
 export function WeekIllustration({
   week,
   size,
-  caption = 'صورة الأسبوع',
+  caption,
   variant = 'full',
   showCaption = false,
 }: {
@@ -29,6 +30,7 @@ export function WeekIllustration({
   /** Renders the asset's caption underneath, where there is room for it. */
   showCaption?: boolean;
 }) {
+  const { t } = useI18n();
   const resolved = illustrationWeek(week);
   const asset = BABY_WEEK_IMAGES[resolved];
 
@@ -45,7 +47,7 @@ export function WeekIllustration({
           transition={150}
         />
         {showCaption && asset.caption ? (
-          <Txt size={11.5} color={colors.faint} align="center" lineHeight={1.5}>
+          <Txt size={11.5} color={colors.muted} align="center" lineHeight={1.5}>
             {asset.caption}
           </Txt>
         ) : null}
@@ -56,7 +58,7 @@ export function WeekIllustration({
   return (
     <View
       accessible
-      accessibilityLabel={`${caption} — الأسبوع ${resolved}`}
+      accessibilityLabel={t('cmp.weekImageLabel', { caption: caption ?? t('cmp.weekImage'), n: resolved })}
       style={{
         width: size,
         height: size,
@@ -73,8 +75,8 @@ export function WeekIllustration({
       <Txt size={size * 0.26} weight={600} color={colors.sage} align="center">
         {resolved}
       </Txt>
-      <Txt size={Math.max(8, size * 0.1)} color={colors.muted} align="center">
-        أسبوع
+      <Txt size={Math.max(11, size * 0.1)} color={colors.muted} align="center">
+        {t('cmp.week')}
       </Txt>
     </View>
   );

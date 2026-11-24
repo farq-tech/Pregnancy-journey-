@@ -2,6 +2,8 @@ import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import { Alert, Linking, Pressable, View } from 'react-native';
 
+import { t as tModule } from '../i18n';
+import { useI18n } from '../i18n/LocaleProvider';
 import { signedUrls, type Attachment } from '../lib/storage';
 import { colors } from '../theme';
 import { Row } from './layout';
@@ -20,6 +22,7 @@ export function AttachmentGallery({
   attachments: Attachment[];
   onRemove?: (attachment: Attachment) => void;
 }) {
+  const { t } = useI18n();
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [failed, setFailed] = useState(false);
 
@@ -54,7 +57,7 @@ export function AttachmentGallery({
   if (failed) {
     return (
       <Txt size={12} color={colors.muted} style={{ marginTop: 8 }}>
-        تعذّر تحميل المرفقات — تحقّقي من الاتصال.
+        {t('cmp.attachLoadFailed')}
       </Txt>
     );
   }
@@ -74,7 +77,8 @@ export function AttachmentGallery({
                 const url = urls[attachment.path];
                 if (url) void Linking.openURL(url);
               }}
-              accessibilityLabel={attachment.caption || 'صورة مرفقة'}
+              accessibilityRole="button"
+              accessibilityLabel={attachment.caption || t('cmp.photoAttached')}
             >
               <Image
                 source={urls[attachment.path] ? { uri: urls[attachment.path] } : undefined}
@@ -106,19 +110,24 @@ export function AttachmentGallery({
           <Txt size={13}>📄</Txt>
           <Pressable
             style={{ flex: 1 }}
+            accessibilityRole="button"
+            accessibilityLabel={attachment.caption || t('cmp.reportAttached')}
             onPress={() => {
               const url = urls[attachment.path];
               if (url) void Linking.openURL(url);
             }}
           >
             <Txt size={12.5} weight={500} color={colors.sage} numberOfLines={1}>
-              {attachment.caption || 'تقرير مرفق'}
+              {attachment.caption || t('cmp.reportAttached')}
             </Txt>
           </Pressable>
           {onRemove ? (
             <Pressable
               onPress={() => confirmRemove(attachment, onRemove)}
-              accessibilityLabel="حذف المرفق"
+              accessibilityRole="button"
+              accessibilityLabel={t('cmp.removeAttachment')}
+              hitSlop={12}
+              style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
             >
               <Txt size={15} color={colors.clayDelete}>
                 ×
@@ -133,8 +142,8 @@ export function AttachmentGallery({
 
 /** Medical files are not something to delete on a stray tap. */
 function confirmRemove(attachment: Attachment, onRemove: (a: Attachment) => void) {
-  Alert.alert('حذف المرفق؟', 'لا يمكن التراجع عن هذا الإجراء.', [
-    { text: 'إلغاء', style: 'cancel' },
-    { text: 'حذف', style: 'destructive', onPress: () => onRemove(attachment) },
+  Alert.alert(tModule('cmp.removeTitle'), tModule('cmp.irreversible'), [
+    { text: tModule('common.cancel'), style: 'cancel' },
+    { text: tModule('common.delete'), style: 'destructive', onPress: () => onRemove(attachment) },
   ]);
 }

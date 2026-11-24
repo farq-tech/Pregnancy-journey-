@@ -10,6 +10,7 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
+import { t } from '../i18n';
 import { fromIso } from './dates';
 import type { Appointment, ReminderOffset } from '../store/types';
 
@@ -90,7 +91,7 @@ export async function syncReminder(appointment: Appointment): Promise<void> {
 
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('appointments', {
-      name: 'مواعيد الحمل',
+      name: t('sys.channelName'),
       importance: Notifications.AndroidImportance.DEFAULT,
     });
   }
@@ -100,8 +101,8 @@ export async function syncReminder(appointment: Appointment): Promise<void> {
     content: {
       title: appointment.title,
       body: appointment.time
-        ? `موعدك القادم الساعة ${appointment.time}`
-        : 'لديك موعد قادم',
+        ? t('sys.reminderAt', { time: appointment.time })
+        : t('sys.reminderSoon'),
       data: { appointmentId: appointment.id },
     },
     trigger: {

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 
 import { AttachmentGallery } from '../../src/components/AttachmentGallery';
 import { AttachmentPicker } from '../../src/components/AttachmentPicker';
@@ -14,18 +14,26 @@ import {
   TextField,
 } from '../../src/components/fields';
 import { Card, Row } from '../../src/components/layout';
+import { useI18n } from '../../src/i18n/LocaleProvider';
 import { formatDayMonth } from '../../src/lib/arabic';
 import { diffDays, fromIso } from '../../src/lib/dates';
 import { computeJourney } from '../../src/lib/pregnancy';
 import type { PickedFile } from '../../src/lib/storage';
 import { useJourney } from '../../src/store/JourneyProvider';
-import { MOODS, type JournalEntry } from '../../src/store/types';
+import { MOODS, moodLabel, type JournalEntry } from '../../src/store/types';
 import { colors } from '../../src/theme';
 
 export default function JournalScreen() {
   const { settings, journal, today, addJournalEntry, remove, attachmentsFor, deleteAttachment } =
     useJourney();
+  const { t } = useI18n();
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  const confirmDelete = (id: string) =>
+    Alert.alert(t('journal.deleteTitle'), t('journal.deleteMsg'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.delete'), style: 'destructive', onPress: () => void remove('journal', id) },
+    ]);
 
   const journey = useMemo(
     () => (settings ? computeJourney(settings, fromIso(today)) : null),
@@ -39,14 +47,16 @@ export default function JournalScreen() {
       <Row justify="space-between">
         <View style={{ flex: 1 }}>
           <Txt size={20} weight={600}>
-            اليوميات
+            {t('journal.title')}
           </Txt>
           <Txt size={12.5} color={colors.muted}>
-            لحظاتك في الرحلة، يومًا بيوم
+            {t('journal.subtitle')}
           </Txt>
         </View>
         <Pressable
           onPress={() => setSheetOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('journal.add')}
           style={({ pressed }) => ({
             backgroundColor: pressed ? colors.sageDark : colors.sage,
             borderRadius: 999,
@@ -55,7 +65,7 @@ export default function JournalScreen() {
           })}
         >
           <Txt size={13.5} weight={600} color={colors.surface}>
-            + تدوينة
+            {t('journal.add')}
           </Txt>
         </Pressable>
       </Row>
@@ -73,16 +83,17 @@ export default function JournalScreen() {
           }}
         >
           <Txt size={15} weight={600} color={colors.muted} align="center">
-            &quot;اليوم أشعر…&quot;
+            {t('journal.empty')}
           </Txt>
-          <Txt size={13} color={colors.faint} align="center" lineHeight={1.7} style={{ marginTop: 6 }}>
-            {'دوّني مشاعرك وأعراضك ووزنك\nلتصبح ذكريات الرحلة'}
+          <Txt size={13} color={colors.muted} align="center" lineHeight={1.7} style={{ marginTop: 6 }}>
+            {t('journal.emptyHint')}
           </Txt>
         </View>
       ) : (
         <View style={{ gap: 10 }}>
           {journal.map((entry) => {
             const gestationalDay = diffDays(fromIso(entry.date), journey.effectiveLmp);
+            const entryWeek = Math.floor(gestationalDay / 7) + 1;
             return (
               <Card
                 key={entry.id}
@@ -92,11 +103,16 @@ export default function JournalScreen() {
               >
                 <Row justify="space-between">
                   <Txt size={12.5} weight={500} color={colors.muted}>
-                    {`${formatDayMonth(fromIso(entry.date))} · الأسبوع ${Math.floor(gestationalDay / 7) + 1}`}
+                    {entryWeek >= 1
+                      ? `${formatDayMonth(fromIso(entry.date))} · ${t('journal.weekN', { n: entryWeek })}`
+                      : formatDayMonth(fromIso(entry.date))}
                   </Txt>
                   <Pressable
-                    onPress={() => void remove('journal', entry.id)}
-                    accessibilityLabel="حذف التدوينة"
+                    onPress={() => confirmDelete(entry.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('journal.deleteLabel')}
+                    hitSlop={12}
+                    style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Txt size={15} color={colors.clayDelete}>
                       ×
@@ -116,7 +132,7 @@ export default function JournalScreen() {
                     }}
                   >
                     <Txt size={12} color={colors.clayText}>
-                      {entry.mood}
+                      {moodLabel(entry.mood)}
                     </Txt>
                   </View>
                 ) : null}
@@ -130,13 +146,13 @@ export default function JournalScreen() {
                 {entry.symptoms || entry.weight != null ? (
                   <Row gap={12} style={{ marginTop: 8 }}>
                     {entry.symptoms ? (
-                      <Txt size={12} color={colors.faint}>
-                        {`أعراض: ${entry.symptoms}`}
+                      <Txt size={12} color={colors.muted}>
+                        {t('journal.symptoms', { v: entry.symptoms })}
                       </Txt>
                     ) : null}
                     {entry.weight != null ? (
-                      <Txt size={12} color={colors.faint}>
-                        {`الوزن: ${entry.weight} كغم`}
+                      <Txt size={12} color={colors.muted}>
+                        {t('journal.weight', { v: entry.weight })}
                       </Txt>
                     ) : null}
                   </Row>
@@ -173,6 +189,7 @@ function JournalSheet({
   onClose: () => void;
   onSave: (input: Omit<JournalEntry, 'id'>, files?: PickedFile[]) => Promise<void>;
 }) {
+  const { t } = useI18n();
   const [date, setDate] = useState(today);
   const [mood, setMood] = useState('');
   const [text, setText] = useState('');
@@ -184,12 +201,12 @@ function JournalSheet({
 
   const submit = async () => {
     if (!text.trim() && !mood) {
-      setError('اكتبي شيئًا أو اختاري مزاج اليوم.');
+      setError(t('journal.needContent'));
       return;
     }
     const parsedWeight = weight.trim() ? Number(weight) : null;
     if (parsedWeight !== null && (Number.isNaN(parsedWeight) || parsedWeight <= 0)) {
-      setError('الوزن يجب أن يكون رقمًا صحيحًا.');
+      setError(t('journal.badWeight'));
       return;
     }
     setSaving(true);
@@ -203,19 +220,19 @@ function JournalSheet({
       setError('');
       onClose();
     } catch {
-      setError('تعذّر الحفظ — تحقّقي من الاتصال وحاولي مرة أخرى.');
+      setError(t('common.saveFailed'));
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <Sheet visible={visible} onClose={onClose} title="تدوينة جديدة">
+    <Sheet visible={visible} onClose={onClose} title={t('journal.sheetTitle')}>
       <DateField value={date} onChange={setDate} />
 
       <View>
         <Txt size={13} weight={500} style={{ marginBottom: 8 }}>
-          مزاج اليوم
+          {t('journal.moodTitle')}
         </Txt>
         <Row wrap gap={7}>
           {MOODS.map((option) => {
@@ -225,7 +242,12 @@ function JournalSheet({
                 key={option}
                 // Tapping the selected mood clears it, so an entry can be text-only.
                 onPress={() => setMood(active ? '' : option)}
+                accessibilityRole="radio"
+                accessibilityLabel={moodLabel(option)}
+                accessibilityState={{ selected: active }}
                 style={{
+                  minHeight: 44,
+                  justifyContent: 'center',
                   borderRadius: 999,
                   paddingVertical: 8,
                   paddingHorizontal: 15,
@@ -233,7 +255,7 @@ function JournalSheet({
                 }}
               >
                 <Txt size={13} color={active ? colors.surface : colors.sage}>
-                  {option}
+                  {moodLabel(option)}
                 </Txt>
               </Pressable>
             );
@@ -241,29 +263,29 @@ function JournalSheet({
         </Row>
       </View>
 
-      <TextField value={text} onChange={setText} placeholder="اليوم أشعر…" rows={3} size={14.5} />
+      <TextField value={text} onChange={setText} placeholder={t('journal.placeholder')} rows={3} size={14.5} />
       <Row gap={10} align="flex-start">
         <TextField
           value={symptoms}
           onChange={setSymptoms}
-          placeholder="أعراض اليوم"
+          placeholder={t('journal.symptomsPh')}
           size={14.5}
           style={{ flex: 2 }}
         />
         <TextField
           value={weight}
           onChange={setWeight}
-          placeholder="الوزن كغم"
+          placeholder={t('journal.weightPh')}
           keyboardType="decimal-pad"
           size={14.5}
           style={{ flex: 1 }}
         />
       </Row>
-      <AttachmentPicker files={files} onChange={setFiles} label="صورة اليوم" />
+      <AttachmentPicker files={files} onChange={setFiles} label={t('journal.photo')} />
       {error ? <ErrorText>{error}</ErrorText> : null}
       <Row gap={10}>
-        <PrimaryButton label={saving ? 'جارٍ الحفظ…' : 'حفظ'} onPress={submit} style={{ flex: 2 }} />
-        <SecondaryButton label="إلغاء" onPress={onClose} style={{ flex: 1 }} />
+        <PrimaryButton label={saving ? t('common.saving') : t('common.save')} onPress={submit} style={{ flex: 2 }} />
+        <SecondaryButton label={t('common.cancel')} onPress={onClose} style={{ flex: 1 }} />
       </Row>
     </Sheet>
   );

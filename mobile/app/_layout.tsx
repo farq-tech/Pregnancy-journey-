@@ -13,12 +13,22 @@ import { useEffect } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { LocaleProvider, useI18n } from '../src/i18n/LocaleProvider';
 import { JourneyProvider } from '../src/store/JourneyProvider';
 import { colors } from '../src/theme';
 
 void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  return (
+    <LocaleProvider>
+      <Root />
+    </LocaleProvider>
+  );
+}
+
+function Root() {
+  const { locale, ready } = useI18n();
   const [fontsLoaded] = useFonts({
     Rubik_400Regular,
     Rubik_500Medium,
@@ -29,16 +39,17 @@ export default function RootLayout() {
   useEffect(() => {
     // Hold the splash until Rubik is ready — swapping the font mid-render would
     // reflow every Arabic line in the app.
-    if (fontsLoaded) void SplashScreen.hideAsync();
-  }, [fontsLoaded]);
+    if (fontsLoaded && ready) void SplashScreen.hideAsync();
+  }, [fontsLoaded, ready]);
 
-  if (!fontsLoaded) return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
+  if (!fontsLoaded || !ready) return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
 
   return (
     <SafeAreaProvider>
       <JourneyProvider>
         <StatusBar style="dark" />
         <Stack
+          key={locale}
           screenOptions={{
             headerShown: false,
             contentStyle: { backgroundColor: colors.bg },
@@ -46,6 +57,7 @@ export default function RootLayout() {
         >
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="onboarding" />
+          <Stack.Screen name="emergency" options={{ presentation: 'modal' }} />
         </Stack>
       </JourneyProvider>
     </SafeAreaProvider>

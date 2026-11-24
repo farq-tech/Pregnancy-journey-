@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, View, type ViewProps, type ViewStyle } from 'react-native';
 
+import { useI18n } from '../i18n/LocaleProvider';
 import { colors } from '../theme';
 
 /**
@@ -24,12 +25,13 @@ export function Row({
   justify?: ViewStyle['justifyContent'];
   wrap?: boolean;
 }) {
+  const { rtl } = useI18n();
   return (
     <View
       {...rest}
       style={[
         {
-          flexDirection: 'row-reverse',
+          flexDirection: rtl ? 'row-reverse' : 'row',
           alignItems: align,
           ...(gap ? { gap } : null),
           ...(justify ? { justifyContent: justify } : null),

@@ -1,37 +1,23 @@
 /**
  * Translation lookup.
  *
- * Arabic is the default and the source of truth; English is picked up only when
- * the device is set to English. The medical content stays Arabic regardless —
- * see the note in `strings.ts`.
+ * Arabic is the default and the source of truth. The language is chosen in the
+ * app (see LocaleProvider) and persisted; the device language is deliberately
+ * not used, so existing Arabic users never get a surprise English UI.
+ * The medical content stays Arabic — see the note in `strings.ts`.
  */
-
-import { getLocales } from 'expo-localization';
 
 import { STRINGS, type Locale, type StringKey } from './strings';
 
 export const DEFAULT_LOCALE: Locale = 'ar';
 
-function detectLocale(): Locale {
-  try {
-    const code = getLocales()[0]?.languageCode;
-    return code === 'en' ? 'en' : DEFAULT_LOCALE;
-  } catch {
-    // getLocales can throw on a misconfigured device; Arabic is the safe default.
-    return DEFAULT_LOCALE;
-  }
-}
-
-let activeLocale: Locale = detectLocale();
+let activeLocale: Locale = DEFAULT_LOCALE;
 
 export function getLocale(): Locale {
   return activeLocale;
 }
 
-/**
- * Overrides the device locale. Exposed for a future in-app language switch and
- * for tests; changing it does not re-render on its own.
- */
+/** Module-level switch; LocaleProvider owns re-rendering. */
 export function setLocale(locale: Locale): void {
   activeLocale = locale;
 }
@@ -41,9 +27,10 @@ export function isRtl(): boolean {
   return activeLocale === 'ar';
 }
 
-/** Looks up a chrome string. Falls back to Arabic, then to the key itself. */
-export function t(key: StringKey): string {
-  return STRINGS[activeLocale][key] ?? STRINGS[DEFAULT_LOCALE][key] ?? key;
+/** Looks up a string, filling `{name}` placeholders. Falls back to Arabic, then the key. */
+export function t(key: StringKey, vars?: Record<string, string | number>): string {
+  const raw = STRINGS[activeLocale][key] ?? STRINGS[DEFAULT_LOCALE][key] ?? key;
+  return vars ? raw.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? '')) : raw;
 }
 
 export type { Locale, StringKey };

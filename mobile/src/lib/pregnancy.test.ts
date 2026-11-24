@@ -50,13 +50,13 @@ describe('spec acceptance example — LMP 19 July 2026, 28-day cycle', () => {
     assert.equal(j.dayNumber, 25);
   });
 
-  it('reads 3 weeks and 4 days, in week 4', () => {
+  it('reads 3 weeks and 4 days, in week 3', () => {
     const j = computeJourney(settings, fromIso('2026-08-13'));
     assert.equal(j.gaWeeks, 3);
     assert.equal(j.gaDays, 4);
-    assert.equal(j.week, 4);
+    assert.equal(j.week, 3);
     assert.equal(gestationalAgeLabel(j.gaWeeks, j.gaDays), '3 أسابيع و4 أيام');
-    assert.equal(weekOrdinalLabel(j.week), 'الأسبوع الرابع');
+    assert.equal(weekOrdinalLabel(j.week), 'الأسبوع الثالث');
   });
 
   it('leaves 255 days to go', () => {
@@ -110,7 +110,7 @@ describe('computeJourney', () => {
     assert.equal(j.gestationalDay, 101);
     assert.equal(j.gaWeeks, 14);
     assert.equal(j.gaDays, 3);
-    assert.equal(j.week, 15);
+    assert.equal(j.week, 14, 'week matches the 14w3d the doctor would say');
   });
 
   it('pushes the due date out for a longer cycle', () => {
@@ -222,17 +222,17 @@ describe('ultrasound re-dating', () => {
 
     assert.equal(after.dayNumber, before.dayNumber - 7);
     assert.equal(after.daysLeft, before.daysLeft + 7);
-    assert.equal(after.week, 3);
-    assert.equal(before.week, 4);
+    assert.equal(after.week, 2);
+    assert.equal(before.week, 3);
     assert.equal(after.dayNumber + after.daysLeft, TERM_DAYS, 'invariant survives re-dating');
   });
 
   it('moves the whole calendar grid, not just the headline', () => {
     const after = computeJourney({ ...settings, eddOverride: '2027-05-02' }, fromIso('2026-08-13'));
-    // Week 8 now starts a week later than it would have.
-    assert.equal(toIso(weekStart(after, 8)), '2026-09-13');
+    // Week 8 (8w0d) now starts a week later than it would have.
+    assert.equal(toIso(weekStart(after, 8)), '2026-09-20');
     const before = computeJourney(settings, fromIso('2026-08-13'));
-    assert.equal(toIso(weekStart(before, 8)), '2026-09-06');
+    assert.equal(toIso(weekStart(before, 8)), '2026-09-13');
   });
 
   it('lets the override win over the cycle-length adjustment', () => {
@@ -245,18 +245,18 @@ describe('ultrasound re-dating', () => {
 });
 
 describe('trimesters', () => {
-  it('starts the second at day 91 and the third at day 189', () => {
-    assert.equal(trimesterFor(90), 1);
-    assert.equal(trimesterFor(91), 2);
-    assert.equal(trimesterFor(188), 2);
-    assert.equal(trimesterFor(189), 3);
+  it('starts the second at 14w0d (day 98) and the third at 28w0d (day 196)', () => {
+    assert.equal(trimesterFor(97), 1);
+    assert.equal(trimesterFor(98), 2);
+    assert.equal(trimesterFor(195), 2);
+    assert.equal(trimesterFor(196), 3);
   });
 
   it('counts whole weeks to the next trimester, and none in the third', () => {
-    assert.equal(weeksToNextTrimester(84), 1);
-    assert.equal(weeksToNextTrimester(90), 1);
-    assert.equal(weeksToNextTrimester(91), 14);
-    assert.equal(weeksToNextTrimester(189), null);
+    assert.equal(weeksToNextTrimester(91), 1);
+    assert.equal(weeksToNextTrimester(97), 1);
+    assert.equal(weeksToNextTrimester(98), 14);
+    assert.equal(weeksToNextTrimester(196), null);
   });
 });
 
@@ -274,8 +274,8 @@ describe('calendar window', () => {
   });
 
   it('starts each week seven days after the last', () => {
-    assert.equal(toIso(weekStart(j, 1)), '2026-01-01');
-    assert.equal(toIso(weekStart(j, 15)), '2026-04-09');
+    assert.equal(toIso(weekStart(j, 14)), '2026-04-09');
+    assert.equal(toIso(weekStart(j, 15)), '2026-04-16');
   });
 
   it('clamps navigation to weeks 1–42 and illustrations to 4–40', () => {
@@ -320,5 +320,36 @@ describe('Arabic agreement', () => {
   it('omits the day part when the age is a whole number of weeks', () => {
     assert.equal(gestationalAgeLabel(8, 0), '8 أسابيع');
     assert.equal(gestationalAgeLabel(8, 1), '8 أسابيع ويوم واحد');
+  });
+});
+
+describe('pregnancy months', () => {
+  const base = { lmp: '2026-01-01', cycleLength: 28, status: 'pregnant', eddOverride: null, babyName: '', motherName: '', doctor: '' } as const;
+  const at = (n: number) => computeJourney(base, addDays(new Date(2026, 0, 1), n));
+  it('starts in month 1 with none completed', () => {
+    assert.equal(at(0).monthNumber, 1);
+    assert.equal(at(0).gaMonths, 0);
+  });
+  it('moves to month 2 after one average month', () => {
+    assert.equal(at(31).gaMonths, 1);
+    assert.equal(at(31).monthNumber, 2);
+  });
+  it('never exceeds month 9', () => {
+    assert.equal(at(279).monthNumber, 9);
+    assert.equal(at(290).monthNumber, 9);
+  });
+});
+
+describe('week numbering matches the clinical convention', () => {
+  const at = (n: number) => computeJourney(base, addDays(new Date(2026, 0, 1), n));
+  it('is in week 40 on the due date (40w0d) and week 39 the day before', () => {
+    assert.equal(at(279).week, 39);
+    assert.equal(at(280).week, 40);
+    assert.equal(at(280).daysLeft, 0);
+  });
+  it('is in week 14 exactly when the second trimester begins', () => {
+    assert.equal(at(98).week, 14);
+    assert.equal(at(98).trimester, 2);
+    assert.equal(at(97).trimester, 1);
   });
 });

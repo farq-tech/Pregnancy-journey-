@@ -1,5 +1,6 @@
-import { StyleSheet, Text, type TextProps, type TextStyle } from 'react-native';
+import { Text, type TextProps, type TextStyle } from 'react-native';
 
+import { useI18n } from '../i18n/LocaleProvider';
 import { colors, fonts, type FontWeightKey } from '../theme';
 
 type Props = TextProps & {
@@ -24,20 +25,24 @@ export function Txt({
   size = 14,
   color = colors.text,
   lineHeight,
-  align = 'right',
+  align,
   style,
   ...rest
 }: Props) {
+  const { rtl } = useI18n();
   return (
     <Text
+      maxFontSizeMultiplier={1.4}
       {...rest}
       style={[
-        styles.base,
         {
           fontFamily: fonts[weight],
           fontSize: size,
           color,
-          textAlign: align,
+          textAlign: align ?? (rtl ? 'right' : 'left'),
+          writingDirection: rtl ? 'rtl' : 'ltr',
+          // Cap Dynamic Type so fixed-size boxes survive the largest settings.
+          
           ...(lineHeight ? { lineHeight: Math.round(size * lineHeight) } : null),
         },
         style,
@@ -46,8 +51,3 @@ export function Txt({
   );
 }
 
-const styles = StyleSheet.create({
-  base: {
-    writingDirection: 'rtl',
-  },
-});

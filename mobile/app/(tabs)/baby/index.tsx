@@ -11,6 +11,8 @@ import {
   MIN_CONTENT_WEEK,
   weekContent,
 } from '../../../src/content/pregnancyData';
+import { useI18n } from '../../../src/i18n/LocaleProvider';
+import { weekOrdinalLabel } from '../../../src/lib/arabic';
 import { fromIso } from '../../../src/lib/dates';
 import { joinMeta } from '../../../src/lib/labels';
 import { clampWeek, computeJourney } from '../../../src/lib/pregnancy';
@@ -18,6 +20,7 @@ import { useJourney } from '../../../src/store/JourneyProvider';
 import { colors } from '../../../src/theme';
 
 export default function BabyTimelineScreen() {
+  const { t } = useI18n();
   const { settings, today, records, appointments } = useJourney();
   const journey = useMemo(
     () => (settings ? computeJourney(settings, fromIso(today)) : null),
@@ -35,7 +38,7 @@ export default function BabyTimelineScreen() {
   if (!journey || !settings) return null;
 
   const currentWeek = clampWeek(journey.week);
-  const babyName = settings.babyName || 'طفلك';
+  const babyName = settings.babyName || t('baby.defaultName');
   const milestones = milestonesWithState(
     journey.gestationalDay,
     journey.effectiveLmp,
@@ -46,10 +49,10 @@ export default function BabyTimelineScreen() {
   return (
     <Screen gap={0}>
       <Txt size={20} weight={600} style={{ marginBottom: 2 }}>
-        {`رحلة ${babyName}`}
+        {t('baby.journeyOf', { name: babyName })}
       </Txt>
       <Txt size={13} color={colors.muted} style={{ marginBottom: 18 }}>
-        {`التطور أسبوعًا بأسبوع — من الأسبوع ${MIN_CONTENT_WEEK} حتى ${MAX_CONTENT_WEEK}`}
+        {t('baby.subtitle', { from: MIN_CONTENT_WEEK, to: MAX_CONTENT_WEEK })}
       </Txt>
 
       <View>
@@ -60,6 +63,8 @@ export default function BabyTimelineScreen() {
             <Pressable
               key={week}
               onPress={() => router.push({ pathname: '/baby/[week]', params: { week } })}
+              accessibilityRole="button"
+              accessibilityLabel={`${weekOrdinalLabel(week)}: ${content.title}${isCurrent ? ` — ${t('baby.currentWeek')}` : ''}`}
             >
               {({ pressed }) => (
                 <Row gap={14} align="stretch" style={{ opacity: pressed ? 0.8 : 1 }}>
@@ -113,7 +118,7 @@ export default function BabyTimelineScreen() {
                         }}
                       >
                         <Txt size={11} weight={600} color={colors.sageDark}>
-                          الأسبوع الحالي
+                          {t('baby.currentWeek')}
                         </Txt>
                       </View>
                     ) : null}
@@ -126,7 +131,7 @@ export default function BabyTimelineScreen() {
       </View>
 
       <Txt size={15} weight={600} style={{ marginTop: 14, marginBottom: 12 }}>
-        المحطات ✓
+        {t('baby.milestones')}
       </Txt>
 
       <Card style={{ paddingVertical: 18, paddingHorizontal: 20, gap: 12 }}>
@@ -144,7 +149,15 @@ export default function BabyTimelineScreen() {
                 : colors.border;
 
           return (
-            <Row key={milestone.id} gap={10} align="flex-start">
+            <Row
+              key={milestone.id}
+              gap={10}
+              align="flex-start"
+              accessible
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: status === 'confirmed', disabled: true }}
+              accessibilityLabel={`${milestone.label}, ${weekOrdinalLabel(milestone.week)}. ${label}`}
+            >
               <View
                 style={{
                   width: 18,
@@ -160,7 +173,7 @@ export default function BabyTimelineScreen() {
               >
                 {mark ? (
                   <Txt
-                    size={10}
+                    size={11}
                     color={status === 'confirmed' ? colors.surface : colors.sage}
                     align="center"
                   >
@@ -175,12 +188,12 @@ export default function BabyTimelineScreen() {
                   color={status === 'upcoming' ? colors.muted : colors.text}
                 >
                   {milestone.label}
-                  <Txt size={12} color={colors.faint}>
-                    {` · الأسبوع ${milestone.week}`}
+                  <Txt size={12} color={colors.muted}>
+                    {t('baby.weekSuffix', { n: milestone.week })}
                   </Txt>
                 </Txt>
                 {milestone.note ? (
-                  <Txt size={12} color={colors.faint} lineHeight={1.6} style={{ marginTop: 1 }}>
+                  <Txt size={12} color={colors.muted} lineHeight={1.6} style={{ marginTop: 1 }}>
                     {milestone.note}
                   </Txt>
                 ) : null}
@@ -196,9 +209,8 @@ export default function BabyTimelineScreen() {
             </Row>
           );
         })}
-        <Txt size={11.5} color={colors.faint} lineHeight={1.7}>
-          المحطات الطبية (كالنبض) لا تُعتبر مؤكدة بوصول التاريخ — تتأكد بإضافة نتيجة السونار في ملف
-          الحمل.
+        <Txt size={11.5} color={colors.muted} lineHeight={1.7}>
+          {t('baby.milestoneFootnote')}
         </Txt>
       </Card>
     </Screen>

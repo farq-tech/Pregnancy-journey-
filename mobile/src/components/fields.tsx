@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 
 import { formatLong } from '../lib/arabic';
+import { useI18n } from '../i18n/LocaleProvider';
 import { fromIso, toIso, type IsoDate } from '../lib/dates';
 import { colors, fonts } from '../theme';
 import { Row } from './layout';
@@ -26,8 +27,6 @@ const inputStyle = {
   backgroundColor: colors.surface,
   color: colors.text,
   fontFamily: fonts[400],
-  textAlign: 'right' as const,
-  writingDirection: 'rtl' as const,
 };
 
 export function FieldLabel({ children }: { children: string }) {
@@ -71,6 +70,7 @@ export function TextField({
   size?: number;
   style?: object;
 }) {
+  const { rtl } = useI18n();
   return (
     <View style={style}>
       {label ? <FieldLabel>{label}</FieldLabel> : null}
@@ -84,7 +84,7 @@ export function TextField({
         numberOfLines={rows}
         style={[
           inputStyle,
-          { fontSize: size },
+          { fontSize: size, textAlign: rtl ? ('right' as const) : ('left' as const) },
           rows ? { height: 24 * rows + 24, textAlignVertical: 'top' as const } : null,
           ltr ? { textAlign: 'left' as const, writingDirection: 'ltr' as const } : null,
         ]}
@@ -99,7 +99,7 @@ export function DateField({
   value,
   onChange,
   hint,
-  placeholder = 'اختاري التاريخ',
+  placeholder,
   mode = 'date',
   style,
 }: {
@@ -134,11 +134,12 @@ export function DateField({
     }
   };
 
+  const { t } = useI18n();
   const display = value
     ? mode === 'time'
       ? value
       : formatLong(fromIso(value as IsoDate))
-    : placeholder;
+    : (placeholder ?? t('cmp.pickDate'));
 
   const picker = (
     <DateTimePicker
@@ -147,7 +148,7 @@ export function DateField({
       display={Platform.OS === 'ios' ? 'spinner' : 'default'}
       onChange={(event, selected) => {
         // Android fires once and dismisses itself; iOS streams updates while the
-        // spinner moves and is dismissed by the "تم" button below.
+        // spinner moves and is dismissed by the "Done" button below.
         if (Platform.OS !== 'ios') setOpen(false);
         if (event.type === 'dismissed' || !selected) return;
         emit(selected);
@@ -158,8 +159,13 @@ export function DateField({
   return (
     <View style={style}>
       {label ? <FieldLabel>{label}</FieldLabel> : null}
-      <Pressable onPress={() => setOpen(true)} style={inputStyle}>
-        <Txt size={15} color={value ? colors.text : colors.faint}>
+      <Pressable
+        onPress={() => setOpen(true)}
+        style={inputStyle}
+        accessibilityRole="button"
+        accessibilityLabel={label ? `${label}: ${display}` : display}
+      >
+        <Txt size={15} color={value ? colors.text : colors.muted}>
           {display}
         </Txt>
       </Pressable>
@@ -172,9 +178,14 @@ export function DateField({
           <Pressable style={styles.scrim} onPress={() => setOpen(false)} />
           <View style={styles.pickerSheet}>
             {picker}
-            <Pressable onPress={() => setOpen(false)} style={styles.pickerDone}>
+            <Pressable
+              onPress={() => setOpen(false)}
+              style={styles.pickerDone}
+              accessibilityRole="button"
+              accessibilityLabel={t('cmp.done')}
+            >
               <Txt size={15} weight={600} color={colors.surface} align="center">
-                تم
+                {t('cmp.done')}
               </Txt>
             </Pressable>
           </View>
@@ -199,16 +210,22 @@ export function SelectField({
   onChange: (v: string) => void;
   style?: object;
 }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const current = options.find((o) => o.value === value);
 
   return (
     <View style={style}>
       {label ? <FieldLabel>{label}</FieldLabel> : null}
-      <Pressable onPress={() => setOpen(true)} style={inputStyle}>
+      <Pressable
+        onPress={() => setOpen(true)}
+        style={inputStyle}
+        accessibilityRole="button"
+        accessibilityLabel={label ? `${label}: ${current?.label ?? t('cmp.select')}` : (current?.label ?? t('cmp.select'))}
+      >
         <Row justify="space-between">
-          <Txt size={15} color={current ? colors.text : colors.faint}>
-            {current?.label ?? 'اختاري'}
+          <Txt size={15} color={current ? colors.text : colors.muted}>
+            {current?.label ?? t('cmp.select')}
           </Txt>
           <Txt size={11} color={colors.muted}>
             ▼

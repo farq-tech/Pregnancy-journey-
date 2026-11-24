@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 
 import { TESTS, TRIMESTERS } from '../content/pregnancyData';
+import { useI18n } from '../i18n/LocaleProvider';
 import { monthName } from '../lib/arabic';
 import type { Journey } from '../lib/pregnancy';
 import { clampWeek } from '../lib/pregnancy';
@@ -22,6 +23,7 @@ export function TodayWidget({
   journey: Journey;
   nextAppointmentLabel: string;
 }) {
+  const { t, rtl } = useI18n();
   const week = clampWeek(journey.week);
   const trimester = TRIMESTERS[journey.trimester - 1];
 
@@ -29,8 +31,8 @@ export function TodayWidget({
   const nextTest = TESTS.find((test) => week <= test.to);
   const testLabel = nextTest
     ? week >= nextTest.from
-      ? 'الآن'
-      : `أسبوع ${nextTest.from}`
+      ? t('today.w.now')
+      : t('today.w.weekN', { n: nextTest.from })
     : '—';
 
   return (
@@ -47,19 +49,19 @@ export function TodayWidget({
     >
       <Row justify="space-between" align="flex-end">
         <View>
-          <Txt size={10} weight={500} color={colors.faint} style={{ letterSpacing: 2 }}>
-            اليوم
+          <Txt size={11} weight={500} color={colors.muted} style={{ letterSpacing: 2 }}>
+            {t('today.label')}
           </Txt>
           <Txt size={20} weight={600}>
             {`${journey.today.getDate()} ${monthName(journey.today.getMonth())}`}
           </Txt>
         </View>
         <View>
-          <Txt size={15} weight={600} color={colors.sage} align="left">
-            {`الأسبوع ${week}`}
+          <Txt size={15} weight={600} color={colors.sage} align={rtl ? 'left' : 'right'}>
+            {t('today.weekN', { n: week })}
           </Txt>
-          <Txt size={12.5} color={colors.muted} align="left">
-            {`${journey.gaWeeks}و ${journey.gaDays}ي`}
+          <Txt size={12.5} color={colors.muted} align={rtl ? 'left' : 'right'}>
+            {t('today.w.ga', { w: journey.gaWeeks, d: journey.gaDays, m: journey.monthNumber })}
           </Txt>
         </View>
       </Row>
@@ -67,11 +69,11 @@ export function TodayWidget({
       <View style={{ height: 1, backgroundColor: colors.track }} />
 
       <Row justify="space-between" align="flex-start">
-        <Cell icon="👶" label="الطفل" value={`أسبوع ${week}`} />
-        <Cell icon="🤰" label="المرحلة" value={trimester.name.replace('الثلث ', '')} />
-        <Cell icon="📅" label="موعد" value={nextAppointmentLabel} />
-        <Cell icon="🧪" label="فحص" value={testLabel} />
-        <Cell icon="⏳" label="متبقٍ" value={`${journey.daysLeft} يوم`} />
+        <Cell icon="👶" label={t('today.w.baby')} value={t('today.w.weekN', { n: week })} />
+        <Cell icon="🤰" label={t('today.w.stage')} value={t(`today.trimShort.${trimester.n}` as 'today.trimShort.1')} />
+        <Cell icon="📅" label={t('today.w.appt')} value={nextAppointmentLabel} />
+        <Cell icon="🧪" label={t('today.w.test')} value={testLabel} />
+        <Cell icon="⏳" label={t('today.w.left')} value={t('today.w.daysLeft', { n: journey.daysLeft })} />
       </Row>
     </View>
   );
@@ -83,7 +85,7 @@ function Cell({ icon, label, value }: { icon: string; label: string; value: stri
       <Txt size={16} align="center">
         {icon}
       </Txt>
-      <Txt size={10} color={colors.faint} align="center">
+      <Txt size={11} color={colors.muted} align="center">
         {label}
       </Txt>
       <Txt size={11} weight={500} align="center" numberOfLines={1}>

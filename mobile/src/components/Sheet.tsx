@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 
+import { useI18n } from '../i18n/LocaleProvider';
 import { colors } from '../theme';
 import { Txt } from './Txt';
 
@@ -31,12 +32,18 @@ export function Sheet({
   subtitle?: string;
   children: ReactNode;
 }) {
+  const { t } = useI18n();
   const { height } = useWindowDimensions();
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.root}>
-        <Pressable style={styles.scrim} onPress={onClose} accessibilityLabel="إغلاق" />
+        <Pressable
+          style={styles.scrim}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel={t('cmp.close')}
+        />
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={[styles.sheet, { maxHeight: height * 0.82 }]}>
             <View style={styles.grabber} />
@@ -45,7 +52,7 @@ export function Sheet({
                 {title}
               </Txt>
               {subtitle ? (
-                <Txt size={12} color={colors.faint} lineHeight={1.7} style={{ marginBottom: 14 }}>
+                <Txt size={12} color={colors.muted} lineHeight={1.7} style={{ marginBottom: 14 }}>
                   {subtitle}
                 </Txt>
               ) : null}
