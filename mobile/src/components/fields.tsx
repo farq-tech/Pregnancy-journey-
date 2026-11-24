@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 
 import { formatLong } from '../lib/arabic';
+import { useI18n } from '../i18n/LocaleProvider';
 import { fromIso, toIso, type IsoDate } from '../lib/dates';
 import { colors, fonts } from '../theme';
 import { Row } from './layout';
@@ -26,8 +27,6 @@ const inputStyle = {
   backgroundColor: colors.surface,
   color: colors.text,
   fontFamily: fonts[400],
-  textAlign: 'right' as const,
-  writingDirection: 'rtl' as const,
 };
 
 export function FieldLabel({ children }: { children: string }) {
@@ -71,6 +70,7 @@ export function TextField({
   size?: number;
   style?: object;
 }) {
+  const { rtl } = useI18n();
   return (
     <View style={style}>
       {label ? <FieldLabel>{label}</FieldLabel> : null}
@@ -84,7 +84,7 @@ export function TextField({
         numberOfLines={rows}
         style={[
           inputStyle,
-          { fontSize: size },
+          { fontSize: size, textAlign: rtl ? ('right' as const) : ('left' as const) },
           rows ? { height: 24 * rows + 24, textAlignVertical: 'top' as const } : null,
           ltr ? { textAlign: 'left' as const, writingDirection: 'ltr' as const } : null,
         ]}

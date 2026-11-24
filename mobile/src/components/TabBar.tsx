@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { t } from '../i18n';
+import { useI18n } from '../i18n/LocaleProvider';
 import type { StringKey } from '../i18n/strings';
 import { colors } from '../theme';
 import {
@@ -53,10 +53,11 @@ const TABS: readonly TabSpec[] = [
 
 export function TabBar({ state, navigation }: TabBarProps) {
   const insets = useSafeAreaInsets();
+  const { t, rtl } = useI18n();
   const activeName = state.routes[state.index]?.name;
 
   return (
-    <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 2) }]}>
+    <View style={[styles.bar, { flexDirection: rtl ? 'row-reverse' : 'row', paddingBottom: Math.max(insets.bottom, 2) }]}>
       {TABS.map(({ name, labelKey, Icon }) => {
         const label = t(labelKey);
         // Nested stacks mean the calendar tab stays lit on a day page, and the
@@ -81,7 +82,7 @@ export function TabBar({ state, navigation }: TabBarProps) {
             style={styles.tab}
           >
             <Icon size={21} color={color} />
-            <Txt size={10} weight={500} color={color} align="center">
+            <Txt size={11} weight={500} color={color} align="center">
               {label}
             </Txt>
           </Pressable>
@@ -93,7 +94,6 @@ export function TabBar({ state, navigation }: TabBarProps) {
 
 const styles = StyleSheet.create({
   bar: {
-    flexDirection: 'row-reverse',
     // The prototype uses a backdrop blur; at 92% white over the app's warm
     // off-white canvas the blur is not perceptible, so this stays a flat fill.
     backgroundColor: 'rgba(255,255,255,0.92)',

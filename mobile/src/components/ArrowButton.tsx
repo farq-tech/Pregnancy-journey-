@@ -22,8 +22,8 @@ export function ArrowButton({
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: 12,
-        width: 36,
-        height: 36,
+        width: 44,
+        height: 44,
         alignItems: 'center',
         justifyContent: 'center',
       })}

@@ -9,6 +9,12 @@
  * asked Intl for.
  */
 
+import { getLocale } from '../i18n';
+
+const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'] as const;
+const WEEKDAYS_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as const;
+const en = () => getLocale() === 'en';
+
 const MONTHS = [
   'يناير',
   'فبراير',
@@ -36,7 +42,7 @@ const WEEKDAYS = [
 ] as const;
 
 /** Column headings in the month grid — the prototype's `wdNames`, verbatim. */
-export const WEEKDAY_SHORT = [
+const WEEKDAY_SHORT_AR = [
   'أحد',
   'إثنين',
   'ثلاثاء',
@@ -46,28 +52,31 @@ export const WEEKDAY_SHORT = [
   'سبت',
 ] as const;
 
+export const weekdayShort = (): readonly string[] =>
+  en() ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] : WEEKDAY_SHORT_AR;
+
 /** `13 أغسطس 2026` */
 export function formatLong(d: Date): string {
-  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  return `${d.getDate()} ${monthName(d.getMonth())} ${d.getFullYear()}`;
 }
 
 /** `13 أغسطس` */
 export function formatDayMonth(d: Date): string {
-  return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+  return `${d.getDate()} ${monthName(d.getMonth())}`;
 }
 
 /** `الخميس` */
 export function formatWeekday(d: Date): string {
-  return WEEKDAYS[d.getDay()];
+  return en() ? WEEKDAYS_EN[d.getDay()] : WEEKDAYS[d.getDay()];
 }
 
 /** `أغسطس 2026` */
 export function formatMonthYear(d: Date): string {
-  return `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  return `${monthName(d.getMonth())} ${d.getFullYear()}`;
 }
 
 export function monthName(monthIndex: number): string {
-  return MONTHS[monthIndex];
+  return en() ? MONTHS_EN[monthIndex] : MONTHS[monthIndex];
 }
 
 /**
@@ -81,7 +90,10 @@ function pluralize(
   two: string,
   few: string,
   many: string,
+  enOne = '',
+  enMany = '',
 ): string {
+  if (en()) return `${n} ${Math.abs(n) === 1 ? enOne : enMany}`;
   const abs = Math.abs(n);
   if (abs === 1) return one;
   if (abs === 2) return two;
@@ -91,17 +103,17 @@ function pluralize(
 
 /** `يوم واحد` · `يومان` · `5 أيام` · `12 يومًا` */
 export function days(n: number): string {
-  return pluralize(n, 'يوم واحد', 'يومان', 'أيام', 'يومًا');
+  return pluralize(n, 'يوم واحد', 'يومان', 'أيام', 'يومًا', 'day', 'days');
 }
 
 /** `أسبوع واحد` · `أسبوعان` · `5 أسابيع` · `12 أسبوعًا` */
 export function weeks(n: number): string {
-  return pluralize(n, 'أسبوع واحد', 'أسبوعان', 'أسابيع', 'أسبوعًا');
+  return pluralize(n, 'أسبوع واحد', 'أسبوعان', 'أسابيع', 'أسبوعًا', 'week', 'weeks');
 }
 
 /** `شهر واحد` · `شهران` · `5 أشهر` · `12 شهرًا` */
 export function months(n: number): string {
-  return pluralize(n, 'شهر واحد', 'شهران', 'أشهر', 'شهرًا');
+  return pluralize(n, 'شهر واحد', 'شهران', 'أشهر', 'شهرًا', 'month', 'months');
 }
 
 const ONES = [
@@ -143,6 +155,10 @@ const TENS: Record<number, string> = {
  * 20 → `العشرون`, 31 → `الحادي والثلاثون`.
  */
 export function ordinal(n: number): string {
+  if (en()) {
+    const v = n % 100;
+    return `${n}${['th', 'st', 'nd', 'rd'][(v - 20) % 10] ?? ['th', 'st', 'nd', 'rd'][v] ?? 'th'}`;
+  }
   if (n <= 10) return ONES[n] ?? '';
   if (n < 20) return `${COMPOUND_ONES[n - 10]} عشر`;
   if (n % 10 === 0) return TENS[n / 10] ?? '';
@@ -151,5 +167,5 @@ export function ordinal(n: number): string {
 
 /** `الأسبوع الرابع عشر` */
 export function weekOrdinalLabel(n: number): string {
-  return `الأسبوع ${ordinal(n)}`;
+  return en() ? `Week ${n}` : `الأسبوع ${ordinal(n)}`;
 }

@@ -1,4 +1,5 @@
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { useI18n } from '../i18n/LocaleProvider';
 
 import { colors } from '../theme';
 
@@ -108,13 +109,16 @@ export function ChevronIcon({
   strokeWidth = 2,
   direction = 'left',
 }: IconProps & { direction?: 'left' | 'right' }) {
+  const { rtl } = useI18n();
+  // Callers state the RTL direction; mirror it in LTR.
+  const flip = (direction === 'left') === rtl;
   return (
     <Svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      style={direction === 'left' ? { transform: [{ scaleX: -1 }] } : undefined}
+      style={flip ? { transform: [{ scaleX: -1 }] } : undefined}
     >
       <Path d="m9 18 6-6-6-6" stroke={color} strokeWidth={strokeWidth} />
     </Svg>
