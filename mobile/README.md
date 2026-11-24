@@ -32,6 +32,20 @@ it is on, the app shows an explicit error saying so rather than silently
 appearing empty. Every row and every uploaded file is scoped to `auth.uid()`, so
 anonymous auth is what gives each install its own private data.
 
+### Publishing to TestFlight
+
+TestFlight builds expire after 90 days ("Beta has expired"). To publish a fresh
+one, run from your own machine (needs Apple Developer + Expo logins):
+
+```bash
+npm install -g eas-cli && eas login
+eas build --platform ios --profile production   # build number auto-increments
+eas submit --platform ios --latest              # uploads to App Store Connect
+```
+
+Then update the app from the TestFlight app on the phone (don't delete it:
+data is tied to the anonymous install).
+
 ### Building a real iOS app
 
 ```bash
