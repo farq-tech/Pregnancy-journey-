@@ -21,7 +21,7 @@ import {
   weeks as weeksLabel,
 } from '../../src/lib/arabic';
 import { addDays, fromIso, toIso } from '../../src/lib/dates';
-import { countdownLabel, gestationalAgeLabel, joinMeta } from '../../src/lib/labels';
+import { countdownLabel, gestationalAgeLabel, joinMeta, monthLabel } from '../../src/lib/labels';
 import {
   TERM_DAYS,
   clampWeek,
@@ -165,6 +165,9 @@ export default function TodayScreen() {
         </Txt>
         <Txt size={15} weight={500} color={colors.sage} align="center">
           {gestationalAgeLabel(journey.gaWeeks, journey.gaDays)}
+        </Txt>
+        <Txt size={13} color={colors.clayDeep} align="center" style={{ marginTop: 2 }}>
+          {monthLabel(journey.monthNumber, journey.gaMonths)}
         </Txt>
         <Txt size={11.5} color={colors.faint} align="center" style={{ marginTop: 2 }}>
           العمر الحملي · Gestational Age

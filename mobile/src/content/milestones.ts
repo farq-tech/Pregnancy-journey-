@@ -84,8 +84,8 @@ export function milestonesWithState(
 ): MilestoneWithState[] {
   return MILESTONES.map((milestone) => {
     const confirmedBy = confirmationSourceFor(milestone);
-    // A milestone's window opens on the first day of its week.
-    const milestoneDay = (milestone.week - 1) * 7;
+    // A milestone's window opens on day `week * 7`, i.e. at `week`w0d.
+    const milestoneDay = milestone.week * 7;
     const daysAway = milestoneDay - gestationalDay;
     const windowOpen = daysAway <= 0;
 
@@ -119,7 +119,7 @@ export function milestonesWithState(
         return {
           ...milestone,
           confirmedBy,
-          state: { status: 'confirmed', label: 'مؤكد بتقرير السونار' },
+          state: { status: 'expected', label: 'يوجد تقرير سونار — راجعي نتيجته مع الطبيب' },
         };
       }
       return {

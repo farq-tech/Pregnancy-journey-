@@ -38,8 +38,7 @@ const BY_TRIMESTER: Record<1 | 2 | 3, readonly string[]> = {
  * whose usual window is open and one per milestone falling in the week.
  */
 export function questionsForWeek(week: number): string[] {
-  // Week 1 starts at gestational day 0.
-  const trimester = trimesterFor((week - 1) * 7);
+  const trimester = trimesterFor(week * 7);
   const questions = [...BY_TRIMESTER[trimester]];
 
   for (const test of TESTS) {

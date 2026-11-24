@@ -41,8 +41,8 @@ const find = (states: ReturnType<typeof milestonesWithState>, id: string) => {
 };
 
 describe('milestone confirmation', () => {
-  // Week 10 — past the week-6 cardiac-activity window, before the week-20 scan.
-  const gestationalDay = 9 * 7;
+  // 10w0d — past the week-6 cardiac-activity window, before the week-20 scan.
+  const gestationalDay = 10 * 7;
 
   it('never claims a heartbeat from the calendar alone', () => {
     const states = milestonesWithState(gestationalDay, effectiveLmp, [], []);
@@ -52,18 +52,20 @@ describe('milestone confirmation', () => {
     assert.notEqual(heart.state.status, 'confirmed');
   });
 
-  it('confirms the heartbeat once a scan from that week or later is on file', () => {
-    const states = milestonesWithState(gestationalDay, effectiveLmp, [scan('2026-08-25')], []);
-    assert.equal(find(states, 'heart').state.status, 'confirmed');
+  it('never confirms a heartbeat from a scan record alone — it only points to the report', () => {
+    // A scan on file says nothing about its findings (it may have shown no heartbeat).
+    const states = milestonesWithState(gestationalDay, effectiveLmp, [scan('2026-09-05')], []);
+    assert.equal(find(states, 'heart').state.status, 'expected');
+    assert.match(find(states, 'heart').state.label, /راجعي نتيجته/);
   });
 
   it('does not let an early scan confirm a later milestone', () => {
     // A week-6 scan must not tick off the week-20 anatomy scan, even once the
     // calendar has reached week 20.
     const atWeek21 = 20 * 7;
-    const states = milestonesWithState(atWeek21, effectiveLmp, [scan('2026-08-25')], []);
-    assert.equal(find(states, 'heart').state.status, 'confirmed');
-    assert.equal(find(states, 'anatomy').state.status, 'expected');
+    const states = milestonesWithState(atWeek21, effectiveLmp, [scan('2026-09-05')], []);
+    assert.match(find(states, 'heart').state.label, /راجعي نتيجته/);
+    assert.match(find(states, 'anatomy').state.label, /يؤكده الطبيب/);
   });
 
   it('treats gestational-age milestones as reached when the date arrives', () => {
@@ -76,12 +78,12 @@ describe('milestone confirmation', () => {
 
   it('confirms the first visit only from an attended appointment', () => {
     const pending = milestonesWithState(gestationalDay, effectiveLmp, [], [
-      visit('2026-09-10', false),
+      visit('2026-09-20', false),
     ]);
     assert.equal(find(pending, 'first-visit').state.status, 'expected');
 
     const attended = milestonesWithState(gestationalDay, effectiveLmp, [], [
-      visit('2026-09-10', true),
+      visit('2026-09-20', true),
     ]);
     assert.equal(find(attended, 'first-visit').state.status, 'confirmed');
   });

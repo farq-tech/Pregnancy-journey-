@@ -52,6 +52,12 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "70396608-0b8f-4ff9-b17d-8444027201b2"
+      }
+    },
+    "owner": "farqtechs-team"
   }
 }

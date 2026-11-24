@@ -59,7 +59,7 @@ export function TodayWidget({
             {`الأسبوع ${week}`}
           </Txt>
           <Txt size={12.5} color={colors.muted} align="left">
-            {`${journey.gaWeeks}و ${journey.gaDays}ي`}
+            {`${journey.gaWeeks}و ${journey.gaDays}ي · ش${journey.monthNumber}`}
           </Txt>
         </View>
       </Row>

@@ -99,6 +99,11 @@ export function weeks(n: number): string {
   return pluralize(n, 'أسبوع واحد', 'أسبوعان', 'أسابيع', 'أسبوعًا');
 }
 
+/** `شهر واحد` · `شهران` · `5 أشهر` · `12 شهرًا` */
+export function months(n: number): string {
+  return pluralize(n, 'شهر واحد', 'شهران', 'أشهر', 'شهرًا');
+}
+
 const ONES = [
   '',
   'الأول',

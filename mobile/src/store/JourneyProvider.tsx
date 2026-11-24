@@ -37,6 +37,8 @@ import type {
 } from './types';
 
 const CACHE_KEY = 'pj_cache_v1';
+/** Last non-empty copy, kept if a fresh (empty) account ever replaces it. */
+const BACKUP_KEY = 'pj_cache_backup_v1';
 
 type Snapshot = {
   settings: Settings | null;
@@ -233,7 +235,15 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
   const [eddBanner, setEddBanner] = useState(false);
   const userId = useRef<string | null>(null);
 
+  const latest = useRef<Snapshot>(EMPTY);
+
   const cache = useCallback((next: Snapshot) => {
+    // If the session was lost the server hands back a brand-new empty account.
+    // Never let that silently erase the only copy of her data on this phone.
+    if (latest.current.settings && !next.settings) {
+      AsyncStorage.setItem(BACKUP_KEY, JSON.stringify(latest.current)).catch(() => {});
+    }
+    latest.current = next;
     setSnapshot(next);
     AsyncStorage.setItem(CACHE_KEY, JSON.stringify(next)).catch(() => {
       // A failed cache write is not worth interrupting the mother for; the
@@ -301,7 +311,8 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
         if (raw && !cancelled) {
           // Merge over EMPTY so a cache written by an older build, before these
           // fields existed, still hydrates instead of yielding undefined lists.
-          setSnapshot({ ...EMPTY, ...(JSON.parse(raw) as Partial<Snapshot>) });
+          latest.current = { ...EMPTY, ...(JSON.parse(raw) as Partial<Snapshot>) };
+          setSnapshot(latest.current);
         }
       } catch {
         // Corrupt cache: fall through to the server fetch.

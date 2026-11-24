@@ -12,8 +12,8 @@ import { addDays, diffDays, fromIso, startOfDay, type IsoDate } from './dates';
 export const TERM_DAYS = 280;
 
 /** Gestational day the second and third trimesters begin on. */
-const SECOND_TRIMESTER_DAY = 91;
-const THIRD_TRIMESTER_DAY = 189;
+const SECOND_TRIMESTER_DAY = 98; // 14w0d
+const THIRD_TRIMESTER_DAY = 196; // 28w0d
 
 /**
  * How far past the LMP the calendar stays navigable: 42 weeks, so the weeks
@@ -57,13 +57,20 @@ export type Journey = {
    * day of the pregnancy. Day 25 of 280 with 255 remaining, never 26 and 255.
    */
   dayNumber: number;
-  /** 1-based gestational week. */
+  /**
+   * Completed gestational weeks (min 1) — the clinical "I'm 14 weeks" convention.
+   * All content, test windows and trimester bounds are keyed to it.
+   */
   week: number;
   /** Completed weeks, as in "14 weeks and 3 days". */
   gaWeeks: number;
   /** Days beyond `gaWeeks`. */
   gaDays: number;
   daysLeft: number;
+  /** Completed months (30.4375-day average month), 0–9. */
+  gaMonths: number;
+  /** The month she is in, 1–9 — "month 5" covers roughly weeks 18–22. */
+  monthNumber: number;
   trimester: 1 | 2 | 3;
 };
 
@@ -94,12 +101,20 @@ export function computeJourney(settings: Settings, now: Date = new Date()): Jour
     today,
     gestationalDay,
     dayNumber: gestationalDay,
-    week: Math.floor(gestationalDay / 7) + 1,
+    week: Math.max(1, Math.floor(gestationalDay / 7)),
     gaWeeks: Math.floor(gestationalDay / 7),
     gaDays: ((gestationalDay % 7) + 7) % 7,
     daysLeft: Math.max(0, diffDays(edd, today)),
+    gaMonths: monthsOf(gestationalDay),
+    monthNumber: Math.min(9, Math.max(1, monthsOf(gestationalDay) + 1)),
     trimester: trimesterFor(gestationalDay),
   };
+}
+
+const DAYS_PER_MONTH = 30.4375;
+
+function monthsOf(gestationalDay: number): number {
+  return Math.min(9, Math.max(0, Math.floor(gestationalDay / DAYS_PER_MONTH)));
 }
 
 export function trimesterFor(gestationalDay: number): 1 | 2 | 3 {
@@ -129,7 +144,7 @@ export function clampWeek(week: number): number {
 
 /** Date the given 1-based gestational week starts on. */
 export function weekStart(journey: Journey, week: number): Date {
-  return addDays(journey.effectiveLmp, (week - 1) * 7);
+  return addDays(journey.effectiveLmp, week * 7);
 }
 
 /** Progress around the ring, 0–100. */

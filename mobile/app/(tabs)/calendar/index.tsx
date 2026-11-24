@@ -87,7 +87,7 @@ export default function CalendarScreen() {
         isToday: iso === toIso(journey.today),
         isPast: diffDays(date, journey.today) < 0,
         // A dot on each week boundary, from week 4 onward.
-        weekStart: g !== null && g % 7 === 0 && g >= 21,
+        weekStart: g !== null && g % 7 === 0 && g >= 28,
         hasAppointment: marked.appointmentDays.has(iso),
         hasJournal: marked.journalDays.has(iso),
         hasRecord: marked.recordDays.has(iso),
